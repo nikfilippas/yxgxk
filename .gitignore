@@ -1,0 +1,14 @@
+# Directories
+__pycache__/
+data/
+legacy/
+other/
+.spyproject/
+
+# File extensions
+*.h5
+*.npy
+*.npz
+*.mcm
+*.cmcm
+
