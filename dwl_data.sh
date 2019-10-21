@@ -21,6 +21,42 @@ if [ ! -f HFI_SkyMap_545_2048_R2.02_full.fits ] ; then
     wget irsa.ipac.caltech.edu/data/Planck/release_2/all-sky-maps/maps/HFI_SkyMap_545_2048_R2.02_full.fits
 fi
 
+## Lensing maps ##
+# fiducial
+if [! -f COM_Lensing_4096_R3.00_MV_dat_klm_map.fits ] ; then
+    echo " Downloading fiducial lensing maps"
+    wget http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Lensing_4096_R3.00.tgz
+
+    tar -xvf COM_Lensing_4096_R3.00.tgz
+    gunzip mask.fits.gz
+    mv mask.fits COM_Lensing_4096_R3.00_mask.fits
+
+    rm COM_Lensing_4096_R3.00.tgz
+    rm mask.fits.gz
+
+    echo " Constructing maps from alms"
+# TODO: python pipeline to rename
+# TODO: python pipeline to create maps
+fi
+
+# SZ_deproj
+if [! -f COM_Lensing_Szdeproj_4096_R3.00_TT_dat_klm_map.fits ] ; then
+    echo " Downloading SZ-deprojected lensing maps"
+    wget http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Lensing-Szdeproj_4096_R3.00.tgz
+
+    tar -xvf COM_Lensing-Szdeproj_4096_R3.00.tgz
+    gunzip mask.fits.gz
+    mv mask.fits COM_Lensing_Szdeproj_4096_R3.00_mask.fits
+
+    rm COM_Lensing-Szdeproj_4096_R3.00.tgz
+    rm mask.fits.gz
+
+    echo " Constructing maps from alms"
+# TODO: python pipeline to rename
+# TODO: python pipeline to create maps
+fi
+
+
 #Masks
 if [ ! -f HFI_Mask_GalPlane-apo0_2048_R2.00.fits ] ; then
     echo " Downloading galatic mask" 
