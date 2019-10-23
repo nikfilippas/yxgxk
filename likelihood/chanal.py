@@ -74,6 +74,13 @@ def gauss_kde(chain):
         yy = f(xx)
         f_new = interp1d(xx, yy, kind="cubic",
                          bounds_error=False, fill_value=0)
+
+        import matplotlib.pyplot as plt
+        fig, ax = plt.subplots()
+        xold = np.linspace(x_min, x_max, 256)
+        ax.plot(xx, yy, "r:", lw=3, label="new dist")
+        ax.plot(xold, f(xold), "k-", lw=3, label="original dist")
+        ax.legend(loc="best")
         return f_new, (xmin, xmax)
 
     minfunc = lambda x, f: -f(x)
@@ -116,7 +123,7 @@ def get_summary_numbers(pars, chains, diff=True):
         Q[2] = np.max([Q[0], Q[2]], axis=0)
 
     Q = Q if not diff else diff_func(Q)
-    Q = dict.fromkeys(pars, Q.T)
+    Q = {par: Qi for par, Qi in zip(pars, Q.T)}
     return Q
 
 
@@ -188,6 +195,7 @@ class chan(object):
 
     def get_chains(self, pars, **specargs):
         """Returns a dictionary containing the chains of `pars`. """
+
         def bias_one(p0, num):
             """Calculates the halo model bias for a set of parameters."""
             bb = hm_bias(self.cosmo, 1/(1+zarr),
@@ -196,25 +204,39 @@ class chan(object):
             return bb
 
 
-        def bias_avg(num):
+        def bias_avg(num, skip):
             """Calculates the halo model bias of a profile, from a chain."""
             from pathos.multiprocessing import ProcessingPool as Pool
             with Pool() as pool:
                 bb = pool.map(lambda p0: bias_one(p0, num),
-                                         sam.chain[::by_skip])
-            # bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::by_skip]))
+                                         sam.chain[::skip])
+            # bb = list(map(lambda p0: bias_one(p0, num), sam.chain[::skip]))
             bb = np.mean(np.array(bb), axis=1)
             return bb
 
+        # path to chain
+        fname = lambda s: self.p.get("global")["output_dir"] + "/sampler_" + \
+                          self.p.get("mcmc")["run_name"] + "_" + s + "_chain"
 
         if type(pars) == str: pars = [pars]
+        import os; print(os.getcwd())
+        preCHAINS = {}
+        fid_pars = pars.copy()
+        for par in pars:
+            try:
+                print(fname(par))
+                preCHAINS[par] = np.load(fname(par)+".npy")
+                fid_pars.remove(par)
+                print("Found saved chains for %s." % par)
+            except FileNotFoundError:
+                continue
 
-        if "by" in pars:
+        if "bg" or "by" in fid_pars:
             # skip every (for computationally expensive hm_bias)
-            by_skip = specargs.get("reduce_by_factor")
-            if by_skip is None:
+            b_skip = specargs.get("reduce_by_factor")
+            if b_skip is None:
                 print("'reduce_by_factor' not given. Defaulting to 100.")
-                by_skip = 100
+                b_skip = 100
 
         for s, v in enumerate(self.p.get("data_vectors")):
             d = DataManager(self.p, v, self.cosmo, all_data=False)
@@ -240,31 +262,36 @@ class chan(object):
             if "probs" in pars:
                 chains["probs"] = sam.probs
 
-            if "by" or "bg" in pars:
+            if ("by" or "bg") in fid_pars:
                 sigz = np.sqrt(np.sum(NN * (zz - zmean)**2) / np.sum(NN))
                 zarr = np.linspace(zmean-sigz, zmean+sigz, 10)
                 if "bg" in pars:
-                    chains["bg"] = bias_avg(num=0)
+                    chains["bg"] = bias_avg(num=0, skip=b_skip)
                 if "by" in pars:
-                    chains["by"] = bias_avg(num=1)
+                    chains["by"] = bias_avg(num=1, skip=b_skip)
 
 
             # Construct tomographic dictionary
             if s == 0:
-                keys = ["z"] + pars
+                keys = ["z"] + fid_pars
                 CHAINS = {k: chains[k] for k in keys}
             else:
                 for k in keys:
                     CHAINS[k] = np.vstack((CHAINS[k], chains[k]))
 
-        return CHAINS
+        # save bias chains to save time if not already saved
+        if "bg" in fid_pars: np.save(fname("bg"), CHAINS["bg"])
+        if "by" in fid_pars: np.save(fname("by"), CHAINS["by"])
+
+        return {**preCHAINS, **CHAINS}
 
 
     def get_best_fit(self, pars, diff=True, chains=None, **specargs):
         """Returns a dictionary containing the best-fit values & errors."""
         if type(pars) == str: pars = [pars]
 
-        if chains is None:  # pass chains to save time
+        # pass chains to save time
+        if chains is None:
             CHAINS = self.get_chains(pars, **specargs)
         else:
             CHAINS = chains
