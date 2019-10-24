@@ -34,7 +34,7 @@ masks:
     mask_tsz: "data/maps/mask_planck60.fits"
     mask_545: "data/maps/mask_planck20.fits"
     mask_lens: "data/maps/COM_Lensing_4096_R3.00_mask.fits"
-    mask_lens: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits"
+    mask_lens_SZ: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits"
 
 # Maps
 maps:
@@ -206,21 +206,21 @@ maps:
     - name: "lens_MV"
       type: "k"
       ns_independent: false
-      map: "data/maps/COM_Lensing_4096_R3.00_MV_dat_klm_map.fits"
+      map: "data/maps/COM_Lensing_4096_R3.00_MV_map.fits"
       mask: "mask_lens"
       beam: False
       systematics: None
     - name: "lens_TT"
       type: "k"
       ns_independent: false
-      map: "data/maps/COM_Lensing_4096_R3.00_TT_dat_klm_map.fits"
+      map: "data/maps/COM_Lensing_4096_R3.00_TT_map.fits"
       mask: "mask_lens"
       beam: False
       systematics: None
     - name: "lens_PP"
       type: "k"
       ns_independent: false
-      map: "data/maps/COM_Lensing_4096_R3.00_PP_dat_klm_map.fits"
+      map: "data/maps/COM_Lensing_4096_R3.00_PP_map.fits"
       mask: "mask_lens"
       beam: False
       systematics: None
@@ -228,7 +228,7 @@ maps:
       type: "k"
       ns_independent: false
       map: "data/maps/COM_Lensing_szdeproj_4096_R3.00_TT_dat_klm_map.fits"
-      mask: "mask_lens"
+      mask: "mask_lens_SZ"
       beam: False
       systematics: None
 
@@ -237,7 +237,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lensing_test1'
+    run_name: 'lensing'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
