@@ -28,15 +28,11 @@ if [! -f COM_Lensing_4096_R3.00_MV_dat_klm_map.fits ] ; then
     wget http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Lensing_4096_R3.00.tgz
 
     tar -xvf COM_Lensing_4096_R3.00.tgz
+    mv COM_Lensing_4096_R3.00/mask.fits.gz .
     gunzip mask.fits.gz
     mv mask.fits COM_Lensing_4096_R3.00_mask.fits
-
     rm COM_Lensing_4096_R3.00.tgz
-    rm mask.fits.gz
-
-    echo " Constructing maps from alms"
-# TODO: python pipeline to rename
-# TODO: python pipeline to create maps
+    python ../../namer.py COM_Lensing_4096_R3.00
 fi
 
 # SZ_deproj
@@ -45,16 +41,17 @@ if [! -f COM_Lensing_Szdeproj_4096_R3.00_TT_dat_klm_map.fits ] ; then
     wget http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Lensing-Szdeproj_4096_R3.00.tgz
 
     tar -xvf COM_Lensing-Szdeproj_4096_R3.00.tgz
+    mv COM_Lensing_Szdeproj_4096_R3.00/mask.fits.gz .
     gunzip mask.fits.gz
     mv mask.fits COM_Lensing_Szdeproj_4096_R3.00_mask.fits
-
     rm COM_Lensing-Szdeproj_4096_R3.00.tgz
-    rm mask.fits.gz
-
-    echo " Constructing maps from alms"
-# TODO: python pipeline to rename
-# TODO: python pipeline to create maps
+    python ../../namer.py COM_Lensing_Szdeproj_4096_R3.00
 fi
+
+
+# Construct maps from alms
+echo " Constructing maps from alms"
+python ../../map_from_alms.py 
 
 
 #Masks
