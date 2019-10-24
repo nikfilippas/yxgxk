@@ -32,7 +32,9 @@ if [! -f COM_Lensing_4096_R3.00_MV_dat_klm_map.fits ] ; then
     gunzip mask.fits.gz
     mv mask.fits COM_Lensing_4096_R3.00_mask.fits
     rm COM_Lensing_4096_R3.00.tgz
-    python ../../namer.py COM_Lensing_4096_R3.00
+    cd ../../
+    python namer.py COM_Lensing_4096_R3.00
+    cd data/maps/
 fi
 
 # SZ_deproj
@@ -45,14 +47,17 @@ if [! -f COM_Lensing_Szdeproj_4096_R3.00_TT_dat_klm_map.fits ] ; then
     gunzip mask.fits.gz
     mv mask.fits COM_Lensing_Szdeproj_4096_R3.00_mask.fits
     rm COM_Lensing-Szdeproj_4096_R3.00.tgz
-    python ../../namer.py COM_Lensing_Szdeproj_4096_R3.00
+    cd ../../
+    python namer.py COM_Lensing_Szdeproj_4096_R3.00
+    cd data/maps/
 fi
 
 
 # Construct maps from alms
 echo " Constructing maps from alms"
-python ../../map_from_alms.py 
-
+cd ../../
+python map_from_alms.py 
+cd data/maps/
 
 #Masks
 if [ ! -f HFI_Mask_GalPlane-apo0_2048_R2.00.fits ] ; then
