@@ -1,9 +1,8 @@
 import numpy as np
 from .power_spectrum import hm_ang_power_spectrum
-from .cosmo_utils import COSMO_ARGS
 
 
-def get_theory(p, dm, return_separated=False,
+def get_theory(p, dm, cosmo, return_separated=False,
                include_1h=True, include_2h=True,
                selection=None,
                hm_correction=None, **kwargs):
@@ -13,6 +12,7 @@ def get_theory(p, dm, return_separated=False,
         p (:obj:`ParamRun`): parameters for this run.
         dm (:obj:`DataManager`): data manager for this set of
             correlations.
+        cosmo (:obj:`ccl.Cosmology`): cosmology object.
         return_separated (bool): return output power spectra
             in separate arrays.
         hm_correction(:obj:`HalomodCorrection`): halo model correction
@@ -20,7 +20,7 @@ def get_theory(p, dm, return_separated=False,
         selection (function): selection function in (M,z) to include
             in the calculation. Pass None if you don't want to select
             a subset of the M-z plane.
-        **kwargs: Parametrisation of the profiles & cosmology.
+        **kwargs: model parameters
     """
     nz_default = p.get('mcmc')['nz_points_g']
     use_zlog = p.get('mcmc')['z_log_sampling']
@@ -53,7 +53,7 @@ def get_theory(p, dm, return_separated=False,
                 zrange = tr[0].z_range
                 zpoints = nz_default
 
-        cl = hm_ang_power_spectrum(ls, profiles,
+        cl = hm_ang_power_spectrum(cosmo, ls, profiles,
                                    zrange=zrange, zpoints=zpoints,
                                    zlog=use_zlog, hm_correction=hm_correction,
                                    include_1h=include_1h,

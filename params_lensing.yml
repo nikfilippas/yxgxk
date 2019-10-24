@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 1024
     # Output directory
-    output_dir: 'output_lensing'
+    output_dir: 'output_default'
 
 jk:
     # Do you want to do jackknives?
@@ -255,6 +255,8 @@ mcmc:
     continue_mcmc: True
     # Save parameters (separated by whitespace)
     save_par: False
+    # Halo mass function
+    mfunc: "tinker"
 
 
 # Model parameters

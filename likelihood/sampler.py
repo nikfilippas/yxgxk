@@ -105,7 +105,7 @@ class Sampler(object):
 
     def get_covariance(self, p0=None, update_cov=False):
         """
-        Computes covariance as inverse Hessian of the posterior around a
+        Computes covariance as inverse Hessian of the posterio around a
         given point.
 
         Args:

@@ -1,8 +1,6 @@
 import yaml
 import pyccl as ccl
 from .bandpowers import Bandpowers
-from model.cosmo_utils import COSMO_KEYS
-
 
 
 class ParamRun(object):
@@ -17,19 +15,22 @@ class ParamRun(object):
             self.p = yaml.safe_load(f)
 
     def get_massfunc(self):
-        """Get preferred mass function."""
-        for P in self.p["params"]:
-            if P["name"] == "mass_function":
-                return P["value"]
-        raise ValueError("Provide cosmological mass function as parameter.")
+        """
+        Get preferred mass function
+        """
+        return self.p['mcmc']['mfunc']
 
     def get_cosmo(self):
-        """Get default cosmology."""
-        # names of all possible cosmological parameters
-        pars = {par["name"]: par["value"] \
-                for par in self.p.get("params") if par["name"] in COSMO_KEYS}
-
-        return ccl.Cosmology(**pars)
+        """
+        Get default cosmology
+        """
+        mfunc = self.get_massfunc()
+        return ccl.Cosmology(Omega_c=0.26066676,
+                             Omega_b=0.048974682,
+                             h=0.6766,
+                             sigma8=0.8102,
+                             n_s=0.9665,
+                             mass_function=mfunc)
 
     def get_outdir(self):
         """

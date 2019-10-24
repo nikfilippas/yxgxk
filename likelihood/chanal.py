@@ -77,10 +77,13 @@ def gauss_kde(chain):
 
         import matplotlib.pyplot as plt
         fig, ax = plt.subplots()
+        plt.ion()
         xold = np.linspace(x_min, x_max, 256)
         ax.plot(xx, yy, "r:", lw=3, label="new dist")
         ax.plot(xold, f(xold), "k-", lw=3, label="original dist")
         ax.legend(loc="best")
+        plt.show()
+        plt.pause(0.001)
         return f_new, (xmin, xmax)
 
     minfunc = lambda x, f: -f(x)

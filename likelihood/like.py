@@ -9,8 +9,7 @@ class Likelihood(object):
     Args:
         pars (dict): dictionary of parameters, as provided in the
             input YAML file.
-        data (``numpy.array``): 1D array with the data vector.
-        covar (``numpy.array``): Covariance matrix.
+        data (array): 1D array with the data vector.
         get_theory (function): function that, given a dictionary of
             parameters, returns the theory prediction for the data
             vector provided in `data`.
@@ -54,7 +53,7 @@ class Likelihood(object):
 
     def build_kwargs(self, par):
         """
-        Given a list of free parameter values, it constructs the
+        Given a list of free parameter values, int constructs the
         dictionary of parameters needed to get a theory prediction.
 
         Args:
@@ -86,12 +85,9 @@ class Likelihood(object):
                 continue
             elif pr['type'] == 'Gaussian':
                 lnp += -0.5 * ((p - pr['values'][0]) / pr['values'][1])**2
-            elif pr['type'] == 'TopHat':
+            else:
                 if not(pr['values'][0] <= p <= pr['values'][1]):
                     return -np.inf
-            else:
-                raise ValueError("Prior type not recognised for one or more \
-                                 parameters")
         return lnp
 
     def lnlike(self, par):

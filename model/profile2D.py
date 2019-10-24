@@ -6,8 +6,10 @@ from scipy.integrate import quad
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
 import pyccl as ccl
-from .cosmo_utils import COSMO_ARGS
-from .utils import R_Delta, concentration_duffy
+try:  # deal with relative import from other scripts
+    from .utils import R_Delta, concentration_duffy
+except ImportError:
+    from utils import R_Delta, concentration_duffy
 
 
 class Arnaud(object):
@@ -33,19 +35,19 @@ class Arnaud(object):
 
         self._fourier_interp = self._integ_interp()
 
-    def kernel(self, a, **kwargs):
+    def kernel(self, cosmo, a, **kwargs):
         """The thermal Sunyaev-Zel'dovich anisotropy window function."""
         prefac = 4.017100792437957e-06
         # avoid recomputing every time
-        # Units of eV * Mpc / cm^3
+        # Units of eV * Mpc / cm^3 
         return prefac*a
 
-    def profnorm(self, a, squeeze=True, **kwargs):
+    def profnorm(self, cosmo, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         return np.ones_like(a)
 
-    def norm(self, M, a, b, squeeze=True, **kwargs):
+    def norm(self, cosmo, M, a, b, squeeze=True):
         """Computes the normalisation factor of the Arnaud profile.
 
         .. note:: Normalisation factor is given in units of ``eV/cm^3``. \
@@ -54,7 +56,6 @@ class Arnaud(object):
         # Input handling
         M, a = np.atleast_1d(M), np.atleast_1d(a)
 
-        cosmo = COSMO_ARGS(kwargs)
         aP = 0.12  # Arnaud et al.
         h70 = cosmo["h"]/0.7
         P0 = 6.41  # reference pressure
@@ -121,7 +122,7 @@ class Arnaud(object):
                                 [F1, F2, F3])
         return F
 
-    def fourier_profiles(self, k, M, a, squeeze=True, **kwargs):
+    def fourier_profiles(self, cosmo, k, M, a, squeeze=True, **kwargs):
         """Computes the Fourier transform of the Arnaud profile.
 
         .. note:: Output units are ``[norm] Mpc^3``
@@ -129,11 +130,10 @@ class Arnaud(object):
         # Input handling
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
 
-        cosmo = COSMO_ARGS(kwargs)
         # hydrostatic bias
         b = kwargs["b_hydro"]
         # R_Delta*(1+z)
-        R = R_Delta(M, a, self.Delta, squeeze=False, **kwargs) / a
+        R = R_Delta(cosmo, M, a, self.Delta, squeeze=False) / a
         # transform axes
         R = R[..., None]
 
@@ -154,25 +154,25 @@ class NFW(object):
         self.kernel = kernel  # associated window function
         self.name = name
 
-    def profnorm(self, a, squeeze=True, **kwargs):
+    def profnorm(self, cosmo, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular
         cross-correlation calculation."""
         return np.ones_like(a)
 
-    def fourier_profiles(self, k, M, a, squeeze=True, **kwargs):
-        """Computes the Fourier transform of the Navarro-Frenk-White profile.
+    def fourier_profiles(self, cosmo, k, M, a, squeeze=True, **kwargs):
+        """
+        Computes the Fourier transform of the Navarro-Frenk-White profile.
         """
         # Input handling
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
 
-        cosmo = COSMO_ARGS(kwargs)
         # extract parameters
         bg = kwargs["bg"] if "bg" in kwargs else 1
         bmax = kwargs["bmax"] if "bmax" in kwargs else 1
 
         c = concentration_duffy(M, a, is_D500=True, squeeze=False)
-        R = R_Delta(M, a, self.Delta,
-                    is_matter=False, squeeze=False, **kwargs)/(c*a)
+        R = R_Delta(cosmo, M, a, self.Delta,
+                    is_matter=False, squeeze=False)/(c*a)
         x = k*R[..., None]
 
         c = c[..., None]*bmax  # optimise
@@ -199,9 +199,8 @@ class HOD(object):
         self.name = name
         self.ns_independent = ns_independent
 
-    def kernel(self, a, **kwargs):
+    def kernel(self, cosmo, a, **kwargs):
         """The galaxy number overdensity window function."""
-        cosmo = COSMO_ARGS(kwargs)
         unit_norm = 3.3356409519815204e-04  # 1/c
         Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
 
@@ -231,7 +230,7 @@ class HOD(object):
         Ns = ((M-M0)*np.heaviside(M-M0, 0) / M1)**alpha
         return Ns
 
-    def profnorm(self, a, squeeze=True, **kwargs):
+    def profnorm(self, cosmo, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         # Input handling
@@ -244,7 +243,6 @@ class HOD(object):
         mpoints = int(64)           # number of integration points
         M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
 
-        cosmo = COSMO_ARGS(kwargs)
         # CCL uses delta_matter
         Dm = self.Delta/ccl.omega_x(cosmo, a, "matter")
         mfunc = [ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)]
@@ -260,8 +258,9 @@ class HOD(object):
         ng = simps(dng, x=np.log10(M))
         return ng.squeeze() if squeeze else ng
 
-    def fourier_profiles(self, k, M, a, squeeze=True, **kwargs):
-        """Computes the Fourier transform of the Halo Occupation Distribution.
+    def fourier_profiles(self, cosmo, k, M, a, squeeze=True, **kwargs):
+        """
+        Computes the Fourier transform of the Halo Occupation Distribution.
         """
         # Input handling
         M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
@@ -274,7 +273,8 @@ class HOD(object):
         Ns = self.n_sat(M, **kwargs)    # satellites
         Nc, Ns = Nc[..., None, None], Ns[..., None, None]
 
-        H, _ = NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
+        H, _ = NFW().fourier_profiles(cosmo, k, M, a, squeeze=False,
+                                      **kwargs)
 
         if self.ns_independent:
             F, F2 = (Nc*fc + Ns*H), (2*Nc*fc*Ns*H + (Ns*H)**2)
