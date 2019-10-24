@@ -227,7 +227,7 @@ maps:
     - name: "lens_szdeproj_TT"
       type: "k"
       ns_independent: false
-      map: "data/maps/COM_Lensing_szdeproj_4096_R3.00_TT_dat_klm_map.fits"
+      map: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_TT_map.fits"
       mask: "mask_lens_SZ"
       beam: False
       systematics: None
