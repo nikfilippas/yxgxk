@@ -157,10 +157,10 @@ def hm_ang_1h_covariance(cosmo, fsky, l, profiles_a, profiles_b,
              (ccl.h_over_h0(cosmo, a) * cosmo["h"]))  # c*z/H(z)
     pau, pav = profiles_a
     pbu, pbv = profiles_b
-    aWu = pau.kernel(cosmo, a)
-    aWv = pav.kernel(cosmo, a)
-    bWu = pbu.kernel(cosmo, a)
-    bWv = pbv.kernel(cosmo, a)
+    aWu = pau.kernel(cosmo, a, **kwargs)
+    aWv = pav.kernel(cosmo, a, **kwargs)
+    bWu = pbu.kernel(cosmo, a, **kwargs)
+    bWv = pbv.kernel(cosmo, a, **kwargs)
     N = H_inv * aWu * aWv * bWu * bWv/chi**6
 
     k = (l+1/2) / chi[..., None]
