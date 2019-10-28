@@ -1,3 +1,0 @@
-from cosmoHammer import MpiCosmoHammerSampler
-from cosmoHammer import LikelihoodComputationChain
-
