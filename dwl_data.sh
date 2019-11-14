@@ -22,8 +22,25 @@ if [ ! -f HFI_SkyMap_545_2048_R2.02_full.fits ] ; then
 fi
 
 ## Lensing maps ##
+if [! -f COM_CompMap_Lensing_2048_R2.00_dat_klm.fits ] ; then
+    echo " Downloading Planck 2015 lensing maps"
+    wget https://irsa.ipac.caltech.edu/data/Planck/release_2/all-sky-maps/maps/component-maps/lensing/COM_CompMap_Lensing_2048_R2.00.tar
+
+
+    tar -xvf COM_CompMap_Lensing_2048_R2.00.tar
+    mv data/mask.fits.gz .
+    gunzip mask.fits.gz
+    mv mask.fits COM_CompMap_Lensing_2048_R2.00_mask.fits
+    rm COM_CompMap_Lensing_2048_R2.00.tar
+    mv data/ COM_CompMap_Lensing_2048_R2.00/
+    cd ../../
+    python namer.py COM_CompMap_Lensing_2048_R2.00
+    cd data/maps/
+fi
+
+: '
 # fiducial
-if [! -f COM_Lensing_4096_R3.00_MV_dat_klm_map.fits ] ; then
+if [! -f COM_Lensing_4096_R3.00_MV_map.fits ] ; then
     echo " Downloading fiducial lensing maps"
     wget http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Lensing_4096_R3.00.tgz
 
@@ -38,7 +55,7 @@ if [! -f COM_Lensing_4096_R3.00_MV_dat_klm_map.fits ] ; then
 fi
 
 # SZ_deproj
-if [! -f COM_Lensing_Szdeproj_4096_R3.00_TT_dat_klm_map.fits ] ; then
+if [! -f COM_Lensing_Szdeproj_4096_R3.00_TT_map.fits ] ; then
     echo " Downloading SZ-deprojected lensing maps"
     wget http://pla.esac.esa.int/pla/aio/product-action?COSMOLOGY.FILE_ID=COM_Lensing-Szdeproj_4096_R3.00.tgz
 
@@ -51,7 +68,7 @@ if [! -f COM_Lensing_Szdeproj_4096_R3.00_TT_dat_klm_map.fits ] ; then
     python namer.py COM_Lensing_Szdeproj_4096_R3.00
     cd data/maps/
 fi
-
+'
 
 # Construct maps from alms
 echo " Constructing maps from alms"
