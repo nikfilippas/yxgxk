@@ -1,48 +1,30 @@
 import numpy as np
 from scipy.integrate import simps
-from scipy.interpolate import interp2d
 import pyccl as ccl
+from hmcorr_template import HM_gauss
 
 
-class HalomodCorrection(object):
-    """Provides methods to estimate the correction to the halo
-    model in the 1h - 2h transition regime.
+def HaloModCorrection(k, a, **kwargs):
+    """
+    Approximates the halo model correction as a gaussian with mean ``mu``
+    and standard deviation ``sigma``.
+
+    .. note: By using this method, we avoid obtaining any cosmological
+              information from the halo model correction, which is a fluke.
 
     Args:
-        cosmo (:obj:`ccl.Cosmology`): cosmology.
-        k_range (list): range of k to use (in Mpc^-1).
-        nlk (int): number of samples in log(k) to use.
-        z_range (list): range of redshifts to use.
-        nz (int): number of samples in redshift to use.
+        k (float or array): wavenumbers in units of Mpc^-1.
+        k0 (float): mean k of the gaussian HM correction.
+        s (float): std k of the gaussian HM correction.
     """
-    def __init__(self, cosmo,
-                 k_range=[1E-1, 5], nlk=20,
-                 z_range=[0., 1.], nz=16):
-        lkarr = np.linspace(np.log10(k_range[0]),
-                            np.log10(k_range[1]),
-                            nlk)
-        karr = 10.**lkarr
-        zarr = np.linspace(z_range[0], z_range[1], nz)
+    A = kwargs["a_HMcorr"]
+    mf = kwargs["mass_function"]
 
-        pk_hm = np.array([ccl.halomodel_matter_power(cosmo, karr, a)
-                          for a in 1. / (1 + zarr)])
-        pk_hf = np.array([ccl.nonlin_matter_power(cosmo, karr, a)
-                          for a in 1. / (1 + zarr)])
-        ratio = pk_hf / pk_hm
+    k0f, sf = HM_gauss(mf)
+    k0 = k0f(a)
+    s = sf(a)
 
-        self.rk_func = interp2d(lkarr, 1/(1+zarr), ratio,
-                                bounds_error=False, fill_value=1)
-
-    def rk_interp(self, k, a):
-        """
-        Returns the halo model correction for an array of k
-        values at a given redshift.
-
-        Args:
-            k (float or array): wavenumbers in units of Mpc^-1.
-            a (float): value of the scale factor.
-        """
-        return self.rk_func(np.log10(k), a)
+    return 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
 
 
 def hm_bias(cosmo, a, profile,
@@ -202,7 +184,7 @@ def hm_power_spectrum(cosmo, k, a, profiles,
 
     if hm_correction is not None:
         for ia, (aa, kk) in enumerate(zip(a, k)):
-            F[ia, :] *= hm_correction.rk_interp(kk, aa)
+            F[ia, :] *= hm_correction(kk, aa, **kwargs)
 
     return F.squeeze() if squeeze else F
 
@@ -240,7 +222,7 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
         If True, includes the 1-halo contribution.
     include_2h : bool
         If True, includes the 2-halo contribution.
-    hm_correction (:obj:`HalomodCorrection` or None):
+    hm_correction (:func:`HalomodCorrection` or None):
         Correction to the halo model in the transition regime.
         If `None`, no correction is applied.
     selection (function): selection function in (M,z) to include
