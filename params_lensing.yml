@@ -384,6 +384,15 @@ params:
       prior:
           type: "TopHat"
           values: [0.8, 1.2]
+    # Halo Model correction - Gaussian approximation
+    - name: "a_HMcorr"
+      label: "\\a_\\textrm{HMcorr}"
+      vary: True
+      value: 0.36
+      prior:
+          type: "TopHat"
+          values: [0.2, 0.6]
+
 
 
 # List all the different combinations of
