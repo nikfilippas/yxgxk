@@ -13,7 +13,7 @@ from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
 from model.profile2D import Arnaud, HOD
 from model.power_spectrum import hm_ang_power_spectrum, \
-    HalomodCorrection
+                                 HalomodCorrection
 from model.trispectrum import hm_ang_1h_covariance
 from model.utils import beam_gaussian, beam_hpix, \
     selection_planck_erf, selection_planck_tophat
@@ -30,7 +30,7 @@ cosmo = p.get_cosmo()
 
 # Include halo model correction if needed
 if p.get('mcmc').get('hm_correct'):
-    hm_correction = HalomodCorrection(cosmo)
+    hm_correction = HalomodCorrection
 else:
     hm_correction = None
 
