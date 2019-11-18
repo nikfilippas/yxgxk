@@ -165,8 +165,8 @@ def interpolate_spectra(leff, cell, ns):
 
 larr_full = np.arange(3*nside)
 cls_cov_gg_data = {}
-cls_cov_gy_data = {f.name: {} for f in fields_sz}
 cls_cov_gg_model = {}
+cls_cov_gy_data = {f.name: {} for f in fields_sz}
 cls_cov_gy_model = {f.name: {} for f in fields_sz}
 prof_y = Arnaud()
 for fg in tqdm(fields_ng, desc="Generating theory power spectra"):
@@ -190,6 +190,7 @@ for fg in tqdm(fields_ng, desc="Generating theory power spectra"):
         d = np.load(p.get_outdir() + '/cl_th_' + fg.name + '.npz')
         clgg = d['clgg']
         clgy = d['clgy']
+        clgk = d['clgk']
     except:
         prof_g = HOD(nz_file=fg.dndz)
         bmh2 = beam_hpix(larr, nside)**2
@@ -202,8 +203,13 @@ for fg in tqdm(fields_ng, desc="Generating theory power spectra"):
                                      zrange=fg.zrange, zpoints=64, zlog=True,
                                      hm_correction=hm_correction, selection=sel,
                                      **(models[fg.name])) * bmy * bmh2
+        clgk = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_k),
+                                     zrange=fg.zrange, zpoints=64, zlog=True,
+                                     hm_correction=hm_correction, selection=sel,
+                                     **(models[fg.name])) * 1  # TODO: beam, prof_k
         np.savez(p.get_outdir() + '/cl_th_' + fg.name + '.npz',
-                 clgg=clgg, clgy=clgy, ls=larr)
+                 clgg=clgg, clgy=clgy, clgk=clgk, ls=larr)
+
     clgg += nlarr
     cls_cov_gg_model[fg.name] = clgg
     for fy in fields_sz:
