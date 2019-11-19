@@ -1,30 +1,6 @@
 import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
-from hmcorr_template import HM_gauss
-
-
-def HaloModCorrection(k, a, **kwargs):
-    """
-    Approximates the halo model correction as a gaussian with mean ``mu``
-    and standard deviation ``sigma``.
-
-    .. note: By using this method, we avoid obtaining any cosmological
-              information from the halo model correction, which is a fluke.
-
-    Args:
-        k (float or array): wavenumbers in units of Mpc^-1.
-        k0 (float): mean k of the gaussian HM correction.
-        s (float): std k of the gaussian HM correction.
-    """
-    A = kwargs["a_HMcorr"]
-    mf = kwargs["mass_function"]
-
-    k0f, sf = HM_gauss(mf)
-    k0 = k0f(a)
-    s = sf(a)
-
-    return 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
 
 
 def hm_bias(cosmo, a, profile,

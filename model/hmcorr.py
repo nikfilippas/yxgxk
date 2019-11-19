@@ -1,5 +1,5 @@
 """
-Approximates the Halo Model correction as a Gaussian.
+Methods for the correction to the halo model transition regime.
 """
 
 import numpy as np
@@ -9,7 +9,7 @@ from scipy.interpolate import interp2d
 from scipy.optimize import curve_fit
 
 
-class HalomodCorrection(object):
+class HM_halofit(object):
     """Provides methods to estimate the correction to the halo
     model in the 1h - 2h transition regime.
 
@@ -19,6 +19,8 @@ class HalomodCorrection(object):
         nlk (int): number of samples in log(k) to use.
         z_range (list): range of redshifts to use.
         nz (int): number of samples in redshift to use.
+
+    .. note: ``interp2d`` flips secondary axis
     """
     def __init__(self, cosmo,
                  k_range=[1E-1, 5], nlk=20,
@@ -62,13 +64,13 @@ def cosmo(mf):
 
 """ HM correction definitions """
 # halofit || args: k, a
-hfT08 = HalomodCorrection(cosmo("tinker")).rk_interp
-hfT10 = HalomodCorrection(cosmo("tinker10")).rk_interp
+hfT08 = HM_halofit(cosmo("tinker")).rk_interp
+hfT10 = HM_halofit(cosmo("tinker10")).rk_interp
 # gaussian
 gauss = lambda k, A, k0, s: 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
 
 
-k = np.geomspace(0.1, 5, 128)
+hm_k = np.geomspace(0.1, 5, 128)
 hm_z = np.linspace(0, 1, 16)
 hm_a = 1/(1+hm_z)
 
@@ -82,12 +84,12 @@ PCOV_T10 = [[] for i in range(hm_z.size)]
 
 for i, aa in enumerate(hm_a):
     # Tinker 2008
-    popt, pcov = curve_fit(gauss, k, hfT08(k, aa))
+    popt, pcov = curve_fit(gauss, hm_k, hfT08(hm_k, aa))
     POPT_T08[i] = popt
     PCOV_T08[i] = np.sqrt(np.diag(pcov))
 
     # Tinker 2010
-    popt, pcov = curve_fit(gauss, k, hfT10(k, aa))
+    popt, pcov = curve_fit(gauss, hm_k, hfT10(hm_k, aa))
     POPT_T10[i] = popt
     PCOV_T10[i] = np.sqrt(np.diag(pcov))
 
@@ -96,7 +98,16 @@ BF_T08 = np.vstack(POPT_T08)[:, 1:]
 BF_T10 = np.vstack(POPT_T08)[:, 1:]
 
 
-def HM_correction(mf):
+def HM_gauss(mf):
+    """
+    Interpolates the best-fit gaussian approximation to the HM correction.
+
+    Args:
+        mf (str): cosmological mass function
+
+    Returns:
+        k0_func, s_func (func): interpolated functions for ``k0`` and ``s``
+    """
     if mf == "tinker":
         k0_func = interp1d(hm_a, BF_T08[:, 0])
         s_func = interp1d(hm_a, BF_T08[:, 1])
@@ -108,29 +119,35 @@ def HM_correction(mf):
     return k0_func, s_func
 
 
+def HaloModCorrection(k, a, squeeze=True, **kwargs):
+    """
+    Approximates the halo model correction as a gaussian with mean ``mu``
+    and standard deviation ``sigma``.
 
+    .. note: By using this method, we avoid obtaining any cosmological
+              information from the halo model correction, which is a fluke.
 
-"""
-''' meta-calculations '''
-bft08 = np.vstack(POPT_T08)
-cvt08 = np.vstack(PCOV_T08)
-bft10 = np.vstack(POPT_T10)
-cvt10 = np.vstack(PCOV_T10)
+    Args:
+        k (float or array): wavenumbers in units of Mpc^-1.
+        k0 (float): mean k of the gaussian HM correction.
+        s (float): std k of the gaussian HM correction.
+        squeeze (bool): whether to squeeze extra dimensions
 
+    Returns:
+        R (float ot array): halo model correction for given k
+    """
+    A = kwargs["a_HMcorr"]
+    mf = kwargs["mass_function"]
 
-# p0 for free parameter ``a``
-a_bf = (bft08[:, 0].mean() + bft10[:, 0].mean())/2
-print("A_bf = %.16f" % a_bf)
-# A_bf = 0.3614146096356469
+    k0f, sf = HM_gauss(mf)
+    k0 = k0f(a)
+    s = sf(a)
 
-# theoretical error for (k0, s)
-errt08 = cvt08/bft08
-errt10 = cvt10/bft10
+    # treat multidimensionality
+    k0, s = np.atleast_1d(k0, s)
+    k0 = k0[..., None]
+    s = s[..., None]
 
-maxerr = 100*errt08[:, 1:].max(), 100*errt10[:, 1:].max()
-merr = 100*errt08[:, 1:].mean(), 100*errt10[:, 1:].mean()
-print("max %% error (T08, T10): %.2f, %.2f" % maxerr)
-print("mean %% error (T08, T10): %.2f, %.2f" % merr)
-# max % error (T08, T10): 2.36, 1.85
-# mean % error (T08, T10): 1.83, 1.01
-"""
+    R = 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
+
+    return R.squeeze() if squeeze else R

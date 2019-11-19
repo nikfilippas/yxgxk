@@ -1,7 +1,7 @@
 from __future__ import print_function
-import numpy as np
 import sys
 import os
+import numpy as np
 import pymaster as nmt
 import healpy as hp
 from tqdm import tqdm
@@ -12,8 +12,8 @@ from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
 from model.profile2D import Arnaud, HOD
-from model.power_spectrum import hm_ang_power_spectrum, \
-                                 HalomodCorrection
+from model.power_spectrum import hm_ang_power_spectrum
+from model.hmcorr import HaloModCorrection
 from model.trispectrum import hm_ang_1h_covariance
 from model.utils import beam_gaussian, beam_hpix, \
     selection_planck_erf, selection_planck_tophat
@@ -27,10 +27,11 @@ p = ParamRun(fname_params)
 
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
+mf = p.get_massfunc()
 
 # Include halo model correction if needed
 if p.get('mcmc').get('hm_correct'):
-    hm_correction = HalomodCorrection
+    hm_correction = HaloModCorrection
 else:
     hm_correction = None
 
