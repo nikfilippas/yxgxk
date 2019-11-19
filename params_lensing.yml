@@ -1,7 +1,7 @@
 # Global parameters
 global:
     # Healpix resolution
-    nside: 1024
+    nside: 512
     # Output directory
     output_dir: 'output_default'
 
@@ -33,8 +33,9 @@ masks:
     mask_lowz: "data/maps/mask_v3.fits"
     mask_tsz: "data/maps/mask_planck60.fits"
     mask_545: "data/maps/mask_planck20.fits"
-    mask_lens: "data/maps/COM_Lensing_4096_R3.00_mask.fits"
-    mask_lens_SZ: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits"
+    mask_lens_2015: "data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits"
+    mask_lens_2018: "data/maps/COM_Lensing_4096_R3.00_mask.fits"
+    mask_lens_SZ_2018: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits"
 
 # Maps
 maps:
@@ -203,32 +204,11 @@ maps:
       map: "data/maps/HFI_SkyMap_545_2048_R2.02_full.fits"
       mask: "mask_545"
       beam: 10.
-    - name: "lens_MV"
+    - name: "lens"
       type: "k"
       ns_independent: false
-      map: "data/maps/COM_Lensing_4096_R3.00_MV_map.fits"
+      map: "data/maps/COM_CompMap_Lensing_2048_R2.00_dat_klm.fits"
       mask: "mask_lens"
-      beam: False
-      systematics: None
-    - name: "lens_TT"
-      type: "k"
-      ns_independent: false
-      map: "data/maps/COM_Lensing_4096_R3.00_TT_map.fits"
-      mask: "mask_lens"
-      beam: False
-      systematics: None
-    - name: "lens_PP"
-      type: "k"
-      ns_independent: false
-      map: "data/maps/COM_Lensing_4096_R3.00_PP_map.fits"
-      mask: "mask_lens"
-      beam: False
-      systematics: None
-    - name: "lens_szdeproj_TT"
-      type: "k"
-      ns_independent: false
-      map: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_TT_map.fits"
-      mask: "mask_lens_SZ"
       beam: False
       systematics: None
 
@@ -412,7 +392,7 @@ data_vectors:
             lmin: 0
           - tracers: ['2mpz','y_milca']
             lmin: 0
-          - tracers: ['2mpz', 'lens_szdeproj_TT']
+          - tracers: ['2mpz', 'lens']
             lmin: 0
     - type: 'Cl'
       name: 'wisc1'
@@ -422,7 +402,7 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc1','y_milca']
             lmin: 0
-          - tracers: ['wisc1', 'lens_szdeproj_TT']
+          - tracers: ['wisc1', 'lens']
             lmin: 0
     - type: 'Cl'
       name: 'wisc2'
@@ -432,7 +412,7 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc2','y_milca']
             lmin: 0
-          - tracers: ['wisc2', 'lens_szdeproj_TT']
+          - tracers: ['wisc2', 'lens']
             lmin: 0
     - type: 'Cl'
       name: 'wisc3'
@@ -442,7 +422,7 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc3','y_milca']
             lmin: 0
-          - tracers: ['wisc3', 'lens_szdeproj_TT']
+          - tracers: ['wisc3', 'lens']
             lmin: 0
     - type: 'Cl'
       name: 'wisc4'
@@ -452,7 +432,7 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc4','y_milca']
             lmin: 0
-          - tracers: ['wisc4', 'lens_szdeproj_TT']
+          - tracers: ['wisc4', 'lens']
             lmin: 0
     - type: 'Cl'
       name: 'wisc5'
@@ -462,5 +442,5 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc5','y_milca']
             lmin: 0
-          - tracers: ['wisc5', 'lens_szdeproj_TT']
+          - tracers: ['wisc5', 'lens']
             lmin: 0
