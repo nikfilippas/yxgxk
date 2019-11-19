@@ -32,7 +32,7 @@ def concentration_duffy(M, a, is_D500=False, squeeze=True):
     float or array_like : The halo concentration.
     """
     # Input handling
-    M, a = np.atleast_1d(M), np.atleast_1d(a)
+    M, a = np.atleast_1d(M, a)
 
     m_pivot = 2.78164e12  # Pivot mass [M_sun]
 
