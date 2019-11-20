@@ -23,4 +23,4 @@ if args.full:
     if nsteps > 0:
         subprocess.call("python mcmc.py %s %d" % (fname, nsteps))
 else:
-    subprocess.call("python mcmc.py %s", % fname)
+    subprocess.call("python mcmc.py %s" % fname)
