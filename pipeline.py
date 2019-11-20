@@ -11,7 +11,7 @@ from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
-from model.profile2D import Arnaud, HOD
+from model.profile2D import Arnaud, HOD, Lensing
 from model.power_spectrum import hm_ang_power_spectrum
 from model.hmcorr import HaloModCorrection
 from model.trispectrum import hm_ang_1h_covariance
@@ -170,6 +170,7 @@ cls_cov_gg_model = {}
 cls_cov_gy_data = {f.name: {} for f in fields_sz}
 cls_cov_gy_model = {f.name: {} for f in fields_sz}
 prof_y = Arnaud()
+prof_k = Lensing()
 for fg in tqdm(fields_ng, desc="Generating theory power spectra"):
     # print(" " + fg.name)
     # Interpolate data
