@@ -25,7 +25,8 @@ kwargs = p.get_cosmo_pars()
 
 # Jackknives
 try:
-    jk_region = int(sys.argv[2])
+    # sys.argv = ['mcmc.py', 'params.yml', nsteps, jk_region]
+    jk_region = int(sys.argv[3])
 except IndexError:
     jk_region = None
 
