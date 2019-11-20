@@ -3,6 +3,7 @@ import os
 import pyccl as ccl
 from .profile2D import Arnaud, HOD
 from .utils import beam_gaussian, beam_hpix
+from .cosmo_utils import COSMO_ARGS
 
 
 def get_profile(m):
@@ -27,19 +28,20 @@ def get_profile(m):
 class Tracer(object):
     """
     Tracer object used to store information related to
-    the signal modeling.
+    the signal modelling.
 
     Args:
         m (dict): dictionary defining a map in the
             param file.
-        cosmo (:obj:`ccl.Cosmology`): cosmology object.
         kmax (float): maximum wavenumber in units of Mpc^-1
+        **kwargs: Parametrisation of the profiles and cosmology.
     """
-    def __init__(self, m, cosmo, kmax):
+    def __init__(self, m, kmax, **kwargs):
         self.name = m['name']
         self.type = m['type']
         self.beam = m['beam']
         self.dndz = m.get('dndz')
+        cosmo = COSMO_ARGS(kwargs)
         # Estimate z-range and ell-max
         if self.dndz is not None:
             z, nz = np.loadtxt(self.dndz, unpack=True)
@@ -89,7 +91,6 @@ def choose_cl_file(p, tracers, jk_region=None):
         fname = p.get_fname_cls(tr[0], tr[1], jk_region=jk_region)
         if os.path.isfile(fname):
             return fname
-            break
 
     raise ValueError("Can't find Cl file for " +
                      tracers[0].name +
@@ -139,14 +140,14 @@ class DataManager(object):
         p (:obj:`ParamRun`): parameters for this run.
         v (dict): dictionary containing the list of two-point functions you
             want to analyze.
-        cosmo (:obj:`ccl.Cosmology`): cosmology object.
         all_data (bool): whether to use all ells or form a mask
+        **kwargs: Parametrisation of the profiles and cosmology.
     """
-    def __init__(self, p, v, cosmo, all_data=False, jk_region=None):
+    def __init__(self, p, v, all_data=False, jk_region=None, **kwargs):
         nside = p.get_nside()
         kmax = np.inf if all_data else p.get('mcmc')['kmax']
         # Create tracers for all maps in the param file.
-        tracers = {m['name']: Tracer(m, cosmo, kmax) for m in p.get('maps')}
+        tracers = {m['name']: Tracer(m, kmax, **kwargs) for m in p.get('maps')}
 
         self.tracers = []
         self.data_vector = []
