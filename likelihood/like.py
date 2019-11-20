@@ -9,7 +9,8 @@ class Likelihood(object):
     Args:
         pars (dict): dictionary of parameters, as provided in the
             input YAML file.
-        data (array): 1D array with the data vector.
+        data (``numpy.array``): 1D array with the data vector.
+        covar (``numpy.array``): Covariance matrix.
         get_theory (function): function that, given a dictionary of
             parameters, returns the theory prediction for the data
             vector provided in `data`.
@@ -51,9 +52,10 @@ class Likelihood(object):
                 self.p_free_prior.append(p.get('prior'))
                 self.p0.append(p.get('value'))
 
+
     def build_kwargs(self, par):
         """
-        Given a list of free parameter values, int constructs the
+        Given a list of free parameter values, it constructs the
         dictionary of parameters needed to get a theory prediction.
 
         Args:
@@ -68,6 +70,7 @@ class Likelihood(object):
         for p1, p2 in self.p_alias:
             params[p1] = params[p2]
         return params
+
 
     def lnprior(self, par):
         """
@@ -85,10 +88,14 @@ class Likelihood(object):
                 continue
             elif pr['type'] == 'Gaussian':
                 lnp += -0.5 * ((p - pr['values'][0]) / pr['values'][1])**2
-            else:
+            elif pr['type'] =='TopHat':
                 if not(pr['values'][0] <= p <= pr['values'][1]):
                     return -np.inf
+            else:
+                raise ValueError("Prior type not recognised for one or more \
+                                 parameters.")
         return lnp
+
 
     def lnlike(self, par):
         """
@@ -107,6 +114,7 @@ class Likelihood(object):
         dx = self.dv-tv
         return -0.5 * np.einsum('i,ij,j', dx, self.ic, dx)
 
+
     def generate_data(self, par):
         """
         Generates a sample of the data given a list of input
@@ -121,6 +129,7 @@ class Likelihood(object):
         params = self.build_kwargs(par)
         tv = self.get_theory(params)
         return tv+np.dot(self.cvhalf, np.random.randn(len(tv)))
+
 
     def lnprob(self, par):
         """
@@ -141,6 +150,7 @@ class Likelihood(object):
 
         return pr
 
+
     def chi2(self, par):
         """
         Computes -2 times the log posterior for a list of input
@@ -160,6 +170,7 @@ class Likelihood(object):
             print(par, -2 * pr)
 
         return -2 * pr
+
 
     def plot_data(self, par, dvec, save_figures=False, save_data=False,
                   prefix=None, get_theory_1h=None, get_theory_2h=None,
@@ -303,6 +314,7 @@ class Likelihood(object):
                 fname = prefix+'cls_'+tr[0].name+'_'+tr[1].name+'.'+extension
                 fig.savefig(fname, bbox_inches='tight')
         return figs
+
 
     def plot_chain(self, chain, save_figure=False, prefix=None,
                    extension='pdf'):

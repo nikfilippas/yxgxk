@@ -5,6 +5,7 @@ This file contains a series of convenience functions used in various parts of th
 import numpy as np
 import pyccl as ccl
 from scipy.special import erf
+from .cosmo_utils import COSMO_ARGS
 
 
 # Halo sizes
@@ -45,7 +46,7 @@ def concentration_duffy(M, a, is_D500=False, squeeze=True):
     return c.squeeze() if squeeze else c
 
 
-def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True):
+def R_Delta(M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
     """
     Calculate the reference radius of a halo.
 
@@ -54,8 +55,6 @@ def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True):
 
     Arguments
     ---------
-    cosmo : ``pyccl.Cosmology`` object
-        Cosmological parameters.
     M : float or array_like
         Halo mass [Msun].
     a : float or array_like
@@ -67,6 +66,8 @@ def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True):
         False when R_Delta is calculated using the critical density.
     squeeze : bool
         Whether to squeeze extra dimensions.
+    **kwargs : dict
+        Parametrisation of the profiles and cosmology.
 
     Returns
     -------
@@ -75,6 +76,7 @@ def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True):
     # Input handling
     M, a = np.atleast_1d(M), np.atleast_1d(a)
 
+    cosmo = COSMO_ARGS(kwargs)
     if is_matter:
         omega_factor = ccl.omega_x(cosmo, a, "matter")
     else:
@@ -130,7 +132,7 @@ def selection_planck_mthr(z):
     Returns:
         float or array: threshold mass in units of M_sun
     """
-    return 4.42370193e+15*z**3-5.49088452e+15*z**2+2.81496501e+15*z**1+5.31833523e+13*z**0
+    return 4.42370193e+15*z**3-5.49088452e+15*z**2+2.81496501e+15*z+5.31833523e+13
 
 
 def selection_planck_erf(m, z, complementary=True):

@@ -48,12 +48,6 @@ class Spectrum(object):
         # Compute data power spectrum
         cell_coupled = nmt.compute_coupled_cell(field1.field, field2.field)
         cell = wsp.decouple_cell(cell_coupled)[0]
-        # try:
-        #     cell = wsp.decouple_cell(cell_coupled)[0]
-        # except ValueError:
-        #     wsp = nmt.NmtWorkspace()
-        #     wsp.compute_coupling_matrix(field1.field, field2.field, bpws.bn)
-        #     cell = wsp.decouple_cell(cell_coupled)[0]
 
 
         # Compute noise power spectrum if needed.

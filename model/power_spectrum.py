@@ -1,9 +1,11 @@
 import numpy as np
 from scipy.integrate import simps
+from scipy.interpolate import interp2d
 import pyccl as ccl
+from model.cosmo_utilsa import COSMO_ARGS
 
 
-def hm_bias(cosmo, a, profile,
+def hm_bias(a, profile,
             logMrange=(6, 17), mpoints=128,
             selection=None,
             **kwargs):
@@ -11,7 +13,6 @@ def hm_bias(cosmo, a, profile,
     tracer.
 
     Args:
-        cosmo (:obj:`ccl.Cosmology`): cosmology.
         a (array): array of scale factor values
         profile (`Profile`): a profile. Only Arnaud and HOD are
             implemented.
@@ -20,13 +21,14 @@ def hm_bias(cosmo, a, profile,
         selection (function): selection function in (M,z) to include
             in the calculation. Pass None if you don't want to select
             a subset of the M-z plane.
-        **kwargs: parameter used internally by the profiles.
+        **kwargs: Parametrisation of the profiles and cosmology.
     """
     # Input handling
     a = np.atleast_1d(a)
 
+    cosmo = COSMO_ARGS(kwargs)
     # Profile normalisations
-    Unorm = profile.profnorm(cosmo, a, squeeze=False, **kwargs)
+    Unorm = profile.profnorm(a, squeeze=False, **kwargs)
     Unorm = Unorm[..., None]
 
     # Set up integration boundaries
@@ -46,7 +48,7 @@ def hm_bias(cosmo, a, profile,
     else:
         select = 1
 
-    U, _ = profile.fourier_profiles(cosmo, np.array([0.001]), M, a,
+    U, _ = profile.fourier_profiles(np.array([0.001]), M, a,
                                     squeeze=False, **kwargs)
 
     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
@@ -65,7 +67,7 @@ def hm_bias(cosmo, a, profile,
     return b2h.squeeze()
 
 
-def hm_power_spectrum(cosmo, k, a, profiles,
+def hm_power_spectrum(k, a, profiles,
                       logMrange=(6, 17), mpoints=128,
                       include_1h=True, include_2h=True,
                       squeeze=True, hm_correction=None,
@@ -75,7 +77,6 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     spectrum of two quantities.
 
     Args:
-        cosmo (:obj:`ccl.Cosmology`): cosmology.
         k (array): array of wavenumbers in units of Mpc^-1
         a (array): array of scale factor values
         profiles (tuple): tuple of two profile objects (currently
@@ -91,18 +92,19 @@ def hm_power_spectrum(cosmo, k, a, profiles,
         selection (function): selection function in (M,z) to include
             in the calculation. Pass None if you don't want to select
             a subset of the M-z plane.
-        **kwargs: parameter used internally by the profiles.
+        **kwargs: Parametrisation of the profiles and cosmology.
     """
     # Input handling
     a, k = np.atleast_1d(a), np.atleast_2d(k)
 
+    cosmo = COSMO_ARGS(kwargs)
     # Profile normalisations
     p1, p2 = profiles
-    Unorm = p1.profnorm(cosmo, a, squeeze=False, **kwargs)
+    Unorm = p1.profnorm(a, squeeze=False, **kwargs)
     if p1.name == p2.name:
         Vnorm = Unorm
     else:
-        Vnorm = p2.profnorm(cosmo, a, squeeze=False, **kwargs)
+        Vnorm = p2.profnorm(a, squeeze=False, **kwargs)
     if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any():
         return None  # zero division
     Unorm, Vnorm = Unorm[..., None], Vnorm[..., None]  # transform axes
@@ -129,13 +131,13 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     else:
         select = 1
 
-    U, UU = p1.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
+    U, UU = p1.fourier_profiles(k, M, a, squeeze=False, **kwargs)
     # optimise for autocorrelation (no need to recompute)
     if p1.name == p2.name:
         V = U
         UV = UU
     else:
-        V, VV = p2.fourier_profiles(cosmo, k, M, a, squeeze=False, **kwargs)
+        V, VV = p2.fourier_profiles(k, M, a, squeeze=False, **kwargs)
         r = kwargs["r_corr"] if "r_corr" in kwargs else 0
         UV = U*V*(1+r)
 
@@ -165,7 +167,7 @@ def hm_power_spectrum(cosmo, k, a, profiles,
     return F.squeeze() if squeeze else F
 
 
-def hm_ang_power_spectrum(cosmo, l, profiles,
+def hm_ang_power_spectrum(l, profiles,
                           zrange=(1e-6, 6), zpoints=32, zlog=True,
                           logMrange=(6, 17), mpoints=128,
                           include_1h=True, include_2h=True,
@@ -178,8 +180,6 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
 
     Parameters
     ----------
-    cosmo : `pyccl.Cosmology` object
-        Cosmological parameters.
     l : array_like
         The l-values (multipole number) of the cross power spectrum.
     profiles : tuple of `profile2D._profile_` objects
@@ -205,8 +205,9 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
         in the calculation. Pass None if you don't want to select
         a subset of the M-z plane.
     **kwargs : keyword arguments
-        Parametrisation of the profiles.
+        Parametrisation of the profiles and cosmology.
     """
+    cosmo = COSMO_ARGS(kwargs)
     # Integration boundaries
     zmin, zmax = zrange
     # Distance measures & out-of-loop optimisations
@@ -225,12 +226,12 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
 
     # Window functions
     p1, p2 = profiles
-    Wu = p1.kernel(cosmo, a, **kwargs)
-    Wv = Wu if (p1.name == p2.name) else p2.kernel(cosmo, a, **kwargs)
+    Wu = p1.kernel(a, **kwargs)
+    Wv = Wu if (p1.name == p2.name) else p2.kernel(a, **kwargs)
     N = H_inv*Wu*Wv/chi**2  # overall normalisation factor
 
     k = (l+1/2)/chi[..., None]
-    Puv = hm_power_spectrum(cosmo, k, a, profiles, logMrange, mpoints,
+    Puv = hm_power_spectrum(k, a, profiles, logMrange, mpoints,
                             include_1h, include_2h, squeeze=False,
                             hm_correction=hm_correction, selection=selection,
                             **kwargs)

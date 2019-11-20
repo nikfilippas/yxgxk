@@ -1,6 +1,9 @@
 import yaml
 import pyccl as ccl
 from .bandpowers import Bandpowers
+from model.cosmo_utils import COSMO_KEYS
+from cosmoHammer.util import Params
+
 
 
 class ParamRun(object):
@@ -14,23 +17,41 @@ class ParamRun(object):
         with open(fname) as f:
             self.p = yaml.safe_load(f)
 
+
     def get_massfunc(self):
-        """
-        Get preferred mass function
-        """
-        return self.p['mcmc']['mfunc']
+        """Get preferred mass function."""
+        for P in self.p["params"]:
+            if P["name"] == "mass_function":
+                return P["value"]
+        raise ValueError("Provide cosmological mass function as parameter.")
+
+
+    def get_cosmo_pars(self):
+        """Extract cosmological parameters from yaml file."""
+        # names of all possible cosmological parameters
+        pars = {par["name"]: par["value"] for par in self.p.get("params") \
+                                          if par["name"] in COSMO_KEYS}
+        return pars
+
 
     def get_cosmo(self):
-        """
-        Get default cosmology
-        """
-        mfunc = self.get_massfunc()
-        return ccl.Cosmology(Omega_c=0.26066676,
-                             Omega_b=0.048974682,
-                             h=0.6766,
-                             sigma8=0.8102,
-                             n_s=0.9665,
-                             mass_function=mfunc)
+        """Get default cosmology."""
+        return ccl.Cosmology(**self.get_cosmo_pars())
+
+    # FIXME: replace with cobaya
+    def get_params(self):
+        """Convert to cosmoHammer Params format."""
+        KEYS = [par for par in COSMO_KEYS if par != "mass_function"]
+        # build dictionary of cosmological parameters
+        pars = {par["name"]: [par["value"],               # center
+                              par["prior"]["values"][0],  # min
+                              par["prior"]["values"][1],  # max
+                              par["width"]]               # width
+                for par in self.p.get("params") if par["name"] in KEYS}
+        # convert dictionary to list of key-value pair tuples
+        pars = tuple(zip(list(pars.keys()), list(pars.values())))
+        return Params(*pars)
+
 
     def get_outdir(self):
         """
@@ -40,6 +61,7 @@ class ParamRun(object):
             str: output directory
         """
         return self.p['global']['output_dir']
+
 
     def get_sampler_prefix(self, data_name):
         """
@@ -53,6 +75,7 @@ class ParamRun(object):
         fname += data_name + "_"
         return fname
 
+
     def get_bandpowers(self):
         """
         Create a `Bandpowers` object from input.
@@ -62,6 +85,7 @@ class ParamRun(object):
         """
         return Bandpowers(self.p['global']['nside'],
                           self.p['bandpowers'])
+
 
     def get_models(self):
         """
@@ -74,6 +98,7 @@ class ParamRun(object):
         for d in self.p['maps']:
             models[d['name']] = d.get('model')
         return models
+
 
     def get_fname_mcm(self, f1, f2, jk_region=None):
         """
@@ -93,6 +118,7 @@ class ParamRun(object):
         fname += ".mcm"
         return fname
 
+
     def get_prefix_cls(self, f1, f2):
         """
         Get file prefix for power spectra.
@@ -104,6 +130,7 @@ class ParamRun(object):
             str: file prefix.
         """
         return self.get_outdir()+"/cls_"+f1.name+"_"+f2.name
+
 
     def get_fname_cls(self, f1, f2, jk_region=None):
         """
@@ -123,6 +150,7 @@ class ParamRun(object):
         print(fname)
         return fname
 
+
     def get_fname_cmcm(self, f1, f2, f3, f4):
         """
         Get file name for the coupling coefficients associated with
@@ -140,6 +168,7 @@ class ParamRun(object):
         fname += f3.mask_id+"_"
         fname += f4.mask_id+".cmcm"
         return fname
+
 
     def get_fname_cov(self, f1, f2, f3, f4, suffix):
         """
@@ -162,17 +191,20 @@ class ParamRun(object):
         fname += f4.name+".npz"
         return fname
 
+
     def get(self, k):
         """
         Return a section of the param file from its name.
         """
         return self.p.get(k)
 
+
     def do_jk(self):
         """
         Return true if JKs are requested.
         """
         return self.p['jk']['do']
+
 
     def get_nside(self):
         """

@@ -197,15 +197,19 @@ for fg in tqdm(fields_ng, desc="Generating theory power spectra"):
         prof_g = HOD(nz_file=fg.dndz)
         bmh2 = beam_hpix(larr, nside)**2
         bmy = beam_gaussian(larr, 10.)
-        clgg = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_g),
+        clgg = hm_ang_power_spectrum(larr, (prof_g, prof_g),
                                      zrange=fg.zrange, zpoints=64, zlog=True,
                                      hm_correction=hm_correction, selection=sel,
                                      **(models[fg.name])) * bmh2
-        clgy = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_y),
+        clgy = hm_ang_power_spectrum(larr, (prof_g, prof_y),
                                      zrange=fg.zrange, zpoints=64, zlog=True,
                                      hm_correction=hm_correction, selection=sel,
                                      **(models[fg.name])) * bmy * bmh2
-        clgk = hm_ang_power_spectrum(cosmo, larr, (prof_g, prof_k),
+        clgk = hm_ang_power_spectrum(larr, (prof_g, prof_k),
+                                     zrange=fg.zrange, zpoints=64, zlog=True,
+                                     hm_correction=hm_correction, selection=sel,
+                                     **(models[fg.name])) * 1  # TODO: beam, prof_k
+        clkk = hm_ang_power_spectrum(larr, (prof_k, prof_k),
                                      zrange=fg.zrange, zpoints=64, zlog=True,
                                      hm_correction=hm_correction, selection=sel,
                                      **(models[fg.name])) * 1  # TODO: beam, prof_k

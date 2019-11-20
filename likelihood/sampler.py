@@ -34,21 +34,19 @@ class Sampler(object):
 
         self.chi2 = chi2
 
+
     def update_p0(self, p0):
-        """
-        Updates initial parameters.
-        """
+        """Updates initial parameters."""
         self.p0 = p0
 
+
     def update_cov(self, cov):
-        """
-        Updates internal covariance.
-        """
+        """Updates internal covariance."""
         self.covar = cov
 
+
     def read_properties(self):
-        """
-        Reads sampler properties (initial parameters and covariance)
+        """Reads sampler properties (initial parameters and covariance)
         from file.
         """
         fname_props = self.prefix_out + "properties.npz"
@@ -59,6 +57,7 @@ class Sampler(object):
                 self.update_cov(f['covar'])
             return True
         return False
+
 
     def get_best_fit(self, p0=None,
                      xtol=0.0001, ftol=0.0001, maxiter=None,
@@ -103,9 +102,10 @@ class Sampler(object):
 
         return res.x
 
+
     def get_covariance(self, p0=None, update_cov=False):
         """
-        Computes covariance as inverse Hessian of the posterio around a
+        Computes covariance as inverse Hessian of the posterior around a
         given point.
 
         Args:
@@ -139,6 +139,7 @@ class Sampler(object):
             self.update_cov(cov)
 
         return cov
+
 
     def sample(self, carry_on=False, verbosity=0):
         """
@@ -186,6 +187,7 @@ class Sampler(object):
 
         return sampler
 
+
     def get_chain(self):
         """
         Read chain from previous run. Chain can be retireved in the `chain`
@@ -199,9 +201,9 @@ class Sampler(object):
         self.chain = reader.get_chain(flat=True)
         self.probs = reader.get_log_prob(flat=True)
 
+
     def save_properties(self):
-        """
-        Saves sampler properties (initial parameters and covariance)
+        """Saves sampler properties (initial parameters and covariance)
         to file.
         """
         fname_props = self.prefix_out + "properties"

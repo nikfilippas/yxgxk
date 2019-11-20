@@ -21,6 +21,7 @@ if args.nsteps:
     print("Updated MCMC to %d steps." % args.nsteps)
 
 p = ParamRun(fname_params)
+kwargs = p.get_cosmo_pars()
 
 # Jackknives
 try:
