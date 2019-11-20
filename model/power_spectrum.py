@@ -1,8 +1,7 @@
 import numpy as np
 from scipy.integrate import simps
-from scipy.interpolate import interp2d
 import pyccl as ccl
-from model.cosmo_utilsa import COSMO_ARGS
+from model.cosmo_utils import COSMO_ARGS
 
 
 def hm_bias(a, profile,
