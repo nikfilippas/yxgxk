@@ -1,18 +1,24 @@
 import sys
+from argparse import ArgumentParser
 import numpy as np
 from analysis.params import ParamRun
+from likelihood.yaml_handler import update_params, update_nsteps
 from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
-from model.power_spectrum import HalomodCorrection
+from model.hmcorr import HaloModCorrection
 from model.utils import selection_planck_erf, selection_planck_tophat
 
-try:
-    fname_params = sys.argv[1]
-except IndexError:
-    raise ValueError("Must provide param file name as command-line argument")
 
+parser = ArgumentParser()
+parser.add_argument("fname_params", help="yaml target parameter file")
+parser.add_argument("-N", "--nsteps", help="MCMC steps", type=int)
+args = parser.parse_args()
+fname_params = args.fname_params
+if args.nsteps:
+    update_nsteps(fname_params, args.nsteps)
+    print("Updated MCMC to %d steps." % args.nsteps)
 
 p = ParamRun(fname_params)
 
@@ -46,11 +52,12 @@ for v in p.get('data_vectors'):
         d = DataManager(p, v, jk_region=jk_region, **kwargs)
         # Include halo model correction if needed
         if p.get('mcmc').get('hm_correct'):
-            hm_correction = HalomodCorrection(**kwargs)
+            hm_correction = HaloModCorrection
         else:
             hm_correction = None
         return get_theory(p, d,
-                          hm_correction=hm_correction, selection=sel,
+                          hm_correction=hm_correction,
+                          selection=sel,
                           **kwargs)
 
     # Set up likelihood
@@ -70,11 +77,15 @@ for v in p.get('data_vectors'):
         sam.save_properties()
 
     print(" Best-fit parameters:")
-    for n, v, s in zip(sam.parnames, sam.p0, np.sqrt(np.diag(sam.covar))):
-        print("  " + n + " : %.3lE +- %.3lE" % (v, s))
+    for n, val, s in zip(sam.parnames, sam.p0, np.sqrt(np.diag(sam.covar))):
+        print("  " + n + " : %.3lE +- %.3lE" % (val, s))
         if n == p.get("mcmc")["save_par"]: par.append(v)
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
+
+    # Update yaml file with best-fit parameters
+    update_params(fname_params, v["name"], sam.parnames, sam.p0)
+    print("Updated yaml file with best-fit parameters.")
 
     if sam.nsteps > 0:
         # Monte-carlo
