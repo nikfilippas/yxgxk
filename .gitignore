@@ -6,6 +6,7 @@ other/
 .spyproject/
 
 # File extensions
+*.pyc
 *.h5
 *.npy
 *.npz
