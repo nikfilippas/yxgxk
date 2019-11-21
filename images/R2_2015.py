@@ -9,7 +9,7 @@ from healpy.pixelfunc import ud_grade
 import matplotlib.pyplot as plt
 
 
-nside = 512
+nside = 2048
 
 ## alms ##
 # from healpy.fitsfunc import read_alm
