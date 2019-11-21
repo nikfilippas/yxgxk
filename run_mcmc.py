@@ -1,3 +1,14 @@
+"""
+Handles running the MCMC.
+
+# Usage (`python run_mcmc.py params.yml`):
+  - No args  : runs directly from the params.yml file.
+  - `--full` :
+      * runs the minimizer to find best-fit values;
+      * replaces the best-fit values in params.yml;
+      * runs `mcmc.py` for the full MCMC.
+"""
+
 import os
 import yaml
 from argparse import ArgumentParser
@@ -11,7 +22,6 @@ args = parser.parse_args()
 
 fname = args.fname_params
 if args.full:
-    # sys.argv.pop(2)
     with open(fname) as f:
         doc = yaml.safe_load(f)
     nsteps = doc["mcmc"]["n_steps"]
