@@ -15,8 +15,8 @@ if args.full:
     with open(fname) as f:
         doc = yaml.safe_load(f)
     nsteps = doc["mcmc"]["n_steps"]
-    os.system("python mcmc.py %s 0" % fname)
+    os.system("python mcmc.py %s -N 0" % fname)
     if nsteps > 0:
-        os.system("python mcmc.py %s %d" % (fname, nsteps))
+        os.system("python mcmc.py %s -N %d" % (fname, nsteps))
 else:
     os.system("python mcmc.py %s" % fname)
