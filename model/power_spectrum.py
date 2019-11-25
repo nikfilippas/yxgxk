@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
+from pyccl.errors import CCLError
 from model.cosmo_utils import COSMO_ARGS
 
 
@@ -121,7 +122,16 @@ def hm_power_spectrum(k, a, profiles,
     if selection is not None:
         select = np.array([selection(M,1./aa-1) for aa in a])
         mfunc *= select
-    bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+    try:
+        bh = np.array([ccl.halo_bias(cosmo, M, A1, A2)
+                       for A1, A2 in zip(a, Dm)])
+    except CCLError:
+        kwargs_patch = kwargs.copy()
+        kwargs_patch["mass_function"] = "tinker10"
+        cosmo_patch = COSMO_ARGS(kwargs_patch)
+        bh = np.array([ccl.halo_bias(cosmo_patch, M, A1, A2)
+                       for A1, A2 in zip(a, Dm)])
+
     # shape transformations
     mfunc, bh = mfunc.T[..., None], bh.T[..., None]
     if selection is not None:

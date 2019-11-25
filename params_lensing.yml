@@ -67,6 +67,13 @@ maps:
           r_corr:  -0.3287
           sigma_lnM:  0.15
           width: 0.8305
+          Omega_c: 0.26066676
+          Omega_b: 0.048974682
+          h: 0.6766
+          sigma8: 0.8102
+          n_s: 0.9665
+          mass_function: "tinker"
+          a_HMcorr: 0.3614146096356469
       # List of systematics
       systematics:
         - 'data/maps/lambda_sfd_ebv.fits'
@@ -89,6 +96,13 @@ maps:
           r_corr:  -0.5759
           sigma_lnM:  0.15
           width: 1.031
+          Omega_c: 0.26066676
+          Omega_b: 0.048974682
+          h: 0.6766
+          sigma8: 0.8102
+          n_s: 0.9665
+          mass_function: "tinker"
+          a_HMcorr: 0.3614146096356469
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
@@ -112,6 +126,13 @@ maps:
           r_corr:  -0.5263
           sigma_lnM:  0.15
           width: 1.060
+          Omega_c: 0.26066676
+          Omega_b: 0.048974682
+          h: 0.6766
+          sigma8: 0.8102
+          n_s: 0.9665
+          mass_function: "tinker"
+          a_HMcorr: 0.3614146096356469
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
@@ -135,6 +156,13 @@ maps:
           r_corr:  -0.5975
           sigma_lnM:  0.15
           width: 1.097
+          Omega_c: 0.26066676
+          Omega_b: 0.048974682
+          h: 0.6766
+          sigma8: 0.8102
+          n_s: 0.9665
+          mass_function: "tinker"
+          a_HMcorr: 0.3614146096356469
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
@@ -158,6 +186,13 @@ maps:
           r_corr:  -0.5788
           sigma_lnM:  0.15
           width: 1.085
+          Omega_c: 0.26066676
+          Omega_b: 0.048974682
+          h: 0.6766
+          sigma8: 0.8102
+          n_s: 0.9665
+          mass_function: "tinker"
+          a_HMcorr: 0.3614146096356469
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
@@ -181,6 +216,13 @@ maps:
           r_corr:  -0.6920
           sigma_lnM:  0.15
           width: 0.8969
+          Omega_c: 0.26066676
+          Omega_b: 0.048974682
+          h: 0.6766
+          sigma8: 0.8102
+          n_s: 0.9665
+          mass_function: "tinker"
+          a_HMcorr: 0.3614146096356469
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
