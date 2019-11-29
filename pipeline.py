@@ -194,26 +194,23 @@ for fg in tqdm(fields_g, desc="Generating theory power spectra"):
         clgk = d['clgk']
     except:
         prof_g = HOD(nz_file=fg.dndz)
+        bmg = beam_hpix(larr, ns=512)**2
         bmh2 = beam_hpix(larr, nside)**2
         bmy = beam_gaussian(larr, 10.)
         clgg = hm_ang_power_spectrum(larr, (prof_g, prof_g),
                                      zrange=fg.zrange, zpoints=64, zlog=True,
                                      hm_correction=hm_correction, selection=sel,
-                                     **(models[fg.name])) * bmh2  # TODO: why not square?
+                                     **(models[fg.name])) * bmg
         clgy = hm_ang_power_spectrum(larr, (prof_g, prof_y),
                                      zrange=fg.zrange, zpoints=64, zlog=True,
                                      hm_correction=hm_correction, selection=sel,
-                                     **(models[fg.name])) * bmy * bmh2
+                                     **(models[fg.name])) * bmy * bmh2  # TODO: correct?
         clgk = hm_ang_power_spectrum(larr, (prof_g, prof_k),
-                                     zrange=fg.zrange, zpoints=64, zlog=True,
-                                     hm_correction=hm_correction, selection=sel,
-                                     **(models[fg.name])) * 1  # TODO: beam, prof_k
-        # clkk = hm_ang_power_spectrum(larr, (prof_k, prof_k),
-        #                              zrange=fg.zrange, zpoints=64, zlog=True,
-        #                              hm_correction=hm_correction, selection=sel,
-        #                              **(models[fg.name])) * 1  # TODO: beam, prof_k
+                                      zrange=fg.zrange, zpoints=64, zlog=True,
+                                      hm_correction=hm_correction, selection=sel,
+                                      **(models[fg.name])) * bmy  # TODO: correct?
         np.savez(p.get_outdir() + '/cl_th_' + fg.name + '.npz',
-                 clgg=clgg, clgy=clgy, clgk=clgk, ls=larr)
+                 clgg=clgg, clgk=clgk, ls=larr)
 
     clgg += nlarr
     cls_cov_gg_model[fg.name] = clgg
@@ -399,28 +396,28 @@ for fy in fields_y:
                                     zrange_b=fg.zrange, zpoints_b=64,
                                     zlog_b=True,
                                     selection=sel, **(models[fg.name]))
-        b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
+        b_hp = beam_hpix(cls_gg[fg.name].leff, nside=512)  # TODO: check
         b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
         dcov *= (b_hp**2*b_y)[:, None]*(b_hp**2*b_y)[None, :]
         dcov_gygy[fy.name][fg.name] = Covariance(fg.name, fy.name,
                                                  fg.name, fy.name, dcov)
 
-# gdgd
-print("  gdgd")
-covs_gdgd_data = {}
+# dgdg
+print("  dgdg")
+covs_dgdg_data = {}
 for fd in fields_d:
-    covs_gdgd_data[fd.name] = {}
+    covs_dgdg_data[fd.name] = {}
     for fg in fields_g:
         clvggd = cls_cov_gg_data[fg.name]
         clvgdd = cls_cov_dg[fg.name][fd.name]
         clvdd = cls_cov_dd[fd.name]
-        covs_gdgd_data[fd.name][fg.name] = get_covariance(fg, fd, fg, fd,
+        covs_dgdg_data[fd.name][fg.name] = get_covariance(fg, fd, fg, fd,
                                                           'data',
                                                           clvggd, clvgdd,
                                                           clvgdd, clvdd)
 
-# ydyd
-print("  ydyd")
+# dydy
+print("  dydy")
 covs_ydyd_data = {}
 for fd in fields_d:
     covs_ydyd_data[fd.name] = {}
@@ -428,10 +425,74 @@ for fd in fields_d:
         clvyyd = cls_cov_yy[fy.name]
         clvydd = cls_cov_dy[fy.name][fd.name]
         clvdd = cls_cov_dd[fd.name]
-        covs_gdgd_data[fd.name][fy.name] = get_covariance(fy, fd, fy, fd,
+        covs_dgdg_data[fd.name][fy.name] = get_covariance(fy, fd, fy, fd,
                                                           'data',
                                                           clvyyd, clvydd,
                                                           clvydd, clvdd)
+
+# dkdk
+print("  dkdk")
+covs_dkdk_data = {}
+for fd in fields_d:
+    covs_dkdk_data[fd.name] = {}
+    for fk in fields_k:
+        clvkkd = cls_cov_kk[fy.name]
+        clvkdd = cls_cov_dk[fk.name][fd.name]
+        clvdd = cls_cov_dd[fd.name]
+        covs_dkdk_data[fd.name][fk.name] = get_covariance(fk, fd, fk, fd,
+                                                          'data',
+                                                          clvkkd, clvkdd,
+                                                          clvkdd, clvdd)
+
+# gggk
+print("  gggk")
+covs_gggk_data = {}
+covs_gggk_model = {}
+dcov_gggk = {}
+for fk in fields_k:
+    covs_gggk_model[fk.name] = {}
+    covs_gggk_data[fk.name] = {}
+    dcov_gggk[fk.name] = {}
+    for fg in fields_g:
+        clvggm = cls_cov_gg_model[fg.name]
+        clvgkm = cls_cov_gk_model[fk.name][fg.name]
+        clvggd = cls_cov_gg_data[fg.name]
+        clvgkd = cls_cov_gk_data[fk.name][fg.name]
+        covs_gggk_model[fk.name][fg.name] = get_covariance(fg, fg, fg, fk,
+                                                           'model',
+                                                           clvggm, clvgkm,
+                                                           clvggm, clvgkm)
+        covs_gggk_data[fk.name][fg.name] = get_covariance(fg, fg, fg, fk,
+                                                          'data',
+                                                          clvggd, clvgkd,
+                                                          clvggd, clvgkd)
+        fsky = np.mean(fg.mask*fk.mask)
+        prof_g = HOD(nz_file=fg.dndz)
+        dcov = hm_ang_1h_covariance(fsky, cls_gg[fg.name].leff,
+                                    (prof_g, prof_g), (prof_g, prof_k),
+                                    zrange_a=fg.zrange, zpoints_a=64,
+                                    zlog_a=True,
+                                    zrange_b=fg.zrange, zpoints_b=64,
+                                    zlog_b=True,
+                                    selection=sel, **(models[fg.name]))
+        b_hp = beam_hpix(cls_gg[fg.name].leff, nside=512)  # TODO: check
+        dcov *= (b_hp**2)[:, None]*(b_hp**2)[None, :]
+        dcov_gggk[fk.name][fg.name] = Covariance(fg.name, fg.name,
+                                                 fg.name, fk.name, dcov)
+
+# ykyk
+print("  ykyk")
+covs_ykyk_data = {}
+for fy in fields_y:
+    covs_ykyk_data[fy.name] = {}
+    for fk in fields_k:
+        clvkkd = cls_cov_kk[fy.name]
+        clvkyd = cls_cov_yk[fk.name][fy.name]
+        clvyy = cls_cov_yy[fy.name]
+        covs_ykyk_data[fy.name][fk.name] = get_covariance(fk, fy, fk, fy,
+                                                          'data',
+                                                          clvkkd, clvkyd,
+                                                          clvkyd, clvyy)
 
 
 
