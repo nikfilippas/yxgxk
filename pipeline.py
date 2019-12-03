@@ -117,20 +117,27 @@ fields_y = []
 fields_k = []
 for d in tqdm(p.get('maps'), desc="Reading fields"):
 #    print(" " + d['name'])
-    f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
+    # f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
+    #           d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
+    #           syst_list = d.get('systematics'))
+    # if d['type'] == 'g':
+    #     fields_g.append(f)
+    # elif d['type'] == 'y':
+    #     fields_y.append(f)
+    # elif d['type'] == 'k':
+    #     fields_k.append(f)
+    # elif d['type'] == 'd':
+    #     fields_d.append(f)
+
+    if d["type"] == "y":
+        fields_y.append(Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
               d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
-              syst_list = d.get('systematics'))
-    if d['type'] == 'g':
-        fields_g.append(f)
-    elif d['type'] == 'y':
-        fields_y.append(f)
-    elif d['type'] == 'k':
-        fields_k.append(f)
-    elif d['type'] == 'd':
-        fields_d.append(f)
+              syst_list = d.get('systematics')))
     else:
-        raise ValueError("Input field type %s not recognised in %s." %
-                         (d["type"], d["name"]))
+        continue
+    # else:
+        # raise ValueError("Input field type %s not recognised in %s." %
+        #                   (d["type"], d["name"]))
 
 # ORDER: d (dust), g (galaxies), y (tSZ), k (lensing)
 # dust power spectra
@@ -258,7 +265,7 @@ for fk in fields_k:
 # cov_yk
 cls_cov_yk = {}
 for fk in fields_k:
-    cls_cov_dk[fk.name] = {}
+    cls_cov_yk[fk.name] = {}
     for fy in fields_y:
         cl = cls_yk[fk.name][fy.name]
         cls_cov_yk[fk.name][fy.name] = interpolate_spectra(cl.leff,
@@ -305,6 +312,34 @@ def get_covariance(fa1, fa2, fb1, fb2, suffix,
         cov.to_file(fname_cov)
     return cov
 
+
+# dgdg
+print("  dgdg")
+covs_dgdg_data = {}
+for fd in fields_d:
+    covs_dgdg_data[fd.name] = {}
+    for fg in fields_g:
+        clvggd = cls_cov_gg_data[fg.name]
+        clvgdd = cls_cov_dg[fg.name][fd.name]
+        clvdd = cls_cov_dd[fd.name]
+        covs_dgdg_data[fd.name][fg.name] = get_covariance(fg, fd, fg, fd,
+                                                          'data',
+                                                          clvggd, clvgdd,
+                                                          clvgdd, clvdd)
+
+# dydy
+print("  dydy")
+covs_ydyd_data = {}
+for fd in fields_d:
+    covs_ydyd_data[fd.name] = {}
+    for fy in fields_y:
+        clvyyd = cls_cov_yy[fy.name]
+        clvydd = cls_cov_dy[fy.name][fd.name]
+        clvdd = cls_cov_dd[fd.name]
+        covs_dgdg_data[fd.name][fy.name] = get_covariance(fy, fd, fy, fd,
+                                                          'data',
+                                                          clvyyd, clvydd,
+                                                          clvydd, clvdd)
 
 # gggg
 print("  gggg")
@@ -389,7 +424,7 @@ for fy in fields_y:
                                                           clvgyd, clvyy)
         fsky = np.mean(fg.mask*fy.mask)
         prof_g = HOD(nz_file=fg.dndz)
-        dcov = hm_ang_1h_covariance(cosmo, fsky, cls_gg[fg.name].leff,
+        dcov = hm_ang_1h_covariance(fsky, cls_gg[fg.name].leff,
                                     (prof_g, prof_y), (prof_g, prof_y),
                                     zrange_a=fg.zrange, zpoints_a=64,
                                     zlog_a=True,
@@ -401,48 +436,6 @@ for fy in fields_y:
         dcov *= (b_hp**2*b_y)[:, None]*(b_hp**2*b_y)[None, :]
         dcov_gygy[fy.name][fg.name] = Covariance(fg.name, fy.name,
                                                  fg.name, fy.name, dcov)
-
-# dgdg
-print("  dgdg")
-covs_dgdg_data = {}
-for fd in fields_d:
-    covs_dgdg_data[fd.name] = {}
-    for fg in fields_g:
-        clvggd = cls_cov_gg_data[fg.name]
-        clvgdd = cls_cov_dg[fg.name][fd.name]
-        clvdd = cls_cov_dd[fd.name]
-        covs_dgdg_data[fd.name][fg.name] = get_covariance(fg, fd, fg, fd,
-                                                          'data',
-                                                          clvggd, clvgdd,
-                                                          clvgdd, clvdd)
-
-# dydy
-print("  dydy")
-covs_ydyd_data = {}
-for fd in fields_d:
-    covs_ydyd_data[fd.name] = {}
-    for fy in fields_y:
-        clvyyd = cls_cov_yy[fy.name]
-        clvydd = cls_cov_dy[fy.name][fd.name]
-        clvdd = cls_cov_dd[fd.name]
-        covs_dgdg_data[fd.name][fy.name] = get_covariance(fy, fd, fy, fd,
-                                                          'data',
-                                                          clvyyd, clvydd,
-                                                          clvydd, clvdd)
-
-# dkdk
-print("  dkdk")
-covs_dkdk_data = {}
-for fd in fields_d:
-    covs_dkdk_data[fd.name] = {}
-    for fk in fields_k:
-        clvkkd = cls_cov_kk[fy.name]
-        clvkdd = cls_cov_dk[fk.name][fd.name]
-        clvdd = cls_cov_dd[fd.name]
-        covs_dkdk_data[fd.name][fk.name] = get_covariance(fk, fd, fk, fd,
-                                                          'data',
-                                                          clvkkd, clvkdd,
-                                                          clvkdd, clvdd)
 
 # gggk
 print("  gggk")
@@ -480,19 +473,85 @@ for fk in fields_k:
         dcov_gggk[fk.name][fg.name] = Covariance(fg.name, fg.name,
                                                  fg.name, fk.name, dcov)
 
-# ykyk
-print("  ykyk")
-covs_ykyk_data = {}
-for fy in fields_y:
-    covs_ykyk_data[fy.name] = {}
-    for fk in fields_k:
-        clvkkd = cls_cov_kk[fy.name]
-        clvkyd = cls_cov_yk[fk.name][fy.name]
-        clvyy = cls_cov_yy[fy.name]
-        covs_ykyk_data[fy.name][fk.name] = get_covariance(fk, fy, fk, fy,
+# gygk
+print("  gygk")
+covs_gygk_data = {}
+covs_gygk_model = {}
+dcov_gygk = {}
+for fk in fields_k:
+    covs_gygk_model[fk.name] = {}
+    covs_gygk_data[fk.name] = {}
+    dcov_gygk[fk.name] = {}
+    for fy in fields_y:
+        covs_gygk_model[fk.name][fy.name] = {}
+        covs_gygk_data[fk.name][fy.name] = {}
+        dcov_gygk[fk.name][fy.name] = {}
+        for fg in fields_g:
+            clvggm = cls_cov_gg_model[fg.name]
+            clvgym = cls_cov_gy_model[fy.name][fg.name]
+            clvgkm = cls_cov_gk_model[fk.name][fg.name]
+            clvggd = cls_cov_gg_data[fg.name]
+            clvgyd = cls_cov_gy_data[fy.name][fg.name]
+            clvyk = cls_cov_yk[fk.name][fy.name]
+            covs_gygk_model[fk.name][fy.name][fg.name] = get_covariance(
+                                        fg, fy, fg, fk, 'model',
+                                        clvggm, clvgkm, clvgym, clvyk)
+
+            covs_gygk_data[fk.name][fy.name][fg.name] = get_covariance(
+                                        fg, fy, fg, fk, 'data',
+                                        clvggd, clvgkd, clvgyd, clvyk)
+
+            fsky = np.mean(fg.mask*fy.mask)
+            prof_g = HOD(nz_file=fg.dndz)
+            dcov = hm_ang_1h_covariance(cosmo, fsky, cls_gg[fg.name].leff,
+                                        (prof_g, prof_y), (prof_g, prof_k),
+                                        zrange_a=fg.zrange, zpoints_a=64,
+                                        zlog_a=True,
+                                        zrange_b=fg.zrange, zpoints_b=64,
+                                        zlog_b=True,
+                                        selection=sel, **(models[fg.name]))
+            b_hp = beam_hpix(cls_gg[fg.name].leff, nside=512)  # TODO: check
+            b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
+            dcov *= (b_hp**2*b_y)[:, None]*(b_hp**2*b_y)[None, :]
+            dcov_gygk[fk.name][fy.name][fg.name] = Covariance(
+                                    fg.name, fy.name, fg.name, fy.name, dcov)
+
+# gkgk
+print("  gkgk")
+covs_gkgk_data = {}
+covs_gkgk_model = {}
+dcov_gkgk = {}
+for fk in fields_k:
+    covs_gkgk_model[fk.name] = {}
+    covs_gkgk_data[fk.name] = {}
+    dcov_gkgk[fk.name] = {}
+    for fg in fields_g:
+        clvggm = cls_cov_gg_model[fg.name]
+        clvgkm = cls_cov_gk_model[fk.name][fg.name]
+        clvggd = cls_cov_gg_data[fg.name]
+        clvgkd = cls_cov_gk_data[fk.name][fg.name]
+        clvkk = cls_cov_kk[fk.name]
+        covs_gkgk_model[fk.name][fg.name] = get_covariance(fg, fk, fg, fk,
+                                                           'model',
+                                                           clvggm, clvgkm,
+                                                           clvgkm, clvkk)
+        covs_gkgk_data[fk.name][fg.name] = get_covariance(fg, fk, fg, fk,
                                                           'data',
-                                                          clvkkd, clvkyd,
-                                                          clvkyd, clvyy)
+                                                          clvggd, clvgkd,
+                                                          clvgkd, clvkk)
+        fsky = np.mean(fg.mask*fk.mask)
+        prof_g = HOD(nz_file=fg.dndz)
+        dcov = hm_ang_1h_covariance(fsky, cls_gg[fg.name].leff,
+                                    (prof_g, prof_k), (prof_g, prof_k),
+                                    zrange_a=fg.zrange, zpoints_a=64,
+                                    zlog_a=True,
+                                    zrange_b=fg.zrange, zpoints_b=64,
+                                    zlog_b=True,
+                                    selection=sel, **(models[fg.name]))
+        b_hp = beam_hpix(cls_gg[fg.name].leff, nside=512)  # TODO: check
+        dcov *= (b_hp**2)[:, None]*(b_hp**2)[None, :]
+        dcov_gkgk[fk.name][fg.name] = Covariance(fg.name, fk.name,
+                                                 fg.name, fk.name, dcov)
 
 
 
