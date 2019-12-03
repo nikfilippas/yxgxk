@@ -249,8 +249,8 @@ maps:
     - name: "lens"
       type: "k"
       ns_independent: false
-      map: "data/maps/COM_CompMap_Lensing_2048_R2.00_dat_klm.fits"
-      mask: "mask_lens"
+      map: "data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits"
+      mask: "mask_lens_2015"
       beam: False
       systematics: None
 
