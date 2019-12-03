@@ -126,7 +126,7 @@ class Arnaud(object):
         .. note:: Output units are ``[norm] Mpc^3``
         """
         # Input handling
-        M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
+        M, a, k = np.atleast_1d(M, a, k)
 
         cosmo = COSMO_ARGS(kwargs)
         # hydrostatic bias
@@ -163,7 +163,7 @@ class NFW(object):
         """Computes the Fourier transform of the Navarro-Frenk-White profile.
         """
         # Input handling
-        M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
+        M, a, k = np.atleast_1d(M, a, k)
 
         # extract parameters
         bg = kwargs["bg"] if "bg" in kwargs else 1
@@ -173,7 +173,7 @@ class NFW(object):
         R = R_Delta(M, a, self.Delta, is_matter=False, squeeze=False)/(c*a)
         x = k*R[..., None]
 
-        c = c[..., None]*bmax  # optimise
+        c = c[..., None]*bmax
         Si1, Ci1 = sici((bg+c)*x)
         Si2, Ci2 = sici(bg*x)
 
@@ -263,7 +263,7 @@ class HOD(object):
         """Computes the Fourier transform of the Halo Occupation Distribution.
         """
         # Input handling
-        M, a, k = np.atleast_1d(M), np.atleast_1d(a), np.atleast_2d(k)
+        M, a, k = np.atleast_1d(M, a, k)
 
         # extract parameters
         fc = kwargs["fc"]
@@ -273,11 +273,43 @@ class HOD(object):
         Ns = self.n_sat(M, **kwargs)    # satellites
         Nc, Ns = Nc[..., None, None], Ns[..., None, None]
 
-        H, _ = NFW().fourier_profiles(k, M, a, squeeze=False,
-                                      **kwargs)
+        H, _ = NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
 
         if self.ns_independent:
             F, F2 = (Nc*fc + Ns*H), (2*Nc*fc*Ns*H + (Ns*H)**2)
         else:
             F, F2 = Nc*(fc + Ns*H), Nc*(2*fc*Ns*H + (Ns*H)**2)
-        return (F.squeeze(), F2.squeeze()) if squeeze else F, F2
+        return (F.squeeze(), F2.squeeze()) if squeeze else (F, F2)
+
+
+
+class Lensing(object):
+    """Calculates a lensing profile objerct of a halo."""
+    def __init__(self, name="lens"):
+        self.name = name
+
+    def kernel(self, a, **kwargs):
+        """The lensing window function."""
+        cosmo = COSMO_ARGS(kwargs)
+
+        H0 = cosmo["h"]
+        Om0 = cosmo["Omega_m"]
+        chi = ccl.comoving_radial_distance
+
+        N = 3*H0**2*Om0/(2*299792.458* ccl.h_over_h0(cosmo, a)*H0)
+        r = (1/a)*chi(cosmo, a)*(1 - chi(cosmo, a)/chi(cosmo, 1/(1+1100)))
+        return N*r
+
+    def profnorm(self, a, squeeze=True, **kwargs):
+        """Computes the overall profile normalisation for the angular cross-
+        correlation calculation."""
+        return np.ones_like(a)
+
+
+    def fourier_profiles(self, k, M, a, squeeze=True, **kwargs):
+        """Computes the Fourier transform of the lensing profile."""
+        # Input handling
+        M, a, k = np.atleast_1d(M, a, k)
+
+        L, L2 = NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
+        return (L.squeeze(), L2.squeeze()) if squeeze else (L, L2)
