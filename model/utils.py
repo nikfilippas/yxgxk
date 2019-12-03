@@ -74,7 +74,7 @@ def R_Delta(M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
     float or array_like : The halo reference radius in `Mpc`.
     """
     # Input handling
-    M, a = np.atleast_1d(M), np.atleast_1d(a)
+    M, a = np.atleast_1d(M, a)
 
     cosmo = COSMO_ARGS(kwargs)
     if is_matter:
