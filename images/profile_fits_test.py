@@ -3,13 +3,15 @@ Quick test of tomographic (gg), (gy), (gk) using yxg best-fit parameters.
 """
 
 
+import sys
+sys.path.append("../")
 import numpy as np
 import matplotlib.pyplot as plt
 from model.profile2D import Arnaud, HOD, Lensing
 from model.power_spectrum import hm_ang_power_spectrum
 from model.hmcorr import HaloModCorrection
 
-outdir = "output_default/"
+outdir = "../output_default/"
 
 files = ["2mpz_2mpz", "2mpz_y_milca", "2mpz_lens",
          "wisc1_wisc1", "wisc1_y_milca", "wisc1_lens",
@@ -114,12 +116,12 @@ kwargs = [{"M0":  11.60,
 
           ]
 
-dndz = ["data/dndz/2MPZ_bin1.txt",
-        "data/dndz/WISC_bin1.txt",
-        "data/dndz/WISC_bin2.txt",
-        "data/dndz/WISC_bin3.txt",
-        "data/dndz/WISC_bin4.txt",
-        "data/dndz/WISC_bin5.txt"]
+dndz = ["../data/dndz/2MPZ_bin1.txt",
+        "../data/dndz/WISC_bin1.txt",
+        "../data/dndz/WISC_bin2.txt",
+        "../data/dndz/WISC_bin3.txt",
+        "../data/dndz/WISC_bin4.txt",
+        "../data/dndz/WISC_bin5.txt"]
 
 col = ["r", "g", "b"]
 
@@ -144,3 +146,5 @@ for i, xx in enumerate(ax):
         xx.loglog(ells, Cl, "k-", lw=2)
 
     xx.legend(loc="lower left", fontsize=8, ncol=3)
+
+plt.savefig("profile_fits_test.pdf")
