@@ -1,7 +1,7 @@
 import numpy as np
 import os
 import pyccl as ccl
-from .profile2D import Arnaud, HOD
+from .profile2D import Arnaud, HOD, Lensing
 from .utils import beam_gaussian, beam_hpix
 from .cosmo_utils import COSMO_ARGS
 
@@ -23,6 +23,8 @@ def get_profile(m):
     elif m['type'] == 'g':
         return HOD(name=m['name'], nz_file=m['dndz'],
                    ns_independent=m.get('ns_independent'))
+    elif m['type'] == 'k':
+        return Lensing(name=m['name'])
 
 
 class Tracer(object):
