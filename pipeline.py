@@ -117,27 +117,20 @@ fields_y = []
 fields_k = []
 for d in tqdm(p.get('maps'), desc="Reading fields"):
 #    print(" " + d['name'])
-    # f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
-    #           d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
-    #           syst_list = d.get('systematics'))
-    # if d['type'] == 'g':
-    #     fields_g.append(f)
-    # elif d['type'] == 'y':
-    #     fields_y.append(f)
-    # elif d['type'] == 'k':
-    #     fields_k.append(f)
-    # elif d['type'] == 'd':
-    #     fields_d.append(f)
-
-    if d["type"] == "y":
-        fields_y.append(Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
+    f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
               d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
-              syst_list = d.get('systematics')))
+              syst_list = d.get('systematics'))
+    if d['type'] == 'g':
+        fields_g.append(f)
+    elif d['type'] == 'y':
+        fields_y.append(f)
+    elif d['type'] == 'k':
+        fields_k.append(f)
+    elif d['type'] == 'd':
+        fields_d.append(f)
     else:
-        continue
-    # else:
-        # raise ValueError("Input field type %s not recognised in %s." %
-        #                   (d["type"], d["name"]))
+        raise ValueError("Input field type %s not recognised in %s." %
+                          (d["type"], d["name"]))
 
 # ORDER: d (dust), g (galaxies), y (tSZ), k (lensing)
 # dust power spectra
