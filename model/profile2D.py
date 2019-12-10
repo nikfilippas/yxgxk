@@ -284,7 +284,7 @@ class HOD(object):
 
 
 class Lensing(object):
-    """Calculates a lensing profile objerct of a halo."""
+    """Calculates a CMB lensing profile objerct of a halo."""
     def __init__(self, name="lens"):
         self.name = name
 
@@ -296,7 +296,7 @@ class Lensing(object):
         Om0 = cosmo["Omega_m"]
         chi = ccl.comoving_radial_distance
 
-        N = 3*H0**2*Om0/(2*299792.458* ccl.h_over_h0(cosmo, a)*H0)
+        N = 3*H0**2*Om0/(2*299792.458**2)
         r = (1/a)*chi(cosmo, a)*(1 - chi(cosmo, a)/chi(cosmo, 1/(1+1100)))
         return N*r
 
@@ -313,3 +313,14 @@ class Lensing(object):
 
         L, L2 = NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
         return (L.squeeze(), L2.squeeze()) if squeeze else (L, L2)
+
+
+
+# class CCL_Lensing(object):
+#     """CMB lensing calculations with CCL tracer."""
+#     def __init__(self, name="lens"):
+#         self.name = name
+
+
+#     def tracer(self, cosmo):
+#         self.tracer = ccl.CMBLensingTracer(cosmo, z_source=1100)
