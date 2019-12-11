@@ -1,12 +1,9 @@
 import os
 import numpy as np
-import pymaster as nmt
 import healpy as hp
 from tqdm import tqdm
 from argparse import ArgumentParser
-from scipy.interpolate import interp1d
-from analysis.field import Field
-from analysis.spectra import Spectrum
+import pipeline_utils as pu
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
@@ -72,102 +69,22 @@ print("OK")
 
 # Compute power spectra
 print("Computing power spectra...", end="")
-def get_mcm(f1, f2, jk_region=None):
-    fname = p.get_fname_mcm(f1, f2, jk_region=jk_region)
-    mcm = nmt.NmtWorkspace()
-    try:
-        mcm.read_from(fname)
-    except:
-        mcm.compute_coupling_matrix(f1.field, f2.field, bpw.bn)
-        mcm.write_to(fname)
-    return mcm
-
-def get_power_spectrum(f1, f2, jk_region=None, save_windows=True):
-    # print(" " + f1.name + "," + f2.name)
-    try:
-        fname = p.get_fname_cls(f1, f2, jk_region=jk_region)
-        cls = Spectrum.from_file(fname, f1.name, f2.name)
-    except:
-        wsp = get_mcm(f1, f2, jk_region=jk_region)
-        cls = Spectrum.from_fields(f1, f2, bpw, wsp=wsp,
-                                   save_windows=save_windows)
-        cls.to_file(p.get_fname_cls(f1, f2, jk_region=jk_region))
-    return cls
-
-
-def cls_xy(fields_x, fields_y):
-    """Generates cls dictionary."""
-    cls_xy = {}
-    if fields_x == fields_y:
-        for fx in fields_x:
-            cls_xy[fx.name] = get_power_spectrum(fx, fx)
-    else:
-        for fy in fields_y:
-            cls_xy[fy.name] = {}
-            for fx in fields_x:
-                cls_xy[fy.name][fx.name] = get_power_spectrum(fx, fy)
-    return cls_xy
-
-
 # Generate all fields
 models = p.get_models()
-fields_d = []
-fields_g = []
-fields_y = []
-fields_k = []
-for d in tqdm(p.get('maps'), desc="Reading fields"):
-#    print(" " + d['name'])
-    f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
-              d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
-              syst_list = d.get('systematics'))
-    if d['type'] == 'g':
-        fields_g.append(f)
-    elif d['type'] == 'y':
-        fields_y.append(f)
-    elif d['type'] == 'k':
-        fields_k.append(f)
-    elif d['type'] == 'd':
-        fields_d.append(f)
-    else:
-        raise ValueError("Input field type %s not recognised in %s." %
-                          (d["type"], d["name"]))
+fields = pu.classify_fields(p)
 
-# ORDER: d (dust), g (galaxies), y (tSZ), k (lensing)
-# dust power spectra
-cls_dd = cls_xy(fields_d, fields_d)
-# galaxies power spectra
-cls_dg = cls_xy(fields_d, fields_g)
-cls_gg = cls_xy(fields_g, fields_g)
-# tSZ power spectra
-cls_dy = cls_xy(fields_d, fields_y)
-cls_gy = cls_xy(fields_g, fields_y)
-cls_yy = cls_xy(fields_y, fields_y)
-# lensing power spectra
-cls_dk = cls_xy(fields_d, fields_k)
-cls_gk = cls_xy(fields_g, fields_k)
-cls_yk = cls_xy(fields_y, fields_k)
-cls_kk = cls_xy(fields_k, fields_k)
+covs = pu.which_cov(p)
+combs = pu.find_combs(covs)
+combs.extend([('d', 'd'), ('d', 'g'), ('d', 'y')])
+Cls = pu.twopoint_combs(fields, combs)
 print("OK")
 
 
 # Generate model power spectra to compute the Gaussian covariance matrix
 print("Generating theory power spectra")
-def interpolate_spectra(leff, cell, ns):
-    # Create a power spectrum interpolated at all ells
-    larr = np.arange(3*ns)
-    clf = interp1d(leff, cell, bounds_error=False, fill_value=0)
-    clo = clf(larr)
-    clo[larr <= leff[0]] = cell[0]
-    clo[larr >= leff[-1]] = cell[-1]
-    return clo
-
-
 larr_full = np.arange(3*nside)
-cls_cov_gg_data = {}
 cls_cov_gg_model = {}
-cls_cov_gy_data = {f.name: {} for f in fields_y}
 cls_cov_gy_model = {f.name: {} for f in fields_y}
-cls_cov_gk_data = {f.name: {} for f in fields_k}
 cls_cov_gk_model = {f.name: {} for f in fields_k}
 prof_y = Arnaud()
 prof_k = Lensing()
@@ -175,14 +92,6 @@ for fg in tqdm(fields_g, desc="Generating theory power spectra"):
     # print(" " + fg.name)
     # Interpolate data
     larr = cls_gg[fg.name].leff
-    clarr_gy = {fy.name: cls_gy[fy.name][fg.name].cell for fy in fields_y}
-    cls_cov_gg_data[fg.name] = interpolate_spectra(cls_gg[fg.name].leff,
-                                                   cls_gg[fg.name].cell, nside)
-    for fy in fields_y:
-        sp = cls_gy[fy.name][fg.name]
-        cls_cov_gy_data[fy.name][fg.name] = interpolate_spectra(sp.leff,
-                                                                sp.cell,
-                                                                nside)
 
     # Compute with model
     larr = np.arange(3*nside)
@@ -217,93 +126,12 @@ for fg in tqdm(fields_g, desc="Generating theory power spectra"):
     for fy in fields_y:
         cls_cov_gy_model[fy.name][fg.name] = clgy
 
-# cov_dd
-cls_cov_dd = {}
-for fd in fields_d:
-    cls_cov_dd[fd.name] = interpolate_spectra(cls_dd[fd.name].leff,
-                                              cls_dd[fd.name].cell, nside)
-
-# cov_dg
-cls_cov_dg = {}
-for fg in fields_g:
-    cls_cov_dg[fg.name] = {}
-    for fd in fields_d:
-        cl = cls_dg[fg.name][fd.name]
-        cls_cov_dg[fg.name][fd.name] = interpolate_spectra(cl.leff,
-                                                           cl.cell, nside)
-
-# cov_dy
-cls_cov_dy = {}
-for fy in fields_y:
-    cls_cov_dy[fy.name] = {}
-    for fd in fields_d:
-        cl = cls_dy[fy.name][fd.name]
-        cls_cov_dy[fy.name][fd.name] = interpolate_spectra(cl.leff,
-                                                           cl.cell, nside)
-# cov_yy
-cls_cov_yy = {}
-for fy in fields_y:
-    cls_cov_yy[fy.name] = interpolate_spectra(cls_yy[fy.name].leff,
-                                              cls_yy[fy.name].cell, nside)
-
-# cov_dk
-cls_cov_dk = {}
-for fk in fields_k:
-    cls_cov_dk[fk.name] = {}
-    for fd in fields_d:
-        cl = cls_dk[fk.name][fd.name]
-        cls_cov_dk[fk.name][fd.name] = interpolate_spectra(cl.leff,
-                                                           cl.cell, nside)
-
-# cov_yk
-cls_cov_yk = {}
-for fk in fields_k:
-    cls_cov_yk[fk.name] = {}
-    for fy in fields_y:
-        cl = cls_yk[fk.name][fy.name]
-        cls_cov_yk[fk.name][fy.name] = interpolate_spectra(cl.leff,
-                                                           cl.cell, nside)
-
-# cov_kk
-cls_cov_kk = {}
-for fk in fields_k:
-    cls_cov_kk[fk.name] = interpolate_spectra(cls_kk[fk.name].leff,
-                                              cls_kk[fk.name].cell, nside)
+cls_cov_data = pu.cls_cov_data(fields, combs, Cls, nside)
 
 
 # Generate covariances
 print("Computing covariances...")
 
-def get_cmcm(f1, f2, f3, f4):
-    fname = p.get_fname_cmcm(f1, f2, f3, f4)
-    cmcm = nmt.NmtCovarianceWorkspace()
-    try:
-        cmcm.read_from(fname)
-    except:
-        cmcm.compute_coupling_coefficients(f1.field,
-                                           f2.field,
-                                           f3.field,
-                                           f4.field)
-        cmcm.write_to(fname)
-    return cmcm
-
-def get_covariance(fa1, fa2, fb1, fb2, suffix,
-                   cla1b1, cla1b2, cla2b1, cla2b2):
-    # print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
-    fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
-    try:
-        cov = Covariance.from_file(fname_cov,
-                                   fa1.name, fa2.name,
-                                   fb1.name, fb2.name)
-    except:
-        mcm_a = get_mcm(fa1, fa2)
-        mcm_b = get_mcm(fb1, fb2)
-        cmcm = get_cmcm(fa1, fa2, fb1, fb2)
-        cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
-                                     cla1b1, cla1b2, cla2b1, cla2b2,
-                                     cwsp=cmcm)
-        cov.to_file(fname_cov)
-    return cov
 
 
 # dgdg

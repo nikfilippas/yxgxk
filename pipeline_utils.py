@@ -5,11 +5,13 @@ Tidy-up the pipeline.
 
 import itertools
 import numpy as np
+from scipy.interpolate import interp1d
 from tqdm import tqdm
 import pymaster as nmt
 from analysis.params import ParamRun
 from analysis.field import Field
 from analysis.spectra import Spectrum
+from analysis.covariance import Covariance
 
 
 fname_params = "params_lensing.yml"
@@ -157,3 +159,70 @@ def twopoint_combs(fields, combs):
         Cls[c] = cls_xy(fields[c[0]], fields[c[1]])
     return Cls
 
+
+def interpolate_spectra(leff, cell, ns):
+    # Create a power spectrum interpolated at all ells
+    larr = np.arange(3*ns)
+    clf = interp1d(leff, cell, bounds_error=False, fill_value=0)
+    clo = clf(larr)
+    clo[larr <= leff[0]] = cell[0]
+    clo[larr >= leff[-1]] = cell[-1]
+    return clo
+
+
+def get_cmcm(f1, f2, f3, f4):
+    fname = p.get_fname_cmcm(f1, f2, f3, f4)
+    cmcm = nmt.NmtCovarianceWorkspace()
+    try:
+        cmcm.read_from(fname)
+    except:
+        cmcm.compute_coupling_coefficients(f1.field,
+                                           f2.field,
+                                           f3.field,
+                                           f4.field)
+        cmcm.write_to(fname)
+    return cmcm
+
+
+def get_covariance(fa1, fa2, fb1, fb2, suffix,
+                   cla1b1, cla1b2, cla2b1, cla2b2):
+    # print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
+    fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
+    try:
+        cov = Covariance.from_file(fname_cov,
+                                   fa1.name, fa2.name,
+                                   fb1.name, fb2.name)
+    except:
+        mcm_a = get_mcm(fa1, fa2)
+        mcm_b = get_mcm(fb1, fb2)
+        cmcm = get_cmcm(fa1, fa2, fb1, fb2)
+        cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
+                                     cla1b1, cla1b2, cla2b1, cla2b2,
+                                     cwsp=cmcm)
+        cov.to_file(fname_cov)
+    return cov
+
+
+
+def cls_cov_data(fields, combs, Cls, nside):
+    """Interpolates the data power spectra to prepare the covariance."""
+    cls_cov = {}.fromkeys(combs)
+    for comb in combs:
+        cls_cov[comb] = {}
+        if comb[0] == comb[1]:
+            for f in fields[comb[0]]:
+                X = Cls[comb][f.name]
+                cls_cov[comb][f.name] = interpolate_spectra(
+                                        X.leff, X.cell, nside)
+        else:
+            for f2 in fields[comb[1]]:
+                cls_cov[comb][f2.name] = {}
+                for f1 in fields[comb[0]]:
+                    X = Cls[comb][f2.name][f1.name]
+                    cls_cov[comb][f2.name][f1.name] = interpolate_spectra(
+                                                      X.leff, X.cell, nside)
+    return cls_cov
+
+
+def cls_cov_model():
+    """Produces the model power spectra to prepare the covariances."""
