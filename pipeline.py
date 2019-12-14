@@ -7,8 +7,6 @@ import pipeline_utils as pu
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
-from model.profile2D import Arnaud, HOD, Lensing
-from model.power_spectrum import hm_ang_power_spectrum
 from model.hmcorr import HaloModCorrection
 from model.trispectrum import hm_ang_1h_covariance
 from model.utils import beam_gaussian, beam_hpix
@@ -20,29 +18,13 @@ args = parser.parse_args()
 fname_params = args.fname_params
 
 p = ParamRun(fname_params)
-
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
 mf = p.get_massfunc()
-
 # Include halo model correction if needed
 hm_correction = HaloModCorrection if p.get('mcmc').get('hm_correct') else None
-
 # Include selection function if needed
-sel = p.get('mcmc').get('selection_function')
-if sel is not None:
-    if sel == 'erf':
-        from model.utils import selection_planck_erf
-        sel = selection_planck_erf
-    elif sel == 'tophat':
-        from model.utils import selection_planck_tophat
-        sel = selection_planck_tophat
-    elif sel.lower() == 'none':
-        sel = None
-    else:
-        raise Warning("Selection function not recognised. Defaulting to None")
-        sel = None
-
+sel = pu.selection_func(p)
 # Read off N_side
 nside = p.get_nside()
 
@@ -72,7 +54,6 @@ print("Computing power spectra...", end="")
 # Generate all fields
 models = p.get_models()
 fields = pu.classify_fields(p)
-
 covs = pu.which_cov(p)
 combs = pu.find_combs(covs)
 combs.extend([('d', 'd'), ('d', 'g'), ('d', 'y')])
@@ -82,51 +63,8 @@ print("OK")
 
 # Generate model power spectra to compute the Gaussian covariance matrix
 print("Generating theory power spectra")
-larr_full = np.arange(3*nside)
-cls_cov_gg_model = {}
-cls_cov_gy_model = {f.name: {} for f in fields_y}
-cls_cov_gk_model = {f.name: {} for f in fields_k}
-prof_y = Arnaud()
-prof_k = Lensing()
-for fg in tqdm(fields_g, desc="Generating theory power spectra"):
-    # print(" " + fg.name)
-    # Interpolate data
-    larr = cls_gg[fg.name].leff
-
-    # Compute with model
-    larr = np.arange(3*nside)
-    nlarr = np.mean(cls_gg[fg.name].nell)*np.ones_like(larr)
-    try:
-        d = np.load(p.get_outdir() + '/cl_th_' + fg.name + '.npz')
-        clgg = d['clgg']
-        clgy = d['clgy']
-        clgk = d['clgk']
-    except:
-        prof_g = HOD(nz_file=fg.dndz)
-        bmg = beam_hpix(larr, ns=512)**2
-        bmh2 = beam_hpix(larr, nside)**2
-        bmy = beam_gaussian(larr, 10.)
-        clgg = hm_ang_power_spectrum(larr, (prof_g, prof_g),
-                                     zrange=fg.zrange, zpoints=64, zlog=True,
-                                     hm_correction=hm_correction, selection=sel,
-                                     **(models[fg.name])) * bmg
-        clgy = hm_ang_power_spectrum(larr, (prof_g, prof_y),
-                                     zrange=fg.zrange, zpoints=64, zlog=True,
-                                     hm_correction=hm_correction, selection=sel,
-                                     **(models[fg.name])) * bmy * bmh2  # TODO: correct?
-        clgk = hm_ang_power_spectrum(larr, (prof_g, prof_k),
-                                      zrange=fg.zrange, zpoints=64, zlog=True,
-                                      hm_correction=hm_correction, selection=sel,
-                                      **(models[fg.name])) * bmy  # TODO: correct?
-        np.savez(p.get_outdir() + '/cl_th_' + fg.name + '.npz',
-                 clgg=clgg, clgk=clgk, ls=larr)
-
-    clgg += nlarr
-    cls_cov_gg_model[fg.name] = clgg
-    for fy in fields_y:
-        cls_cov_gy_model[fy.name][fg.name] = clgy
-
-cls_cov_data = pu.cls_cov_data(fields, combs, Cls, nside)
+cls_model = pu.cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside)
+cls_data = pu.cls_cov_data(fields, combs, Cls, nside)
 
 
 # Generate covariances

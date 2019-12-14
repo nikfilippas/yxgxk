@@ -12,6 +12,9 @@ from analysis.params import ParamRun
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
+from model.profile2D import HOD, Arnaud, Lensing
+from model.power_spectrum import hm_ang_power_spectrum
+from model.utils import beam_hpix, beam_gaussian
 
 
 fname_params = "params_lensing.yml"
@@ -20,6 +23,25 @@ p = ParamRun(fname_params)
 
 # Find which Cls we will be using
 twopoints = p.get("data_vectors")[0]["twopoints"]
+
+
+def selection_func(p):
+    """Returns the selection function."""
+    sel = p.get('mcmc').get('selection_function')
+    if sel is not None:
+        if sel == 'erf':
+            from model.utils import selection_planck_erf
+            sel = selection_planck_erf
+        elif sel == 'tophat':
+            from model.utils import selection_planck_tophat
+            sel = selection_planck_tophat
+        elif sel.lower() == 'none':
+            sel = None
+        else:
+            raise Warning("Selection function not recognised. Defaulting to None")
+            sel = None
+    return sel
+
 
 
 def unravel_maps(p):
@@ -224,5 +246,99 @@ def cls_cov_data(fields, combs, Cls, nside):
     return cls_cov
 
 
-def cls_cov_model():
+def Beam(X, larr, nside):
+    """Computes the beam of a combination of two profiles."""
+    p1, p2 = X  # cross-correlated profiles
+
+    bmg = beam_hpix(larr, ns=512)**2
+    bmh2 = beam_hpix(larr, nside)**2
+    bmy = beam_gaussian(larr, 10.)
+
+    bb = np.ones_like(larr)  # TODO: replace with correct formula
+    return bb
+
+
+
+
+def cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside):
     """Produces the model power spectra to prepare the covariances."""
+    prof_dict = {'y': Arnaud(), 'k': Lensing()}
+
+    combs = which_cls(p)
+    combs = [tuple(c) for c in combs]
+    cls_cov = {}.fromkeys(combs)
+    print(cls_cov)
+
+    larr = np.arange(3*nside)
+    data = {'ls': larr}  # output1
+    for fg in tqdm(fields['g'], desc="Generating model power spectra"):
+        nlarr = np.mean(Cls[('g', 'g')][fg.name].nell) * np.ones_like(larr)
+
+        try:
+            d = np.load(p.get_outdir() + '/cl_th_' + fg.name + '.npz')
+
+            for comb in combs:
+                if comb == ('g', 'g'):
+                    cls_cov[('g', 'g')][fg.name] = d['clgg']  # 'gg' in top branch
+                else:
+                    arr = 'cl' + comb[0] + comb[1]
+                    for ff in fields[comb[1]]:  # assume 'g' is first tracer
+                        cls_cov[comb][ff.name][fg.name] = d[arr]
+
+        except:
+            # common profile arguments
+            prof_g = HOD(nz_file=fg.dndz)
+
+            def kwargs(prof):
+                """Sets up hm_ang_power_spectrum args and kwargs."""
+                P_args = {'l': larr,
+                           'profiles': (prof_g, prof),
+                          'zrange': fg.zrange,
+                          'zpoints': 64,
+                          'zlog': True,
+                          'hm_correction': hm_correction,
+                          'selection': sel}
+                kw = {**P_args, **(models[fg.name])}
+                return kw
+
+            for comb in combs:
+                if comb == ('g', 'g'):
+                    if cls_cov[('g', 'g')] is None:
+                        print("is none")
+                        cls_cov[('g', 'g')] = {}
+                        print("chk1")
+
+                    print(cls_cov)
+                    print("went here")
+                    cls_cov[('g', 'g')][fg.name] = hm_ang_power_spectrum(
+                                                **kwargs(prof_g)) \
+                                                * Beam(('g', 'g'), larr, nside) \
+                                                + nlarr
+                    print("and here")
+                    data['clgg'] = cls_cov[('g', 'g')][fg.name]  # output2
+                    print("wrote")
+                else:
+                    print("got here")
+                    # only HOD profile is tomographic: optimise
+                    clgX = hm_ang_power_spectrum(**kwargs(prof_dict[comb[1]])) \
+                                                 * Beam(('g', comb[1]), larr, nside)
+
+                    arr = 'cl' + comb[0] + comb[1]
+                    data[arr] = clgX  # output3
+
+                    for ff in fields[comb[1]]:
+                        if cls_cov[comb] is None:
+                            cls_cov[comb] = {}
+                        cls_cov[comb][ff.name] = {}
+                        cls_cov[comb][ff.name][fg.name] = clgX
+
+            np.savez(p.get_outdir() + '/cl_th_' + fg.name + '.npz', **data)
+
+    return cls_cov
+
+
+
+# def covariance_data(fields):
+#     """Computes the covariance matrix."""
+#     cov = {}
+#     for
