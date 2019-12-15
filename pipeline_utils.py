@@ -304,21 +304,14 @@ def cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside):
             for comb in combs:
                 if comb == ('g', 'g'):
                     if cls_cov[('g', 'g')] is None:
-                        print("is none")
                         cls_cov[('g', 'g')] = {}
-                        print("chk1")
 
-                    print(cls_cov)
-                    print("went here")
                     cls_cov[('g', 'g')][fg.name] = hm_ang_power_spectrum(
                                                 **kwargs(prof_g)) \
                                                 * Beam(('g', 'g'), larr, nside) \
                                                 + nlarr
-                    print("and here")
                     data['clgg'] = cls_cov[('g', 'g')][fg.name]  # output2
-                    print("wrote")
                 else:
-                    print("got here")
                     # only HOD profile is tomographic: optimise
                     clgX = hm_ang_power_spectrum(**kwargs(prof_dict[comb[1]])) \
                                                  * Beam(('g', comb[1]), larr, nside)
@@ -338,7 +331,83 @@ def cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside):
 
 
 
-# def covariance_data(fields):
-#     """Computes the covariance matrix."""
-#     cov = {}
-#     for
+def covariance(cls_model, cls_data, covs, fields, cov_type='data'):
+    """Computes the covariance matrix."""
+    combs = find_combs(covs)
+    covs = {}.fromkeys(combs)
+
+
+    def recurse(COV, comb, f=[], memory=[]):
+        S = set(comb)
+        idx = comb[-1]
+        S.remove(idx)
+
+        for ff in fields[idx]:
+            f.append(ff.name)
+            if len(S) > 0:
+                L = len(comb)//2
+                if idx not in memory:
+                    COV[ff.name] = {}
+                    memory.append(idx)
+                    return recurse(COV[ff.name], comb[:L], f, memory)
+                else:
+                    return recurse(COV, comb[:L], f, memory)
+            else:
+                print("success")
+
+                # clv = [cls_data[F] for F in f]
+                # COV[ff.name] = get_covariance(f1, f2, f3, f4, cov_type, ...)
+
+
+
+
+    for comb in combs:
+        covs[comb] = {}
+        recurse(covs[comb], comb, f=[], memory=[])
+
+
+
+
+
+
+'''
+# gggy
+print("  gggy")
+covs_gggy_data = {}
+covs_gggy_model = {}
+dcov_gggy = {}
+for fy in fields_y:
+    covs_gggy_model[fy.name] = {}
+    covs_gggy_data[fy.name] = {}
+    dcov_gggy[fy.name] = {}
+    for fg in fields_g:
+        clvggm = cls_cov_gg_model[fg.name]
+        clvgym = cls_cov_gy_model[fy.name][fg.name]
+        clvggd = cls_cov_gg_data[fg.name]
+        clvgyd = cls_cov_gy_data[fy.name][fg.name]
+        covs_gggy_model[fy.name][fg.name] = get_covariance(fg, fg, fg, fy,
+                                                           'model',
+                                                           clvggm, clvgym,
+                                                           clvggm, clvgym)
+        covs_gggy_data[fy.name][fg.name] = get_covariance(fg, fg, fg, fy,
+                                                          'data',
+                                                          clvggd, clvgyd,
+                                                          clvggd, clvgyd)
+        fsky = np.mean(fg.mask*fy.mask)
+        prof_g = HOD(nz_file=fg.dndz)
+        dcov = hm_ang_1h_covariance(fsky, cls_gg[fg.name].leff,
+                                    (prof_g, prof_g), (prof_g, prof_y),
+                                    zrange_a=fg.zrange, zpoints_a=64,
+                                    zlog_a=True,
+                                    zrange_b=fg.zrange, zpoints_b=64,
+                                    zlog_b=True,
+                                    selection=sel, **(models[fg.name]))
+        b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
+        b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
+        dcov *= (b_hp**2)[:, None]*(b_hp**2*b_y)[None, :]
+        dcov_gggy[fy.name][fg.name] = Covariance(fg.name, fg.name,
+                                                 fg.name, fy.name, dcov)
+'''
+#'''
+
+
