@@ -104,7 +104,11 @@ def find_combs(covs):
         # delete transpose
         for f in F:
             if ft.index(f[0]) > ft.index(f[1]):
-                F.pop(F.index(f))
+                if f[::-1] in F:
+                    F.pop(F.index(f))
+                else:
+                    F[F.index(f)] = f[::-1]
+
         cc.append(F)
 
     # concatenate list
@@ -246,17 +250,17 @@ def cls_cov_data(fields, combs, Cls, nside):
     return cls_cov
 
 
+
 def Beam(X, larr, nside):
     """Computes the beam of a combination of two profiles."""
-    p1, p2 = X  # cross-correlated profiles
-
-    bmg = beam_hpix(larr, ns=512)**2
-    bmh2 = beam_hpix(larr, nside)**2
+    bmg = beam_hpix(larr, ns=512)
+    bmh = beam_hpix(larr, nside)
     bmy = beam_gaussian(larr, 10.)
 
-    bb = np.ones_like(larr)  # TODO: replace with correct formula
+    bb = np.ones_like(larr).astype(float)
+    bb *= bmg**(X.count('g'))
+    bb *= (bmh*bmy)**(X.count('y'))
     return bb
-
 
 
 
@@ -292,7 +296,7 @@ def cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside):
             def kwargs(prof):
                 """Sets up hm_ang_power_spectrum args and kwargs."""
                 P_args = {'l': larr,
-                           'profiles': (prof_g, prof),
+                          'profiles': (prof_g, prof),
                           'zrange': fg.zrange,
                           'zpoints': 64,
                           'zlog': True,
@@ -333,37 +337,63 @@ def cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside):
 
 def covariance(cls_model, cls_data, covs, fields, cov_type='data'):
     """Computes the covariance matrix."""
-    combs = find_combs(covs)
+    combs = covs.reshape((len(covs), 4)).tolist()
+    combs = [tuple(c) for c in combs]
     covs = {}.fromkeys(combs)
 
 
-    def recurse(COV, comb, f=[], memory=[]):
+    # def get_dict(dic, lst):
+    #     """Access an arbitrary depth using a list in a dictionary."""
+
+
+
+    def recurse(COV, comb, COMB, f=[], memory=[]):
         S = set(comb)
         idx = comb[-1]
         S.remove(idx)
 
         for ff in fields[idx]:
-            f.append(ff.name)
             if len(S) > 0:
                 L = len(comb)//2
                 if idx not in memory:
                     COV[ff.name] = {}
                     memory.append(idx)
-                    return recurse(COV[ff.name], comb[:L], f, memory)
+                    f.append(ff)
+                    recurse(COV[ff.name], comb[:L], COMB, f, memory)
                 else:
-                    return recurse(COV, comb[:L], f, memory)
+                    recurse(COV, comb[:L], COMB, f, memory)
+
             else:
+                f.append(ff)
+                print(COMB, [X.name for X in f])
+
+
+                f1 = None
+                f2 = None
+                f3 = None
+                f4 = None
+
+
+                arg = np.array(COMB).reshape((2, 2))
+                names = find_combs([arg])
+                clv = cls_data[...]
+
+                clv = [cls_data[F] for F in f]
+                COV[ff.name] = get_covariance(f1, f2, f3, f4, cov_type, ...)
+
+
+
+
+                f.pop(-1)  # remove lower dict level
                 print("success")
 
-                # clv = [cls_data[F] for F in f]
-                # COV[ff.name] = get_covariance(f1, f2, f3, f4, cov_type, ...)
 
 
 
 
     for comb in combs:
         covs[comb] = {}
-        recurse(covs[comb], comb, f=[], memory=[])
+        recurse(covs[comb], comb, COMB=comb, f=[], memory=[])
 
 
 
