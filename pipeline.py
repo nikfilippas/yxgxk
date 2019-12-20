@@ -56,7 +56,7 @@ models = p.get_models()
 fields = pu.classify_fields(p)
 covs = pu.which_cov(p)
 combs = pu.find_combs(covs)
-combs.extend([('d', 'd'), ('d', 'g'), ('d', 'y')])
+combs.extend([('d', 'd'), ('g', 'd'), ('y', 'd')])
 Cls = pu.twopoint_combs(fields, combs)
 print("OK")
 
@@ -69,6 +69,13 @@ cls_data = pu.cls_cov_data(fields, combs, Cls, nside)
 
 # Generate covariances
 print("Computing covariances...")
+covs = covs.tolist()
+covs.extend([[['d', 'g'], ['d', 'g']],
+             [['d', 'y'], ['d', 'y']]])
+covs = np.asarray(covs)
+
+covs_data = pu.covariance(cls_model, cls_data, covs, fields, 'data')
+covs_model = pu.covariance(cls_model, cls_data, covs, fields, 'model')
 
 
 

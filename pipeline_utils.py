@@ -95,7 +95,7 @@ FOIL = lambda cov: [t for t in itertools.product(*cov)]
 def find_combs(covs):
     """Returns set of unique 2-point combinations."""
     # list of field types
-    ft = ['d', 'g', 'y', 'k']
+    ft = ['g', 'y', 'k', 'd']
 
     # all possible combinations
     cc = []
@@ -366,6 +366,7 @@ def covariance(cls_model, cls_data, covs, fields, cov_type='data'):
             else:
                 f.append(ff)
                 print(COMB, [X.name for X in f])
+                f.pop(-1)  # TODO: at the end of the function
 
 
                 f1 = None
