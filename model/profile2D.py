@@ -10,6 +10,10 @@ from .cosmo_utils import COSMO_ARGS
 from .utils import R_Delta, concentration_duffy
 
 
+
+types = ["y", "g", "k"]  # model profiles available
+
+
 class Arnaud(object):
     """
     Calculate an Arnaud profile quantity of a halo and its Fourier transform.
