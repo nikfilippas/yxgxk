@@ -11,9 +11,6 @@ from .utils import R_Delta, concentration_duffy
 
 
 
-types = ["y", "g", "k"]  # model profiles available
-
-
 class Arnaud(object):
     """
     Calculate an Arnaud profile quantity of a halo and its Fourier transform.
@@ -34,6 +31,7 @@ class Arnaud(object):
         self.qpoints = int(qpoints)  # no of sampling points
         self.Delta = 500             # reference overdensity (Arnaud et al.)
         self.name = name
+        self.type = 'y'
 
         self._fourier_interp = self._integ_interp()
 
@@ -201,6 +199,7 @@ class HOD(object):
         self.z_avg = np.average(self.z, weights=nz)
         self.name = name
         self.ns_independent = ns_independent
+        self.type = 'g'
 
     def kernel(self, a, **kwargs):
         """The galaxy number overdensity window function."""
@@ -291,6 +290,8 @@ class Lensing(object):
     """Calculates a CMB lensing profile objerct of a halo."""
     def __init__(self, name="lens"):
         self.name = name
+        self.Delta = 500
+        self.type = 'k'
 
     def kernel(self, a, **kwargs):
         """The lensing window function."""
@@ -320,11 +321,4 @@ class Lensing(object):
 
 
 
-# class CCL_Lensing(object):
-#     """CMB lensing calculations with CCL tracer."""
-#     def __init__(self, name="lens"):
-#         self.name = name
-
-
-#     def tracer(self, cosmo):
-#         self.tracer = ccl.CMBLensingTracer(cosmo, z_source=1100)
+types = {'g': HOD, 'y': Arnaud, 'k': Lensing}

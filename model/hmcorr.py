@@ -109,11 +109,11 @@ def HM_gauss(mf):
         k0_func, s_func (func): interpolated functions for ``k0`` and ``s``
     """
     if mf == "tinker":
-        k0_func = interp1d(hm_a, BF_T08[:, 0])
-        s_func = interp1d(hm_a, BF_T08[:, 1])
+        k0_func = interp1d(hm_a, BF_T08[:, 0], bounds_error=False, fill_value=1)
+        s_func = interp1d(hm_a, BF_T08[:, 1], bounds_error=False, fill_value=1e64)
     elif mf == "tinker10":
-        k0_func = interp1d(hm_a, BF_T10[:, 0])
-        s_func = interp1d(hm_a, BF_T10[:, 1])
+        k0_func = interp1d(hm_a, BF_T10[:, 0], bounds_error=False, fill_value=1)
+        s_func = interp1d(hm_a, BF_T10[:, 1], bounds_error=False, fill_value=1e64)
     else:
         raise ValueError("Mass function not recognised in HM correction.")
     return k0_func, s_func
@@ -122,7 +122,7 @@ def HM_gauss(mf):
 def HaloModCorrection(k, a, squeeze=True, **kwargs):
     """
     Approximates the halo model correction as a gaussian with mean ``mu``
-    and standard deviation ``sigma``.
+    and standard deviation ``sigma``.cha
 
     .. note: By using this method, we avoid obtaining any cosmological
               information from the halo model correction, which is a fluke.

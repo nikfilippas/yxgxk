@@ -36,18 +36,18 @@ class Field(object):
         self.mask = hp.ud_grade(hp.read_map(fname_mask, verbose=False,
                                             field=field_mask), nside_out=nside)
         # Read map
-        self.map0 = hp.ud_grade(hp.read_map(fname_map, verbose=False,
+        map0 = hp.ud_grade(hp.read_map(fname_map, verbose=False,
                                             field=field_map), nside_out=nside)
         mask_bn = np.ones_like(self.mask)
         mask_bn[self.mask <= 0] = 0  # Binary mask
-        self.map0 *= mask_bn  # Remove masked pixels
+        map0 *= mask_bn  # Remove masked pixels
         if is_ndens:  # Compute delta if this is a number density map
             # Mean number of galaxies per pixel.
-            mean_g = np.sum(self.map0*self.mask) / np.sum(self.mask)
+            mean_g = np.sum(map0*self.mask) / np.sum(self.mask)
             # Transform to number density
             self.ndens = mean_g * hp.nside2npix(self.nside) / (4*np.pi)
             # Compute delta
-            self.map = self.mask*(self.map0 / mean_g - 1.)
+            map = self.mask*(map0 / mean_g - 1.)
             # Read redshift distribution
             self.dndz = fname_dndz
             self.z, self.nz = np.loadtxt(self.dndz, unpack=True)
@@ -56,25 +56,25 @@ class Field(object):
             self.zrange = np.array([z_inrange[0], z_inrange[-1]])
         else:  # Nothing to do otherwise
             self.ndens = 0
-            self.map = self.map0
+            map = map0
             self.z = None
             self.dndz = None
 
         # Load contaminant templates
-        self.temp = None
+        temp = None
         if syst_list is not None:
             for sname in syst_list:
                 if os.path.isfile(sname):
-                    if self.temp is None:
-                        self.temp = []
+                    if temp is None:
+                        temp = []
                     t = hp.ud_grade(hp.read_map(sname, verbose=False),
                                     nside_out=nside)
                     t_mean = np.sum(t * self.mask)/np.sum(self.mask)
-                    self.temp.append([mask_bn * (t- t_mean)])
+                    temp.append([mask_bn * (t- t_mean)])
 
         # Generate NmtField
-        self.field = nmt.NmtField(self.mask, [self.map],
-                                  templates=self.temp)
+        self.field = nmt.NmtField(self.mask, [map],
+                                  templates=temp)
 
     def update_field(self, new_mask=1.):
         """
@@ -86,5 +86,6 @@ class Field(object):
         Args:
             new_mask (float or array): new mask.
         """
-        self.field = nmt.NmtField(self.mask * new_mask, [self.map],
-                                  templates=self.temp)
+        self.field = nmt.NmtField(self.mask * new_mask,
+                                  [self.field.get_maps()],
+                                  templates=self.field.get_templates())

@@ -53,7 +53,12 @@ print("OK")
 print("Computing power spectra...", end="")
 # Generate all fields
 models = p.get_models()
-fields = pu.classify_fields(p)
+fields = pu.read_fields(p)
+xcorr = pu.get_xcorr(fields)
+mcorr = pu.model_xcorr(p, fields, xcorr, hm_correction=hm_correction)
+
+
+
 covs = pu.which_cov(p)
 combs = pu.find_combs(covs)
 combs.extend([('d', 'd'), ('g', 'd'), ('y', 'd')])

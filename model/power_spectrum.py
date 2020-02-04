@@ -170,8 +170,9 @@ def hm_power_spectrum(k, a, profiles,
     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
 
     if hm_correction is not None:
-        for ia, (aa, kk) in enumerate(zip(a, k)):
-            F[ia, :] *= hm_correction(kk, aa, **kwargs)
+        if (p1.type == 'g') or (p2.type == 'g'):
+            for ia, (aa, kk) in enumerate(zip(a, k)):
+                F[ia, :] *= hm_correction(kk, aa, **kwargs)
 
     return F.squeeze() if squeeze else F
 
