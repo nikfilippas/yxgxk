@@ -41,12 +41,12 @@ probs = reader.get_log_prob(flat=True)
 
 BF = chain[np.argmax(probs)]
 
-cd ../yxg
-from model.power_spectrum import hm_ang_power_spectrum
-from model.profile2D import Arnaud
-from model.profile2D import HOD
-H = HOD(nz_file="data/dndz/2MPZ_bin1.txt")
-cd ../yxgxk
+# cd ../yxg
+# from model.power_spectrum import hm_ang_power_spectrum
+# from model.profile2D import Arnaud
+# from model.profile2D import HOD
+# H = HOD(nz_file="data/dndz/2MPZ_bin1.txt")
+# cd ../yxgxk
 
 from model.power_spectrum import hm_ang_power_spectrum
 from model.profile2D import Arnaud
@@ -74,6 +74,7 @@ bf_pars = {"M1": BF[0],
           "sigma_lnM": 0.15,
           "width": BF[4],
           "a_HMcorr": 0.3614146096356469
+           #0.35015861  # 2mpz
           }
 cosmo_pars = p.get_cosmo_pars()
 kwargs = {**bf_pars, **cosmo_pars}

@@ -9,6 +9,48 @@ from scipy.interpolate import interp2d
 from scipy.optimize import curve_fit
 
 
+class HalomodCorrection_old(object):
+    """Provides methods to estimate the correction to the halo
+    model in the 1h - 2h transition regime.
+
+    Args:
+        cosmo (:obj:`ccl.Cosmology`): cosmology.
+        k_range (list): range of k to use (in Mpc^-1).
+        nlk (int): number of samples in log(k) to use.
+        z_range (list): range of redshifts to use.
+        nz (int): number of samples in redshift to use.
+    """
+    def __init__(self, cosmo,
+                 k_range=[1E-1, 5], nlk=20,
+                 z_range=[0., 1.], nz=16):
+        lkarr = np.linspace(np.log10(k_range[0]),
+                            np.log10(k_range[1]),
+                            nlk)
+        karr = 10.**lkarr
+        zarr = np.linspace(z_range[0], z_range[1], nz)
+
+        pk_hm = np.array([ccl.halomodel_matter_power(cosmo, karr, a)
+                          for a in 1. / (1 + zarr)])
+        pk_hf = np.array([ccl.nonlin_matter_power(cosmo, karr, a)
+                          for a in 1. / (1 + zarr)])
+        ratio = pk_hf / pk_hm
+
+        self.rk_func = interp2d(lkarr, 1/(1+zarr), ratio,
+                                bounds_error=False, fill_value=1)
+
+    def rk_interp(self, k, a, **kwargs):
+        """
+        Returns the halo model correction for an array of k
+        values at a given redshift.
+
+        Args:
+            k (float or array): wavenumbers in units of Mpc^-1.
+            a (float): value of the scale factor.
+        """
+        return self.rk_func(np.log10(k), a)
+
+
+
 class HM_halofit(object):
     """Provides methods to estimate the correction to the halo
     model in the 1h - 2h transition regime.
