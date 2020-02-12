@@ -28,59 +28,36 @@ sel = pu.selection_func(p)
 # Read off N_side
 nside = p.get_nside()
 
-# JackKnives setup # TODO: deal with JK later
-if p.do_jk():
-    # Set union mask
-    msk_tot = np.ones(hp.nside2npix(nside))
-    for k in p.get('masks').keys():
-        if k != 'mask_545':
-            msk_tot *= hp.ud_grade(hp.read_map(p.get('masks')[k],
-                                               verbose=False),
-                                   nside_out=nside)
-    # Set jackknife regions
-    jk = JackKnife(p.get('jk')['nside'], msk_tot)
+# # JackKnives setup # TODO: deal with JK later
+# if p.do_jk():
+#     # Set union mask
+#     msk_tot = np.ones(hp.nside2npix(nside))
+#     for k in p.get('masks').keys():
+#         if k != 'mask_545':
+#             msk_tot *= hp.ud_grade(hp.read_map(p.get('masks')[k],
+#                                                verbose=False),
+#                                    nside_out=nside)
+#     # Set jackknife regions
+#     jk = JackKnife(p.get('jk')['nside'], msk_tot)
 
 # Create output directory if needed
 os.system('mkdir -p ' + p.get_outdir())
 
 # Generate bandpowers
 print("Generating bandpowers...", end="")
-bpw = p.get_bandpowers()
-print("OK")
-
-
-# Compute power spectra
+bpw = p.get_bandpowers(); print("OK")
 print("Computing power spectra...", end="")
-# Generate all fields
 models = p.get_models()
 fields = pu.read_fields(p)
-xcorr = pu.get_xcorr(fields)
-mcorr = pu.model_xcorr(p, fields, xcorr, hm_correction=hm_correction)
-
-
-
-covs = pu.which_cov(p)
-combs = pu.find_combs(covs)
-combs.extend([('d', 'd'), ('g', 'd'), ('y', 'd')])
-Cls = pu.twopoint_combs(fields, combs)
-print("OK")
-
-
-# Generate model power spectra to compute the Gaussian covariance matrix
+xcorr = pu.get_xcorr(fields); print("OK")
 print("Generating theory power spectra")
-cls_model = pu.cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside)
-cls_data = pu.cls_cov_data(fields, combs, Cls, nside)
-
-
-# Generate covariances
+mcorr = pu.model_xcorr(p, fields, xcorr, hm_correction=hm_correction)
 print("Computing covariances...")
-covs = covs.tolist()
-covs.extend([[['d', 'g'], ['d', 'g']],
-             [['d', 'y'], ['d', 'y']]])
-covs = np.asarray(covs)
+pu.get_cov(p, fields, xcorr, mcorr)
 
-covs_data = pu.covariance(cls_model, cls_data, covs, fields, 'data')
-covs_model = pu.covariance(cls_model, cls_data, covs, fields, 'model')
+
+
+
 
 
 
@@ -297,3 +274,5 @@ if p.do_jk():
             cvd_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'data_4pt'))
             cvm_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'model_4pt'))
     print("OK")
+'''
+'''

@@ -2,7 +2,7 @@
 Tidy-up the pipeline.
 """
 
-
+import os
 import itertools
 import copy
 import numpy as np
@@ -16,14 +16,6 @@ from analysis.covariance import Covariance
 from model.profile2D import HOD, Arnaud, Lensing, types
 from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import beam_hpix, beam_gaussian
-
-
-fname_params = "params_lensing.yml"
-p = ParamRun(fname_params)
-
-
-# Find which Cls we will be using
-twopoints = p.get("data_vectors")[0]["twopoints"]
 
 
 def selection_func(p):
@@ -44,7 +36,6 @@ def selection_func(p):
     return sel
 
 
-
 def unravel_maps(p):
     """Constructs dictionary of tracer types
     containing dictionary of tracer names, and all other attributes as values.
@@ -56,7 +47,6 @@ def unravel_maps(p):
 
         maps[M["type"]][M["name"]] = M
     return maps
-
 
 
 def read_fields(p):
@@ -102,6 +92,7 @@ def get_power_spectrum(p, f1, f2, jk_region=None, save_windows=True):
 def get_xcorr(fields, jk_region=None, save_windows=True):
     """Constructs a 2x2 cross-correlation matrix of all fields."""
     xcorr = {}
+
     for name1 in fields:
         xcorr[name1] = {}
         f1 = fields[name1][0]
@@ -127,7 +118,6 @@ def get_profile(p, name_p, type_p):
         prof = types[type_p]()
         kwargs = p.get_cosmo_pars()
     return prof, kwargs
-
 
 
 def model_xcorr(p, fields, xcorr, hm_correction=None):
@@ -171,29 +161,66 @@ def model_xcorr(p, fields, xcorr, hm_correction=None):
     return mcorr
 
 
+def get_cmcm(f1, f2, f3, f4):
+    fname = p.get_fname_cmcm(f1, f2, f3, f4)
+    cmcm = nmt.NmtCovarianceWorkspace()
+    try:
+        cmcm.read_from(fname)
+    except:
+        cmcm.compute_coupling_coefficients(f1.field, f2.field,
+                                           f3.field, f4.field)
+        cmcm.write_to(fname)
+    return cmcm
 
 
-def cls_xy(fields1, fields2):
-    """Generate Cls dictionary."""
-    cls_xy = {}
-    if fields1 == fields2:
-        for f1 in fields1:
-            cls_xy[f1.name] = get_power_spectrum(f1, f1)
-    else:
-        for f2 in fields2:
-            cls_xy[f2.name] = {}
-            for f1 in fields1:
-                cls_xy[f2.name][f1.name] = get_power_spectrum(f1, f2)
-    return cls_xy
+def get_covariance(fa1, fa2, fb1, fb2, suffix,
+                   cla1b1, cla1b2, cla2b1, cla2b2):
+    # print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
+    fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
+    fname_cov_T = p.get_fname_cov(fb1, fb2, fa1, f12, suffix)
+    try:
+        cov = Covariance.from_file(fname_cov,
+                                   fa1.name, fa2.name,
+                                   fb1.name, fb2.name)
+    except:
+        # look for transpose
+        try:
+            cov = Covariance.from_file(fname_cov_T,
+                                       fb1.name, fb2.name,
+                                       fa1.name, fa2.name)  # TODO: syntax
+        except:
+            pass
+
+        mcm_a = get_mcm(fa1, fa2)
+        mcm_b = get_mcm(fb1, fb2)
+        cmcm = get_cmcm(fa1, fa2, fb1, fb2)
+        cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
+                                     cla1b1, cla1b2, cla2b1, cla2b2,
+                                     cwsp=cmcm)
+        cov.to_file(fname_cov)
+    return None
 
 
-def twopoint_combs(fields, combs):
-    """Computes Cls dictionary for all listed combinations of the fields."""
+def get_cov(p, fields, xcorr, mcorr):
+    """Computes the covariance of a pair of twopoints."""
+    for dv in p.get("data_vectors"):
+        for tp1 in dv["twopoints"]:
+            tr11, tr12 = tp1["tracers"]
+            for tp2 in dv["twopoints"]:
+                tr21, tr22 = tp2["tracers"]
+                # data
+                get_covariance(fields[tr11][0], fields[tr12][0],
+                               fields[tr21][0], fields[tr22][0], 'data',
+                               xcorr[tr11][tr21], xcorr[tr11][tr22],
+                               xcorr[tr12][tr21], xcorr[tr12][tr22])
+                # model
+                get_covariance(fields[tr11][0], fields[tr12][0],
+                               fields[tr21][0], fields[tr22][0], 'model',
+                               mcorr[tr11][tr21], mcorr[tr11][tr22],
+                               mcorr[tr12][tr21], mcorr[tr12][tr22])
+    return None
 
-    Cls = {}.fromkeys(combs)
-    for c in Cls:
-        Cls[c] = cls_xy(fields[c[0]], fields[c[1]])
-    return Cls
+
 
 
 def interpolate_spectra(leff, cell, ns):
@@ -206,37 +233,7 @@ def interpolate_spectra(leff, cell, ns):
     return clo
 
 
-def get_cmcm(f1, f2, f3, f4):
-    fname = p.get_fname_cmcm(f1, f2, f3, f4)
-    cmcm = nmt.NmtCovarianceWorkspace()
-    try:
-        cmcm.read_from(fname)
-    except:
-        cmcm.compute_coupling_coefficients(f1.field,
-                                           f2.field,
-                                           f3.field,
-                                           f4.field)
-        cmcm.write_to(fname)
-    return cmcm
 
-
-def get_covariance(fa1, fa2, fb1, fb2, suffix,
-                   cla1b1, cla1b2, cla2b1, cla2b2):
-    # print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
-    fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
-    try:
-        cov = Covariance.from_file(fname_cov,
-                                   fa1.name, fa2.name,
-                                   fb1.name, fb2.name)
-    except:
-        mcm_a = get_mcm(fa1, fa2)
-        mcm_b = get_mcm(fb1, fb2)
-        cmcm = get_cmcm(fa1, fa2, fb1, fb2)
-        cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
-                                     cla1b1, cla1b2, cla2b1, cla2b2,
-                                     cwsp=cmcm)
-        cov.to_file(fname_cov)
-    return cov
 
 
 
@@ -253,246 +250,13 @@ def Beam(X, larr, nside):
 
 
 
-# def cls_cov_data(fields, combs, Cls, nside):
-#     """Interpolates the data power spectra to prepare the covariance."""
-#     cls_cov = {}.fromkeys(combs)
-#     for comb in combs:
-#         cls_cov[comb] = {}
-#         if comb[0] == comb[1]:
-#             for f in fields[comb[0]]:
-#                 X = Cls[comb][f.name]
-#                 cls_cov[comb][f.name] = interpolate_spectra(
-#                                         X.leff, X.cell, nside)
-#         else:
-#             for f2 in fields[comb[1]]:
-#                 cls_cov[comb][f2.name] = {}
-#                 for f1 in fields[comb[0]]:
-#                     X = Cls[comb][f2.name][f1.name]
-#                     cls_cov[comb][f2.name][f1.name] = interpolate_spectra(
-#                                                       X.leff, X.cell, nside)
-#     return cls_cov
-
-
-
-# def tracer_type(maps, tracers):
-#     """Finds the types of the tracer names given in a list."""
-#     types = []
-#     for tr in tracers:
-#         for m in maps:
-#             if tr in maps[m].keys():
-#                 types.append(m)
-#     return types
-
-
-# def which_cls(p):
-#     """Returns a list of twopoint cross-correlations pairs."""
-#     maps = unravel_maps(p)
-#     twopoints = []
-#     for tp in p.get("data_vectors")[0]["twopoints"]:
-#         tracers = tp["tracers"]
-#         twopoints.append(tracer_type(maps, tracers))
-
-#     return twopoints
-
-
-# def which_cov(p):
-#     """Determines which covariances are going to be calculated."""
-#     twopoints = which_cls(p)
-#     # list all combinations
-#     covs = np.array([c for c in itertools.product(*[twopoints, twopoints])])
-#     # reshape to square matrix & extract upper triangular matrix
-#     covs = covs.reshape((len(twopoints), len(twopoints), 2, 2))
-#     idx = np.triu_indices(len(twopoints))
-#     covs = covs[idx]
-#     return covs
-
-
-# FOIL = lambda cov: [t for t in itertools.product(*cov)]
-
-# def find_combs(covs):
-#     """Returns set of unique 2-point combinations."""
-#     # list of field types
-#     ft = ['g', 'y', 'k', 'd']
-
-#     # all possible combinations
-#     cc = []
-#     for cov in covs:
-#         F = FOIL(cov)
-#         # delete transpose
-#         for f in F:
-#             if ft.index(f[0]) > ft.index(f[1]):
-#                 if f[::-1] in F:
-#                     F.pop(F.index(f))
-#                 else:
-#                     F[F.index(f)] = f[::-1]
-
-#         cc.append(F)
-
-#     # concatenate list
-#     combs = cc[0]
-#     for i in cc[1:]:
-#         combs += i
-
-#     # only keep unique combinations
-#     combs = np.unique(combs, axis=0)
-#     combs = [tuple(c) for c in combs]
-
-#     return combs
-
-
-# def classify_fields(p):
-#     """Constructs a dictionary of classified fields."""
-#     nside = p.get_nside()
-#     fields = {}
-#     for d in tqdm(p.get("maps"), desc="Reading fields"):
-#         f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
-#                   d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
-#                   syst_list = d.get('systematics'))
-#         if d["type"] not in fields:
-#             fields[d["type"]] = []
-#         fields[d["type"]].append(f)
-#     return fields
-
-
-
-# def cls_cov_model(p, fields, Cls, models, hm_correction, sel, nside):
-#     """Produces the model power spectra to prepare the covariances."""
-#     prof_dict = {'y': Arnaud(), 'k': Lensing()}
-
-#     combs = which_cls(p)
-#     combs = [tuple(c) for c in combs]
-#     cls_cov = {}.fromkeys(combs)
-#     print(cls_cov)
-
-#     larr = np.arange(3*nside)
-#     data = {'ls': larr}  # output1
-#     for fg in tqdm(fields['g'], desc="Generating model power spectra"):
-#         nlarr = np.mean(Cls[('g', 'g')][fg.name].nell) * np.ones_like(larr)
-
-#         try:
-#             d = np.load(p.get_outdir() + '/cl_th_' + fg.name + '.npz')
-
-#             for comb in combs:
-#                 if comb == ('g', 'g'):
-#                     cls_cov[('g', 'g')][fg.name] = d['clgg']  # 'gg' in top branch
-#                 else:
-#                     arr = 'cl' + comb[0] + comb[1]
-#                     for ff in fields[comb[1]]:  # assume 'g' is first tracer
-#                         cls_cov[comb][ff.name][fg.name] = d[arr]
-
-#         except:
-#             # common profile arguments
-#             prof_g = HOD(nz_file=fg.dndz)
-
-#             def kwargs(prof):
-#                 """Sets up hm_ang_power_spectrum args and kwargs."""
-#                 P_args = {'l': larr,
-#                           'profiles': (prof_g, prof),
-#                           'zrange': fg.zrange,
-#                           'zpoints': 64,
-#                           'zlog': True,
-#                           'hm_correction': hm_correction,
-#                           'selection': sel}
-#                 kw = {**P_args, **(models[fg.name])}
-#                 return kw
-
-#             for comb in combs:
-#                 if comb == ('g', 'g'):
-#                     if cls_cov[('g', 'g')] is None:
-#                         cls_cov[('g', 'g')] = {}
-
-#                     cls_cov[('g', 'g')][fg.name] = hm_ang_power_spectrum(
-#                                                 **kwargs(prof_g)) \
-#                                                 * Beam(('g', 'g'), larr, nside) \
-#                                                 + nlarr
-#                     data['clgg'] = cls_cov[('g', 'g')][fg.name]  # output2
-#                 else:
-#                     # only HOD profile is tomographic: optimise
-#                     clgX = hm_ang_power_spectrum(**kwargs(prof_dict[comb[1]])) \
-#                                                  * Beam(('g', comb[1]), larr, nside)
-
-#                     arr = 'cl' + comb[0] + comb[1]
-#                     data[arr] = clgX  # output3
-
-#                     for ff in fields[comb[1]]:
-#                         if cls_cov[comb] is None:
-#                             cls_cov[comb] = {}
-#                         cls_cov[comb][ff.name] = {}
-#                         cls_cov[comb][ff.name][fg.name] = clgX
-
-#             np.savez(p.get_outdir() + '/cl_th_' + fg.name + '.npz', **data)
-
-#     return cls_cov
-
-
-
-# def covariance(cls_model, cls_data, covs, fields, cov_type='data'):
-#     """Computes the covariance matrix."""
-#     combs = covs.reshape((len(covs), 4)).tolist()
-#     combs = [tuple(c) for c in combs]
-#     covs = {}.fromkeys(combs)
-
-
-#     # def get_dict(dic, lst):
-#     #     """Access an arbitrary depth using a list in a dictionary."""
-
-
-
-#     def recurse(COV, comb, COMB, f=[], memory=[]):
-#         S = set(comb)
-#         idx = comb[-1]
-#         S.remove(idx)
-
-#         for ff in fields[idx]:
-#             if len(S) > 0:
-#                 L = len(comb)//2
-#                 if idx not in memory:
-#                     COV[ff.name] = {}
-#                     memory.append(idx)
-#                     f.append(ff)
-#                     recurse(COV[ff.name], comb[:L], COMB, f, memory)
-#                 else:
-#                     recurse(COV, comb[:L], COMB, f, memory)
-
-#             else:
-#                 f.append(ff)
-#                 print(COMB, [X.name for X in f])
-#                 f.pop(-1)  # TODO: at the end of the function
-
-
-#                 f1 = None
-#                 f2 = None
-#                 f3 = None
-#                 f4 = None
-
-
-#                 arg = np.array(COMB).reshape((2, 2))
-#                 names = find_combs([arg])
-#                 clv = cls_data[...]
-
-#                 clv = [cls_data[F] for F in f]
-#                 COV[ff.name] = get_covariance(f1, f2, f3, f4, cov_type, ...)
-
-
-
-
-#                 f.pop(-1)  # remove lower dict level
-#                 print("success")
-
-
-
-
-
-    # for comb in combs:
-    #     covs[comb] = {}
-    #     recurse(covs[comb], comb, COMB=comb, f=[], memory=[])
 
 
 
 
 
 
-'''
+# '''
 # gggy
 print("  gggy")
 covs_gggy_data = {}

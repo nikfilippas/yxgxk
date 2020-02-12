@@ -58,7 +58,7 @@ tt1 = np.load("legacy/tt1.npy")
 # gxg data
 LSD0 = np.load("output_default/cls_2mpz_2mpz.npz")
 # yxg data
-LSD1 = np.load("output_default/cls_2mpz_y_milca.npz")
+# LSD1 = np.load("output_default/cls_2mpz_y_milca.npz")
 
 # global theory
 L = np.arange(6, 3000, 1)
@@ -83,21 +83,21 @@ ax[0].plot(lsd0, dd0, "ro", alpha=0.2)
 # old theory
 ax[0].plot(lst0, tt0, "k--", alpha=0.3, lw=3, label="yxg fit")
 # new data
-ax[0].plot(LSD0["ls"], LSD0["cls"], "bo", alpha=0.2)
+ax[0].plot(LSD0["ls"], LSD0["cls"]-LSD0["nls"], "bo", alpha=0.2)
 # new theory
 ax[0].plot(L, TT0, "k:", alpha=0.3, lw=3, label="new fit, old HMcorr")
 ax[0].plot(L, TT0_HM, "k-", alpha=0.3, lw=3, label="new fit")
 ax[0].legend(loc="upper right")
 
-# yxg #
-# old data
-ax[1].plot(lsd1, dd1, "ro", alpha=0.2)
-# old theory
-ax[1].plot(lst1, tt1, "k--", alpha=0.3, lw=3, label="yxg fit")
-# new data
-ax[1].plot(LSD1["ls"], LSD1["cls"], "bo", alpha=0.2)
-# new theory
-ax[1].plot(L, TT1, "k-", alpha=0.3, lw=3, label="new fit")
+# # yxg #
+# # old data
+# ax[1].plot(lsd1, dd1, "ro", alpha=0.2)
+# # old theory
+# ax[1].plot(lst1, tt1, "k--", alpha=0.3, lw=3, label="yxg fit")
+# # new data
+# ax[1].plot(LSD1["ls"], LSD1["cls"], "bo", alpha=0.2)
+# # new theory
+# ax[1].plot(L, TT1, "k-", alpha=0.3, lw=3, label="new fit")
 
 for a in ax:
     a.loglog()

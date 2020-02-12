@@ -66,7 +66,6 @@ class Spectrum(object):
             for il in range(lmax+1):
                 t_hat = np.zeros(lmax+1)
                 t_hat[il] = 1.
-
                 windows[:, il] = wsp.decouple_cell(wsp.couple_cell([t_hat]))
         else:
             windows = None

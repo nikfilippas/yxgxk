@@ -36,16 +36,20 @@ class Field(object):
         self.mask = hp.ud_grade(hp.read_map(fname_mask, verbose=False,
                                             field=field_mask), nside_out=nside)
         # Read map
-        map0 = hp.ud_grade(hp.read_map(fname_map, verbose=False,
-                                            field=field_map), nside_out=nside)
+        map0 = hp.read_map(fname_map, verbose=False,
+                           field=field_map)
+        self.nside_original = hp.npix2nside(len(map0))
+        map0 = hp.ud_grade(map0, nside_out=nside)
+
         mask_bn = np.ones_like(self.mask)
         mask_bn[self.mask <= 0] = 0  # Binary mask
         map0 *= mask_bn  # Remove masked pixels
         if is_ndens:  # Compute delta if this is a number density map
-            # Mean number of galaxies per pixel.
+            # Mean number ondef galaxies per pixel.
+            n_subpix = (nside / self.nside_original)**2
             mean_g = np.sum(map0*self.mask) / np.sum(self.mask)
             # Transform to number density
-            self.ndens = mean_g * hp.nside2npix(self.nside) / (4*np.pi)
+            self.ndens = mean_g * hp.nside2npix(self.nside) / (4*np.pi) / n_subpix
             # Compute delta
             map = self.mask*(map0 / mean_g - 1.)
             # Read redshift distribution
