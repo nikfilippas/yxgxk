@@ -2,7 +2,7 @@ import yaml
 import pyccl as ccl
 from .bandpowers import Bandpowers
 from model.cosmo_utils import COSMO_KEYS
-from cosmoHammer.util import Params
+# from cosmoHammer.util import Params
 
 
 
@@ -38,19 +38,19 @@ class ParamRun(object):
         """Get default cosmology."""
         return ccl.Cosmology(**self.get_cosmo_pars())
 
-    # FIXME: replace with cobaya
-    def get_params(self):
-        """Convert to cosmoHammer Params format."""
-        KEYS = [par for par in COSMO_KEYS if par != "mass_function"]
-        # build dictionary of cosmological parameters
-        pars = {par["name"]: [par["value"],               # center
-                              par["prior"]["values"][0],  # min
-                              par["prior"]["values"][1],  # max
-                              par["width"]]               # width
-                for par in self.p.get("params") if par["name"] in KEYS}
-        # convert dictionary to list of key-value pair tuples
-        pars = tuple(zip(list(pars.keys()), list(pars.values())))
-        return Params(*pars)
+    # # FIXME: replace with cobaya
+    # def get_params(self):
+    #     """Convert to cosmoHammer Params format."""
+    #     KEYS = [par for par in COSMO_KEYS if par != "mass_function"]
+    #     # build dictionary of cosmological parameters
+    #     pars = {par["name"]: [par["value"],               # center
+    #                           par["prior"]["values"][0],  # min
+    #                           par["prior"]["values"][1],  # max
+    #                           par["width"]]               # width
+    #             for par in self.p.get("params") if par["name"] in KEYS}
+    #     # convert dictionary to list of key-value pair tuples
+    #     pars = tuple(zip(list(pars.keys()), list(pars.values())))
+    #     return Params(*pars)
 
 
     def get_outdir(self):
