@@ -39,7 +39,10 @@ class Field(object):
         map0 = hp.read_map(fname_map, verbose=False,
                            field=field_map)
         self.nside_original = hp.npix2nside(len(map0))
-        map0 = hp.ud_grade(map0, nside_out=nside)
+        if is_ndens:
+            map0 = hp.alm2map(hp.map2alm(map0), nside)
+        else:
+            map0 = hp.ud_grade(map0, nside_out=nside)
 
         mask_bn = np.ones_like(self.mask)
         mask_bn[self.mask <= 0] = 0  # Binary mask
