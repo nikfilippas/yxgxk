@@ -9,7 +9,6 @@ import numpy as np
 from scipy.interpolate import interp1d
 from tqdm import tqdm
 import pymaster as nmt
-from analysis.params import ParamRun
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
@@ -89,7 +88,7 @@ def get_power_spectrum(p, f1, f2, jk_region=None, save_windows=True):
     return Cls
 
 
-def get_xcorr(fields, jk_region=None, save_windows=True):
+def get_xcorr(p, fields, jk_region=None, save_windows=True):
     """Constructs a 2x2 cross-correlation matrix of all fields."""
     xcorr = {}
 
@@ -118,6 +117,18 @@ def get_profile(p, name_p, type_p):
         prof = types[type_p]()
         kwargs = p.get_cosmo_pars()
     return prof, kwargs
+
+
+def Beam(X, larr, nside):
+    """Computes the beam of a combination of two profiles."""
+    bmg = beam_hpix(larr, ns=512)
+    bmh = beam_hpix(larr, nside)
+    bmy = beam_gaussian(larr, 10.)
+
+    bb = np.ones_like(larr).astype(float)
+    bb *= (bmh*bmg)**(X.count('g'))
+    bb *= (bmh*bmy)**(X.count('y'))
+    return bb
 
 
 def model_xcorr(p, fields, xcorr, hm_correction=None):
@@ -152,6 +163,9 @@ def model_xcorr(p, fields, xcorr, hm_correction=None):
                     cl = hm_ang_power_spectrum(l, (prof1, prof2),
                                                hm_correction=hm_correction,
                                                **kwargs1)
+                    bl = Beam((type1, type2), l, p.get_nside())
+                    cl *= bl
+
                     print('\n', end='')
 
                 mcorr[name1][name2].cell = cl
@@ -161,7 +175,7 @@ def model_xcorr(p, fields, xcorr, hm_correction=None):
     return mcorr
 
 
-def get_cmcm(f1, f2, f3, f4):
+def get_cmcm(p, f1, f2, f3, f4):
     fname = p.get_fname_cmcm(f1, f2, f3, f4)
     cmcm = nmt.NmtCovarianceWorkspace()
     try:
@@ -173,32 +187,37 @@ def get_cmcm(f1, f2, f3, f4):
     return cmcm
 
 
-def get_covariance(fa1, fa2, fb1, fb2, suffix,
+def get_covariance(p, fa1, fa2, fb1, fb2, suffix,
                    cla1b1, cla1b2, cla2b1, cla2b2):
-    # print(" " + fa1.name + "," + fa2.name + "," + fb1.name + "," + fb2.name)
+    """Checks if covariance exists; otherwise it creates it."""
     fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
-    fname_cov_T = p.get_fname_cov(fb1, fb2, fa1, f12, suffix)
-    try:
-        cov = Covariance.from_file(fname_cov,
-                                   fa1.name, fa2.name,
-                                   fb1.name, fb2.name)
-    except:
-        # look for transpose
-        try:
-            cov = Covariance.from_file(fname_cov_T,
-                                       fb1.name, fb2.name,
-                                       fa1.name, fa2.name)  # TODO: syntax
-        except:
-            pass
-
-        mcm_a = get_mcm(fa1, fa2)
-        mcm_b = get_mcm(fb1, fb2)
-        cmcm = get_cmcm(fa1, fa2, fb1, fb2)
+    fname_cov_T = p.get_fname_cov(fb1, fb2, fa1, fa2, suffix)
+    outdir = os.listdir(p.get_outdir())
+    print(fname_cov)
+    if (fname_cov not in outdir) and (fname_cov_T not in outdir):
+        mcm_a = get_mcm(p, fa1, fa2)
+        mcm_b = get_mcm(p, fb1, fb2)
+        cmcm = get_cmcm(p, fa1, fa2, fb1, fb2)
         cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
                                      cla1b1, cla1b2, cla2b1, cla2b2,
                                      cwsp=cmcm)
         cov.to_file(fname_cov)
     return None
+
+
+def interpolate_spectra(p, spectrum):
+    """
+    Creates a power spectrum interpolated at all ells.
+    'Covariance.from_fields()' requires that the power spectrum
+    is sampled at every multipole up to '3*nside-1'.
+    """
+    larr = np.arange(3*p.get_nside())
+    leff, cell = spectrum.leff, spectrum.cell
+    clf = interp1d(leff, cell,
+                   bounds_error=False,
+                   fill_value=(cell[0], cell[-1]))  # constant beyond boundary
+    clo = clf(larr)
+    return clo
 
 
 def get_cov(p, fields, xcorr, mcorr):
@@ -209,44 +228,25 @@ def get_cov(p, fields, xcorr, mcorr):
             for tp2 in dv["twopoints"]:
                 tr21, tr22 = tp2["tracers"]
                 # data
-                get_covariance(fields[tr11][0], fields[tr12][0],
+                get_covariance(p, fields[tr11][0], fields[tr12][0],
                                fields[tr21][0], fields[tr22][0], 'data',
-                               xcorr[tr11][tr21], xcorr[tr11][tr22],
-                               xcorr[tr12][tr21], xcorr[tr12][tr22])
+                               interpolate_spectra(p, xcorr[tr11][tr21]),
+                               interpolate_spectra(p, xcorr[tr11][tr22]),
+                               interpolate_spectra(p, xcorr[tr12][tr21]),
+                               interpolate_spectra(p, xcorr[tr12][tr22]))
                 # model
-                get_covariance(fields[tr11][0], fields[tr12][0],
+                get_covariance(p, fields[tr11][0], fields[tr12][0],
                                fields[tr21][0], fields[tr22][0], 'model',
-                               mcorr[tr11][tr21], mcorr[tr11][tr22],
-                               mcorr[tr12][tr21], mcorr[tr12][tr22])
+                               interpolate_spectra(p, mcorr[tr11][tr21]),
+                               interpolate_spectra(p, mcorr[tr11][tr22]),
+                               interpolate_spectra(p, mcorr[tr12][tr21]),
+                               interpolate_spectra(p, mcorr[tr12][tr22]))
+
     return None
 
 
 
 
-def interpolate_spectra(leff, cell, ns):
-    # Create a power spectrum interpolated at all ells
-    larr = np.arange(3*ns)
-    clf = interp1d(leff, cell, bounds_error=False, fill_value=0)
-    clo = clf(larr)
-    clo[larr <= leff[0]] = cell[0]
-    clo[larr >= leff[-1]] = cell[-1]
-    return clo
-
-
-
-
-
-
-def Beam(X, larr, nside):
-    """Computes the beam of a combination of two profiles."""
-    bmg = beam_hpix(larr, ns=512)
-    bmh = beam_hpix(larr, nside)
-    bmy = beam_gaussian(larr, 10.)
-
-    bb = np.ones_like(larr).astype(float)
-    bb *= bmg**(X.count('g'))
-    bb *= (bmh*bmy)**(X.count('y'))
-    return bb
 
 
 
@@ -256,7 +256,13 @@ def Beam(X, larr, nside):
 
 
 
-# '''
+
+
+
+
+
+
+'''
 # gggy
 print("  gggy")
 covs_gggy_data = {}

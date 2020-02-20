@@ -9,7 +9,6 @@ from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
 from model.hmcorr import HaloModCorrection
 from model.trispectrum import hm_ang_1h_covariance
-from model.utils import beam_gaussian, beam_hpix
 
 
 parser = ArgumentParser()
@@ -28,18 +27,6 @@ sel = pu.selection_func(p)
 # Read off N_side
 nside = p.get_nside()
 
-# # JackKnives setup # TODO: deal with JK later
-# if p.do_jk():
-#     # Set union mask
-#     msk_tot = np.ones(hp.nside2npix(nside))
-#     for k in p.get('masks').keys():
-#         if k != 'mask_545':
-#             msk_tot *= hp.ud_grade(hp.read_map(p.get('masks')[k],
-#                                                verbose=False),
-#                                    nside_out=nside)
-#     # Set jackknife regions
-#     jk = JackKnife(p.get('jk')['nside'], msk_tot)
-
 # Create output directory if needed
 os.system('mkdir -p ' + p.get_outdir())
 
@@ -49,18 +36,18 @@ bpw = p.get_bandpowers(); print("OK")
 print("Computing power spectra...", end="")
 models = p.get_models()
 fields = pu.read_fields(p)
-xcorr = pu.get_xcorr(fields); print("OK")
+xcorr = pu.get_xcorr(p, fields); print("OK")
 print("Generating theory power spectra")
 mcorr = pu.model_xcorr(p, fields, xcorr, hm_correction=hm_correction)
 print("Computing covariances...")
-pu.get_cov(p, fields, xcorr, mcorr)
+# pu.get_cov(p, fields, xcorr, mcorr)
 
 
 
 
 
 
-
+'''
 # Save 1-halo covariance
 print("Saving 1-halo covariances...", end="")
 for fg in fields_g:
@@ -75,6 +62,20 @@ for fg in fields_g:
                                             fg.name + "_" + fy.name + "_" +
                                             fg.name + "_" + fy.name + ".npz")
 print("OK")
+
+
+# JackKnives setup
+if p.do_jk():
+    # Set union mask
+    msk_tot = np.ones(hp.nside2npix(nside))
+    masks = p.get('masks')
+    for k in masks:
+        if k != 'mask_545':
+            msk_tot *= hp.ud_grade(hp.read_map(masks[k], verbose=False),
+                                    nside_out=nside)
+    # Set jackknife regions
+    jk = JackKnife(p.get('jk')['nside'], msk_tot)
+
 
 # Do jackknife
 if p.do_jk():
@@ -275,4 +276,4 @@ if p.do_jk():
             cvm_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'model_4pt'))
     print("OK")
 '''
-'''
+#'''
