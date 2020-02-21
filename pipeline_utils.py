@@ -50,15 +50,22 @@ def unravel_maps(p):
 
 def read_fields(p):
     """Constructs a dictionary of classified fields."""
+    from pathos.multiprocessing import ProcessPool as Pool
     nside = p.get_nside()
     fields = {}
-    for d in tqdm(p.get("maps"), desc="Reading fields"):
+    def field_loop(d):
+    # for d in tqdm(p.get("maps"), desc="Reading fields"):
+        print(d["name"])
         f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
                   d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
                   syst_list = d.get('systematics'))
         fields[d["name"]] = []
         fields[d["name"]].append(f)
         fields[d["name"]].append(d["type"])
+        print(d["name"])
+
+    Pool(4).map(field_loop, p.get("maps")[:3])
+
     return fields
 
 
