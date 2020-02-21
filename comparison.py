@@ -103,7 +103,7 @@ for i in range(6):
 ## FIGURE ###
 import matplotlib.pyplot as plt
 for i in range(6):
-    if i != 4: continue
+    # if i != 3: continue
     fig, ax = plt.subplots(2, 1, sharex=True, squeeze=True)
     plt.title("z-bin no. %d" %i)
 
@@ -118,7 +118,7 @@ for i in range(6):
     ax[0].plot(L, TT[0][i], "k:", alpha=0.3, lw=3, label="new fit, old HMcorr")
     # ax[0].plot(L, TT0_HM, "k-", alpha=0.3, lw=3, label="new fit")
     ax[0].legend(loc="upper right")
-    break
+    # break
     # yxg #
     # old data
     ax[1].plot(lsd[1][i], dd[1][i], "ro", alpha=0.2)
@@ -133,5 +133,5 @@ for i in range(6):
         a.loglog()
         a.legend(loc="upper right")
 
-    # fig.savefig("comparison%d.pdf" % i)
-    # plt.close()
+    fig.savefig("comparison%d.pdf" % i)
+    plt.close()
