@@ -40,7 +40,7 @@ xcorr = pu.get_xcorr(p, fields); print("OK")
 print("Generating theory power spectra")
 mcorr = pu.model_xcorr(p, fields, xcorr, hm_correction=hm_correction)
 print("Computing covariances...")
-# pu.get_cov(p, fields, xcorr, mcorr)
+pu.get_cov(p, fields, xcorr, mcorr)
 
 
 
