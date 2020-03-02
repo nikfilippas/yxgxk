@@ -10,7 +10,8 @@ from model.data import DataManager
 from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.theory import get_theory
-from model.power_spectrum import HalomodCorrection, hm_bias
+from model.power_spectrum import hm_bias
+from model.hmcorr import HaloModCorrection as HalomodCorrection
 from model.utils import selection_planck_erf, selection_planck_tophat
 from scipy.stats import norm
 _PP = norm.sf(-1)-norm.sf(1)
