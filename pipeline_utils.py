@@ -12,6 +12,8 @@ import pymaster as nmt
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
+from model.hmcorr import HaloModCorrection
+from model.trispectrum import hm_ang_1h_covariance
 from model.profile2D import HOD, Arnaud, Lensing, types
 from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import beam_hpix, beam_gaussian
@@ -131,8 +133,10 @@ def Beam(X, larr, nside):
     return bb
 
 
-def model_xcorr(p, fields, xcorr, hm_correction=None):
+def model_xcorr(p, fields, xcorr):
     """Models the angular power spectrum."""
+    hm_correction = HaloModCorrection if p.get('mcmc').get('hm_correct') else None
+
     # copy & reset shape
     mcorr = copy.deepcopy(xcorr)
     for name1 in mcorr:
@@ -220,13 +224,68 @@ def interpolate_spectra(p, spectrum):
     return clo
 
 
+def merge_models(models1, models2):
+    """Merges dictionaries of model parameters."""
+    models = models1.copy()
+    for par in models:
+        models[par] = [models1[par], models2[par]]
+    return models
+
+
+def get_zrange(fields, f1, f2):
+    """Returns effective redshift range (zrange) for a cross-correlation."""
+    for i, F in enumerate([f1, f2]):
+        field_type = fields[F.name][1]
+        if field_type == 'g':
+            zrange = F.zrange
+            break
+        if i == 1:
+            zrange = (1e-6, 6)
+    return zrange
+
+
+# def get_models(f1, f2)
+
+def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
+                      zpoints_a=64, zlog_a=True,
+                      zpoints_b=64, zlog_b=True,
+                      selection=None):
+    """Computes and saves the 1-halo covariance."""
+    nside = p.get_nside()
+    leff = xcorr[f11.name][f11.name].leff
+    profile_types = [fields[F.name][1] for F in [f11, f12, f21, f22]]
+    p11, p12, p21, p22 = [types[x] for x in profile_types]
+
+    fsky = np.mean(f11.mask*f12.mask*f21.mask*f22.mask)
+    zrange_a = get_zrange(fields, f11, f12)
+    zrange_b = get_zrange(fields, f21, f22)
+
+    dcov = hm_ang_1h_covariance(fsky, leff, (p11, p12), (p21, p22),
+                                zrange_a=zrange_a, zpoints_a=64,
+                                zlog_a=True, zrange_b=zrange_b, zpoints_b=64,
+                                zlog_b=True, selection=selection_func(p),
+                                kwargs_a=models_a, kwargs_b=models_b)
+
+    B1 = Beam(profile_types[:2], leff, nside)
+    B2 = Beam(profile_types[2:], leff, nside)
+    dcov *= B1[:, None]*B2[None, :]
+    cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
+    cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
+                f11.name + "_" + f12.name + "_" +
+                f21.name + "_" + f22.name + ".npz")
+    return None
+
+
+
 def get_cov(p, fields, xcorr, mcorr):
     """Computes the covariance of a pair of twopoints."""
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:
             tr11, tr12 = tp1["tracers"]
+            f11, f12 = fields[tr11][0], fields[tr12][0]
             for tp2 in dv["twopoints"]:
                 tr21, tr22 = tp2["tracers"]
+                f21, f22 = fields[tr21][0], fields[tr22][0]
                 # data
                 get_covariance(p, fields[tr11][0], fields[tr12][0],
                                fields[tr21][0], fields[tr22][0], 'data',
@@ -242,64 +301,9 @@ def get_cov(p, fields, xcorr, mcorr):
                                interpolate_spectra(p, mcorr[tr12][tr21]),
                                interpolate_spectra(p, mcorr[tr12][tr22]))
 
+                get_1h_covariance(p, fields, xcorr,
+                                  f11, f12, f21, f22,
+                                  selection=selection_func(p))
+
+
     return None
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-'''
-# gggy
-print("  gggy")
-covs_gggy_data = {}
-covs_gggy_model = {}
-dcov_gggy = {}
-for fy in fields_y:
-    covs_gggy_model[fy.name] = {}
-    covs_gggy_data[fy.name] = {}
-    dcov_gggy[fy.name] = {}
-    for fg in fields_g:
-        clvggm = cls_cov_gg_model[fg.name]
-        clvgym = cls_cov_gy_model[fy.name][fg.name]
-        clvggd = cls_cov_gg_data[fg.name]
-        clvgyd = cls_cov_gy_data[fy.name][fg.name]
-        covs_gggy_model[fy.name][fg.name] = get_covariance(fg, fg, fg, fy,
-                                                           'model',
-                                                           clvggm, clvgym,
-                                                           clvggm, clvgym)
-        covs_gggy_data[fy.name][fg.name] = get_covariance(fg, fg, fg, fy,
-                                                          'data',
-                                                          clvggd, clvgyd,
-                                                          clvggd, clvgyd)
-        fsky = np.mean(fg.mask*fy.mask)
-        prof_g = HOD(nz_file=fg.dndz)
-        dcov = hm_ang_1h_covariance(fsky, cls_gg[fg.name].leff,
-                                    (prof_g, prof_g), (prof_g, prof_y),
-                                    zrange_a=fg.zrange, zpoints_a=64,
-                                    zlog_a=True,
-                                    zrange_b=fg.zrange, zpoints_b=64,
-                                    zlog_b=True,
-                                    selection=sel, **(models[fg.name]))
-        b_hp = beam_hpix(cls_gg[fg.name].leff, nside)
-        b_y = beam_gaussian(cls_gg[fg.name].leff, 10.)
-        dcov *= (b_hp**2)[:, None]*(b_hp**2*b_y)[None, :]
-        dcov_gggy[fy.name][fg.name] = Covariance(fg.name, fg.name,
-                                                 fg.name, fy.name, dcov)
-'''
-#'''
-
-
