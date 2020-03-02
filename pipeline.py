@@ -7,8 +7,6 @@ import pipeline_utils as pu
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from analysis.params import ParamRun
-from model.hmcorr import HaloModCorrection
-from model.trispectrum import hm_ang_1h_covariance
 
 
 parser = ArgumentParser()
@@ -20,10 +18,6 @@ p = ParamRun(fname_params)
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
 mf = p.get_massfunc()
-# Include halo model correction if needed
-hm_correction = HaloModCorrection if p.get('mcmc').get('hm_correct') else None
-# Include selection function if needed
-sel = pu.selection_func(p)
 # Read off N_side
 nside = p.get_nside()
 
@@ -34,11 +28,10 @@ os.system('mkdir -p ' + p.get_outdir())
 print("Generating bandpowers...", end="")
 bpw = p.get_bandpowers(); print("OK")
 print("Computing power spectra...", end="")
-models = p.get_models()
 fields = pu.read_fields(p)
 xcorr = pu.get_xcorr(p, fields); print("OK")
 print("Generating theory power spectra")
-mcorr = pu.model_xcorr(p, fields, xcorr, hm_correction=hm_correction)
+mcorr = pu.model_xcorr(p, fields, xcorr)
 print("Computing covariances...")
 pu.get_cov(p, fields, xcorr, mcorr)
 
@@ -48,22 +41,6 @@ pu.get_cov(p, fields, xcorr, mcorr)
 
 
 '''
-# Save 1-halo covariance
-print("Saving 1-halo covariances...", end="")
-for fg in fields_g:
-    dcov_gggg[fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
-                               fg.name + "_" + fg.name + "_" +
-                               fg.name + "_" + fg.name + ".npz")
-    for fy in fields_y:
-        dcov_gggy[fy.name][fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
-                                            fg.name + "_" + fg.name + "_" +
-                                            fg.name + "_" + fy.name + ".npz")
-        dcov_gygy[fy.name][fg.name].to_file(p.get_outdir() + "/dcov_1h4pt_" +
-                                            fg.name + "_" + fy.name + "_" +
-                                            fg.name + "_" + fy.name + ".npz")
-print("OK")
-
-
 # JackKnives setup
 if p.do_jk():
     # Set union mask
