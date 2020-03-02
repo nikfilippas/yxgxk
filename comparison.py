@@ -19,19 +19,7 @@ cosmo_pars = {'Omega_c': 0.26066676,
               'a_HMcorr': 0.35015861}
 
 kwargs = [[] for i in range(6)]
-
-kwargs[0] = {'fc': 1.0,
-             'alpha': 1.0,
-             'beta_gal': 1.0,
-             'sigma_lnM': 0.15,
-             'M1': 12.939399020269125,
-             'Mmin': 11.616598183948195,
-             'b_hydro': 0.7878221462263877,
-             'r_corr': 0.6762753732566117,
-             'width': 1.1981397977341839,
-             'M0': 11.616598183948195,
-             'beta_max': 1.0}
-
+kwargs[0] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigma_lnM': 0.15, 'M1': 12.939399020269125, 'Mmin': 11.616598183948195, 'b_hydro': 0.7878221462263877, 'r_corr': 0.6762753732566117, 'width': 1.1981397977341839, 'M0': 11.616598183948195, 'beta_max': 1.0}
 kwargs[1] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigma_lnM': 0.15, 'M1': 12.939399020269125, 'Mmin': 11.616598183948195, 'b_hydro': 0.7878221462263877, 'r_corr': 0.6762753732566117, 'width': 1.1981397977341839, 'M0': 11.616598183948195, 'beta_max': 1.0}
 kwargs[2] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigma_lnM': 0.15, 'M1': 11.716163989135934, 'Mmin': 10.470958015134814, 'b_hydro': 0.31194600628571223, 'r_corr': -0.5880946385481943, 'width': 0.8084603154884547, 'M0': 10.470958015134814, 'beta_max': 1.0}
 kwargs[3] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigma_lnM': 0.15, 'M1': 12.589710102154282, 'Mmin': 11.400264012460116, 'b_hydro': 0.38506384781329783, 'r_corr': -0.5896259515254361, 'width': 0.9846392322801006, 'M0': 11.400264012460116, 'beta_max': 1.0}
@@ -46,6 +34,7 @@ from model.hmcorr import HalomodCorrection_old
 hm_correction = HalomodCorrection_old(cosmo).rk_interp
 # new
 from model.hmcorr import HaloModCorrection
+# hm_correction = HaloModCorrection
 
 
 ## PREVIOUS ANALYSIS ##
@@ -81,7 +70,7 @@ LSD[1][4] = np.load("output_default/cls_wisc4_y_milca.npz")
 LSD[1][5] = np.load("output_default/cls_wisc5_y_milca.npz")
 
 # global theory
-L = np.arange(6, 3000, 1)
+L = np.geomspace(6, 3000, 50)
 from model.power_spectrum import hm_ang_power_spectrum
 from model.profile2D import HOD, Arnaud
 g = []
@@ -89,49 +78,59 @@ g.append(HOD(nz_file="data/dndz/2MPZ_bin1.txt"))
 for i in range(5):
     g.append(HOD(nz_file="data/dndz/WISC_bin%d.txt" % (i+1)))
 
+z = np.linspace(0.001, 6, 1000)
 y = Arnaud()
 
 TT = [[[] for i in range(6)] for j in range(2)]
 for i in range(6):
-    TT[0][i] = hm_ang_power_spectrum(L, (g[i], g[i]), hm_correction=hm_correction, **{**kwargs[i], **cosmo_pars})
-    TT[1][i] = hm_ang_power_spectrum(L, (y, g[i]), hm_correction=hm_correction, **{**kwargs[i], **cosmo_pars})
+    # determine z-range
+    nz = g[i].nzf(z)
+    z_inrange = z[nz >= 0.005*np.amax(nz)]
+    z_range = [z_inrange[0], z_inrange[-1]]
+    # print(z_range)
 
+    TT[0][i] = hm_ang_power_spectrum(L, (g[i], g[i]),
+                                     hm_correction=hm_correction,
+                                     z_range=z_range,
+                                     **{**kwargs[i], **cosmo_pars})
+    TT[1][i] = hm_ang_power_spectrum(L, (y, g[i]),
+                                     hm_correction=hm_correction,
+                                     z_range=[1-6, 6],
+                                     **{**kwargs[i], **cosmo_pars})
 
-# TT0_HM = hm_ang_power_spectrum(L, (g, g), hm_correction=HaloModCorrection, **kwargs)
 
 
 ## FIGURE ###
+zbins = ["2mpz"] + ["wisc%d" % d for d in range(1, 6)]
 import matplotlib.pyplot as plt
 for i in range(6):
-    # if i != 3: continue
     fig, ax = plt.subplots(2, 1, sharex=True, squeeze=True)
-    plt.title("z-bin no. %d" %i)
+    plt.title(zbins[i])
 
     # gxg #
     # old data
     ax[0].plot(lsd[0][i], dd[0][i], "ro", alpha=0.2)
-    # old theory
-    ax[0].plot(lst[0][i], tt[0][i], "k--", alpha=0.3, lw=3, label="yxg fit")
     # new data
     ax[0].plot(LSD[0][i]["ls"], LSD[0][i]["cls"]-LSD[0][i]["nls"], "bo", alpha=0.2)
+    # old theory
+    ax[0].plot(lst[0][i], tt[0][i], "k-", lw=2, label="yxg fit")
     # new theory
-    ax[0].plot(L, TT[0][i], "k:", alpha=0.3, lw=3, label="new fit, old HMcorr")
-    # ax[0].plot(L, TT0_HM, "k-", alpha=0.3, lw=3, label="new fit")
+    ax[0].plot(L, TT[0][i], "g-", lw=1, label="new fit")
     ax[0].legend(loc="upper right")
-    # break
+
     # yxg #
     # old data
     ax[1].plot(lsd[1][i], dd[1][i], "ro", alpha=0.2)
-    # old theory
-    ax[1].plot(lst[1][i], tt[1][i], "k--", alpha=0.3, lw=3, label="yxg fit")
     # new data
     ax[1].plot(LSD[1][i]["ls"], LSD[1][i]["cls"], "bo", alpha=0.2)
+    # old theory
+    ax[1].plot(lst[1][i], tt[1][i], "k-", lw=2, label="yxg fit")
     # new theory
-    ax[1].plot(L, TT[1][i], "k-", alpha=0.3, lw=3, label="new fit")
+    ax[1].plot(L, TT[1][i], "g-", lw=1, label="new fit")
 
     for a in ax:
         a.loglog()
         a.legend(loc="upper right")
 
-    fig.savefig("comparison%d.pdf" % i)
-    plt.close()
+    # fig.savefig("comparison%d.pdf" % i)
+    # plt.close()
