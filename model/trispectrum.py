@@ -7,7 +7,7 @@ from .cosmo_utils import COSMO_ARGS
 def hm_1h_trispectrum(k, a, profiles,
                       logMrange=(6, 17), mpoints=128,
                       selection=None,
-                      **kwargs):
+                      kwargs_a=None, kwargs_b=None):
     """Computes the halo model prediction for the 1-halo 3D
     trispectrum of four quantities.
 
@@ -23,15 +23,18 @@ def hm_1h_trispectrum(k, a, profiles,
         selection (function): selection function in (M,z) to include
             in the calculation. Pass None if you don't want to select
             a subset of the M-z plane.
-        **kwargs: parameter used internally by the profiles.
+        kwargs_a (parameter dictionary): Parametrisation of the profiles
+            and cosmology for 1st cross-corr.
+        kwargs_b (parameter dictionary): Parametrisation of the profiles
+            and cosmology for 2nd cross-corr.
     """
     pau, pav, pbu, pbv = profiles
-    cosmo = COSMO_ARGS(kwargs)
+    cosmo = COSMO_ARGS(kwargs_a)
 
-    aUnorm = pau.profnorm(a, squeeze=False, **kwargs)
-    aVnorm = pav.profnorm(a, squeeze=False, **kwargs)
-    bUnorm = pbu.profnorm(a, squeeze=False, **kwargs)
-    bVnorm = pbv.profnorm(a, squeeze=False, **kwargs)
+    aUnorm = pau.profnorm(a, squeeze=False, **kwargs_a)
+    aVnorm = pav.profnorm(a, squeeze=False, **kwargs_a)
+    bUnorm = pbu.profnorm(a, squeeze=False, **kwargs_b)
+    bVnorm = pbv.profnorm(a, squeeze=False, **kwargs_b)
 
     logMmin, logMmax = logMrange
     mpoints = int(mpoints)
@@ -45,24 +48,24 @@ def hm_1h_trispectrum(k, a, profiles,
     else:
         select = 1
 
-    aU, aUU = pau.fourier_profiles(k, M, a, squeeze=False, **kwargs)
+    aU, aUU = pau.fourier_profiles(k, M, a, squeeze=False, **kwargs_a)
     if pau.name == pav.name:
         aUV = aUU
     else:
-        aV, aVV = pav.fourier_profiles(k, M, a, squeeze=False, **kwargs)
-        if 'r_corr' in kwargs:
-            r = kwargs['r_corr']
+        aV, aVV = pav.fourier_profiles(k, M, a, squeeze=False, **kwargs_a)
+        if 'r_corr' in kwargs_a:
+            r = kwargs_a['r_corr']
         else:
             r = 0
         aUV = np.sqrt(aUU*aVV)*(1+r)
 
-    bU, bUU = pbu.fourier_profiles(k, M, a, squeeze=False, **kwargs)
+    bU, bUU = pbu.fourier_profiles(k, M, a, squeeze=False, **kwargs_b)
     if pbu.name == pbv.name:
         bUV = bUU
     else:
-        bV, bVV = pbv.fourier_profiles(k, M, a, squeeze=False, **kwargs)
-        if 'r_corr' in kwargs:
-            r = kwargs['r_corr']
+        bV, bVV = pbv.fourier_profiles(k, M, a, squeeze=False, **kwargs_b)
+        if 'r_corr' in kwargs_b:
+            r = kwargs_b['r_corr']
         else:
             r = 0
         bUV = np.sqrt(bUU*bVV)*(1+r)
@@ -85,7 +88,7 @@ def hm_ang_1h_covariance(fsky, l, profiles_a, profiles_b,
                          zrange_a=(1e-6, 6), zpoints_a=32, zlog_a=True,
                          zrange_b=(1e-6, 6), zpoints_b=32, zlog_b=True,
                          logMrange=(6, 17), mpoints=128,
-                         selection=None, **kwargs):
+                         selection=None, kwargs_a=None, kwargs_b=None):
     """Computes the 1-h trispectrum contribution to the covariance of the
     angular cross power spectra involving two pairs of quantities.
 
@@ -125,10 +128,12 @@ def hm_ang_1h_covariance(fsky, l, profiles_a, profiles_b,
     selection (function): selection function in (M,z) to include
         in the calculation. Pass None if you don't want to select
         a subset of the M-z plane.
-    **kwargs : keyword arguments
-        Parametrisation of the profiles and cosmology.
+    kwargs_a : parameter dictionary
+        Parametrisation of the profiles and cosmology for 1st cross-corr.
+    kwargs_b : parameter dictionary
+        Parametrisation of the profiles and cosmology for 2nd cross-corr.
     """
-    cosmo = COSMO_ARGS(kwargs)
+    cosmo = COSMO_ARGS(kwargs_a)
     zrange = np.array([min(np.amin(zrange_a), np.amin(zrange_b)),
                        max(np.amax(zrange_a), np.amax(zrange_b))])
     dz = min((zrange_a[1]-zrange_a[0])/zpoints_a,
@@ -153,16 +158,16 @@ def hm_ang_1h_covariance(fsky, l, profiles_a, profiles_b,
              (ccl.h_over_h0(cosmo, a) * cosmo["h"]))  # c*z/H(z)
     pau, pav = profiles_a
     pbu, pbv = profiles_b
-    aWu = pau.kernel(a, **kwargs)
-    aWv = pav.kernel(a, **kwargs)
-    bWu = pbu.kernel(a, **kwargs)
-    bWv = pbv.kernel(a, **kwargs)
+    aWu = pau.kernel(a, **kwargs_a)
+    aWv = pav.kernel(a, **kwargs_a)
+    bWu = pbu.kernel(a, **kwargs_b)
+    bWv = pbv.kernel(a, **kwargs_b)
     N = H_inv * aWu * aWv * bWu * bWv/chi**6
 
     k = (l+1/2) / chi[..., None]
     t1h = hm_1h_trispectrum(k, a, (pau, pav, pbu, pbv),
                             logMrange, mpoints, selection=selection,
-                            **kwargs)
+                            kwargs_a=kwargs_a, kwargs_b=kwargs_b)
 
     tl = simps(N[:, None, None] * t1h, x, axis=0)
 
