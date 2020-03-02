@@ -49,7 +49,7 @@ def get_theory(p, dm, return_separated=False,
                              (tr[1].z_range[1]-tr[1].z_range[0])/nz_default)
                     # Calculate the point preserving that sampling rate
                     zpoints = int((zrange[1]-zrange[0])/dz)
-            else:  # Only other option right now is for both of them to be y
+            else:  # Only other option right now is for none of them to be 'g'
                 zrange = tr[0].z_range
                 zpoints = nz_default
 
