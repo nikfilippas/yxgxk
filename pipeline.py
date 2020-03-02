@@ -1,6 +1,5 @@
 import os
 import numpy as np
-import healpy as hp
 from tqdm import tqdm
 from argparse import ArgumentParser
 import pipeline_utils as pu
