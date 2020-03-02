@@ -13,3 +13,5 @@ other/
 *.mcm
 *.cmcm
 
+# Others
+.bashrc
