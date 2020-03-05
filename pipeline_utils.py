@@ -244,21 +244,31 @@ def get_zrange(fields, f1, f2):
     return zrange
 
 
-# def get_models(f1, f2)
-
 def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                       zpoints_a=64, zlog_a=True,
-                      zpoints_b=64, zlog_b=True,
-                      selection=None):
+                      zpoints_b=64, zlog_b=True):
     """Computes and saves the 1-halo covariance."""
+    # Global parameters
     nside = p.get_nside()
     leff = xcorr[f11.name][f11.name].leff
-    profile_types = [fields[F.name][1] for F in [f11, f12, f21, f22]]
-    p11, p12, p21, p22 = [types[x] for x in profile_types]
+    # Set-up profiles
+    flds = [f11, f12, f21, f22]
+    profile_types = [fields[F.name][1] for F in flds]
+    profiles = [types[x] for x in profile_types]
+    for pr, pt, fd in zip(profiles, profile_types, flds):
+        if pt == 'g':
+            pr = pr(nz_file=fd.dndz)
+        else:
+            pr = pr()
+    p11, p12, p21, p22 = profiles
 
+    # Additional parameters
     fsky = np.mean(f11.mask*f12.mask*f21.mask*f22.mask)
     zrange_a = get_zrange(fields, f11, f12)
     zrange_b = get_zrange(fields, f21, f22)
+    # Get models
+    models_a = p.get_models()[f11.name]
+    models_b = p.get_models()[f12.name]
 
     dcov = hm_ang_1h_covariance(fsky, leff, (p11, p12), (p21, p22),
                                 zrange_a=zrange_a, zpoints_a=64,
@@ -301,9 +311,9 @@ def get_cov(p, fields, xcorr, mcorr):
                                interpolate_spectra(p, mcorr[tr12][tr21]),
                                interpolate_spectra(p, mcorr[tr12][tr22]))
 
-                get_1h_covariance(p, fields, xcorr,
-                                  f11, f12, f21, f22,
-                                  selection=selection_func(p))
+                if (f11.name == f21.name) and (f12.name == f22.name):
+                    get_1h_covariance(p, fields, xcorr,
+                                      f11, f12, f21, f22)
 
 
     return None
