@@ -23,9 +23,6 @@ nside = p.get_nside()
 # Create output directory if needed
 os.system('mkdir -p ' + p.get_outdir())
 
-# Generate bandpowers
-print("Generating bandpowers...", end="")
-bpw = p.get_bandpowers(); print("OK")
 print("Computing power spectra...", end="")
 fields = pu.read_fields(p)
 xcorr = pu.get_xcorr(p, fields); print("OK")
