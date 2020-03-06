@@ -2,6 +2,7 @@ import os
 import numpy as np
 from tqdm import tqdm
 from argparse import ArgumentParser
+import healpy as hp
 import pipeline_utils as pu
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
@@ -32,11 +33,6 @@ print("Computing covariances...")
 pu.get_cov(p, fields, xcorr, mcorr)
 
 
-
-
-
-
-'''
 # JackKnives setup
 if p.do_jk():
     # Set union mask
@@ -50,15 +46,28 @@ if p.do_jk():
     jk = JackKnife(p.get('jk')['nside'], msk_tot)
 
 
+
+
+# '''
+g_names = ["2mpz"] + ["wisc%d" % d for d in range(1, 6)]
+y_names = ["y_milca", "y_nilc"]
+k_names = ["lens"]
+d_names = ["dust_545"]
+
+fields_g = [fields[x][0] for x in g_names]
+fields_y = [fields[x][0] for x in y_names]
+fields_k = [fields[x][0] for x in k_names]
+fields_d = [fields[x][0] for x in d_names]
+
 # Do jackknife
 if p.do_jk():
     for jk_id in tqdm(range(jk.npatches), desc="Jackknives"):
         if os.path.isfile(p.get_fname_cls(fields_y[-1],
                                           fields_y[-1],
                                           jk_region=jk_id)):
-#            print("Found %d" % (jk_id + 1))
+            # print("Found %d" % (jk_id + 1))
             continue
-#        print("%d-th JK sample out of %d" % (jk_id + 1, jk.npatches))
+        print("%d-th JK sample out of %d" % (jk_id + 1, jk.npatches))
         msk = jk.get_jk_mask(jk_id)
         # Update field
         for fg in fields_g:
@@ -74,30 +83,46 @@ if p.do_jk():
         # Compute spectra
         # gg
         for fg in fields_g:
-            get_power_spectrum(fg, fg, jk_region=jk_id, save_windows=False)
+            pu.get_power_spectrum(p, fg, fg, jk_region=jk_id, save_windows=False)
         # gy
         for fy in fields_y:
             for fg in fields_g:
-                get_power_spectrum(fy, fg, jk_region=jk_id, save_windows=False)
+                pu.get_power_spectrum(p, fy, fg, jk_region=jk_id, save_windows=False)
         # yy
         for fy in fields_y:
-            get_power_spectrum(fy, fy, jk_region=jk_id, save_windows=False)
+            pu.get_power_spectrum(p, fy, fy, jk_region=jk_id, save_windows=False)
         # dy
         for fy in fields_y:
             for fd in fields_d:
-                get_power_spectrum(fy, fd, jk_region=jk_id, save_windows=False)
+                pu.get_power_spectrum(p, fy, fd, jk_region=jk_id, save_windows=False)
         # dg
         for fg in fields_g:
             for fd in fields_d:
-                get_power_spectrum(fg, fd, jk_region=jk_id, save_windows=False)
+                pu.get_power_spectrum(p, fg, fd, jk_region=jk_id, save_windows=False)
         # dd
         for fd in fields_d:
-            get_power_spectrum(fd, fd, jk_region=jk_id, save_windows=False)
+            pu.get_power_spectrum(p, fd, fd, jk_region=jk_id, save_windows=False)
+        # gk
+        for fk in fields_k:
+            for fg in fields_g:
+                pu.get_power_spectrum(p, fk, fg, jk_region=jk_id, save_windows=False)
+        # kk
+        for fk in fields_k:
+            pu.get_power_spectrum(p, fk, fk, jk_region=jk_id, save_windows=False)
+        # dk
+        for fk in fields_k:
+            for fd in fields_d:
+                pu.get_power_spectrum(p, fk, fd, jk_region=jk_id, save_windows=False)
+        # yk
+        for fk in fields_k:
+            for fy in fields_y:
+                pu.get_power_spectrum(p, fk, fy, jk_region=jk_id, save_windows=False)
 
         # Cleanup MCMs
         if not p.get('jk')['store_mcm']:
             os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
 
+"""
     # Get covariances
     # gggg
     print("Getting covariances...", end="")
@@ -248,5 +273,4 @@ if p.do_jk():
             cvd_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'data_4pt'))
             cvm_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'model_4pt'))
     print("OK")
-'''
-#'''
+"""

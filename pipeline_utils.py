@@ -255,11 +255,11 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
     flds = [f11, f12, f21, f22]
     profile_types = [fields[F.name][1] for F in flds]
     profiles = [types[x] for x in profile_types]
-    for pr, pt, fd in zip(profiles, profile_types, flds):
+    for i, (pr, pt, fd) in enumerate(zip(profiles, profile_types, flds)):
         if pt == 'g':
-            pr = pr(nz_file=fd.dndz)
+            profiles[i] = pr(nz_file=fd.dndz)
         else:
-            pr = pr()
+            profiles[i] = pr()
     p11, p12, p21, p22 = profiles
 
     # Additional parameters
