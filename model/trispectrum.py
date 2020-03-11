@@ -159,8 +159,8 @@ def hm_ang_1h_covariance(fsky, l, profiles_a, profiles_b,
     pau, pav = profiles_a
     pbu, pbv = profiles_b
     aWu = pau.kernel(a, **kwargs_a)
-    aWv = pav.kernel(a, **kwargs_a)
-    bWu = pbu.kernel(a, **kwargs_b)
+    aWv = pav.kernel(a, **kwargs_b)
+    bWu = pbu.kernel(a, **kwargs_a)
     bWv = pbv.kernel(a, **kwargs_b)
     N = H_inv * aWu * aWv * bWu * bWv/chi**6
 
