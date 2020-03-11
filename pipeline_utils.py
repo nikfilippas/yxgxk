@@ -269,11 +269,12 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
     # Get models
     models_a = p.get_models()[f11.name]
     models_b = p.get_models()[f12.name]
+    models_b = models_a if models_b is None else models_b
 
     dcov = hm_ang_1h_covariance(fsky, leff, (p11, p12), (p21, p22),
-                                zrange_a=zrange_a, zpoints_a=64,
-                                zlog_a=True, zrange_b=zrange_b, zpoints_b=64,
-                                zlog_b=True, selection=selection_func(p),
+                                zrange_a=zrange_a, zpoints_a=64, zlog_a=True,
+                                zrange_b=zrange_b, zpoints_b=64, zlog_b=True,
+                                selection=selection_func(p),
                                 kwargs_a=models_a, kwargs_b=models_b)
 
     B1 = Beam(profile_types[:2], leff, nside)
