@@ -3,6 +3,7 @@ __pycache__/
 data/
 legacy/
 other/
+output_backup/
 .spyproject/
 
 # File extensions
@@ -15,3 +16,5 @@ other/
 
 # Others
 .bashrc
+job.sh.sh
+python.sh
