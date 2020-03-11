@@ -179,8 +179,8 @@ fig.tight_layout(h_pad=0, w_pad=0)
 
 
 
-ax[0].legend(loc="upper right")
+#ax[0].legend(loc="upper right")
 
 
-# fig.savefig("comparison.pdf")
+fig.savefig("comparison.pdf")
 # plt.close()
