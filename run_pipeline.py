@@ -29,7 +29,7 @@ with open(fname) as f:
 
 
 def arg_algo(fname):
-    os.system("rm -r %s/cov_*" % out)            # remove pre-existing covars
+    os.system("rm -rf %s/cov_*" % out)           # remove pre-existing covars
     os.system("python pipeline.py %s" % fname)   # run `pipeline.py`
     os.system("python mcmc.py %s -N 0" % fname)  # run minimizer (replace bf)
     os.system("rm -r %s/cov_*" % out)            # remove temp covars
