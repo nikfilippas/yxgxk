@@ -3,18 +3,19 @@ Tidy-up the pipeline.
 """
 
 import os
-import itertools
 import copy
 import numpy as np
 from scipy.interpolate import interp1d
 from tqdm import tqdm
+import healpy as hp
 import pymaster as nmt
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
+from analysis.jackknife import JackKnife
 from model.hmcorr import HaloModCorrection
 from model.trispectrum import hm_ang_1h_covariance
-from model.profile2D import HOD, Arnaud, Lensing, types
+from model.profile2D import types
 from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import beam_hpix, beam_gaussian
 
@@ -192,20 +193,27 @@ def get_cmcm(p, f1, f2, f3, f4):
 
 
 def get_covariance(p, fa1, fa2, fb1, fb2, suffix,
-                   cla1b1, cla1b2, cla2b1, cla2b2):
+                   cla1b1=None, cla1b2=None, cla2b1=None, cla2b2=None,
+                   jk=None):
     """Checks if covariance exists; otherwise it creates it."""
     fname_cov = p.get_fname_cov(fa1, fa2, fb1, fb2, suffix)
     fname_cov_T = p.get_fname_cov(fb1, fb2, fa1, fa2, suffix)
-    outdir = os.listdir(p.get_outdir())
     print(fname_cov)
-    if (fname_cov not in outdir) and (fname_cov_T not in outdir):
+    if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
         mcm_a = get_mcm(p, fa1, fa2)
         mcm_b = get_mcm(p, fb1, fb2)
         cmcm = get_cmcm(p, fa1, fa2, fb1, fb2)
-        cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
-                                     cla1b1, cla1b2, cla2b1, cla2b2,
-                                     cwsp=cmcm)
-        cov.to_file(fname_cov)
+        if suffix != "jk":
+            cov = Covariance.from_fields(fa1, fa2, fb1, fb2, mcm_a, mcm_b,
+                                         cla1b1, cla1b2, cla2b1, cla2b2,
+                                         cwsp=cmcm)
+            cov.to_file(fname_cov)
+        else:
+            prefix1 = p.get_prefix_cls(fa1, fa2) + "_jk"
+            prefix2 = p.get_prefix_cls(fb1, fb2) + "_jk"
+            cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
+                                     fa1.name, fa2.name, fb1.name, fb2.name)
+            cov.to_file(fname_cov, n_samples=jk.npatches)
     return None
 
 
@@ -287,6 +295,21 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
     return None
 
 
+def jk_setup(p):
+    """Sets-up the Jackknives."""
+    if p.do_jk():
+        # Set union mask
+        nside = p.get_nside()
+        msk_tot = np.ones(hp.nside2npix(nside))
+        masks = p.get('masks')
+        for k in masks:
+            if k != 'mask_545':
+                msk_tot *= hp.ud_grade(hp.read_map(masks[k], verbose=False),
+                                       nside_out=nside)
+        # Set jackknife regions
+        jk = JackKnife(p.get('jk')['nside'], msk_tot)
+        return jk
+
 
 def get_cov(p, fields, xcorr, mcorr):
     """Computes the covariance of a pair of twopoints."""
@@ -315,6 +338,36 @@ def get_cov(p, fields, xcorr, mcorr):
                 if (f11.name == f21.name) and (f12.name == f22.name):
                     get_1h_covariance(p, fields, xcorr,
                                       f11, f12, f21, f22)
+                # jackknife
+                if p.do_jk():
+                    '''
+                    ## English is weird ##
+                    ordinals = dict.fromkeys(range(10), 'th')
+                    for N, c in zip([1,2,3], ['st','nd','rd']): ordinals[N] = c
+                    suffix = 'th' if jk_id in [11,12,13] else ordinals[(jk_id+1)%10]
+                    print("%d%s JK sample out of %d" % (jk_id+1, suffix, jk.npatches))
+                    '''
+                    # codegolf way to get the same result
+                    S=lambda n:str(n)+'tsnrhtdd'[n%5*(n%100^15>4>n%10)::4]  # 54 bytes!
+                    # https://stackoverflow.com/questions/9647202/ordinal-numbers-replacement
+
+                    jk = jk_setup(p)
+                    for jk_id in tqdm(range(jk.npatches), desc="Jackknives"):
+
+                        if np.any(["jk%d" %jk_id in x
+                                   for x in os.listdir(p.get_outdir())]):
+                            print("Found %d" % (jk_id+1))
+                            continue
+                        print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
+
+                        msk = jk.get_jk_mask(jk_id)
+                        for ff in fields: fields[ff][0].update_field(msk)
+                        get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
+                        # Cleanup MCMs
+                        if not p.get('jk')['store_mcm']:
+                            os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
+                            get_covariance(p, fields[tr11][0], fields[tr12][0],
+                                           fields[tr21][0], fields[tr22][0], 'jk', jk=jk)
 
 
     return None
