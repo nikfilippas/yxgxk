@@ -147,7 +147,7 @@ if p.do_jk():
                                          fy.name, fd.name, fy.name, fd.name)
             cov.to_file(fname_out, n_samples=jk.npatches)
     print("OK")
-"""
+
     # Joint covariances
     print("Joint covariances...", end="")
     for fg in fields_g:
