@@ -85,7 +85,7 @@ class Covariance(object):
             fname (str): path to output file, including the `.npz`
                 suffix. The covariance can be read by reading this
                 file and retrieving the field with key \'cov\'.
-            nsamples (int): if this covariance matrix was computed
+            n_samples (int): if this covariance matrix was computed
                 from a set of samples, pass the number of samples
                 used.
         """
