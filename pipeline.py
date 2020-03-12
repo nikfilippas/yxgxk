@@ -49,79 +49,34 @@ if p.do_jk():
 
 
 
-# '''
-g_names = ["2mpz"] + ["wisc%d" % d for d in range(1, 6)]
-y_names = ["y_milca", "y_nilc"]
-k_names = ["lens"]
-d_names = ["dust_545"]
-
-fields_g = [fields[x][0] for x in g_names]
-fields_y = [fields[x][0] for x in y_names]
-fields_k = [fields[x][0] for x in k_names]
-fields_d = [fields[x][0] for x in d_names]
-
 # Do jackknife
 if p.do_jk():
     for jk_id in tqdm(range(jk.npatches), desc="Jackknives"):
-        if os.path.isfile(p.get_fname_cls(fields_y[-1],
-                                          fields_y[-1],
-                                          jk_region=jk_id)):
-            # print("Found %d" % (jk_id + 1))
+        if np.any(["jk%d" %jk_id in x for x in os.listdir(p.get_outdir())]):
+            print("Found %d" % (jk_id+1))
             continue
-        print("%d-th JK sample out of %d" % (jk_id + 1, jk.npatches))
-        msk = jk.get_jk_mask(jk_id)
-        # Update field
-        for fg in fields_g:
-#            print(" " + fg.name)
-            fg.update_field(msk)
-        for fy in fields_y:
-#            print(" " + fy.name)
-            fy.update_field(msk)
-        for fd in fields_d:
-#            print(" " + fy.name)
-            fd.update_field(msk)
 
-        # Compute spectra
-        # gg
-        for fg in fields_g:
-            pu.get_power_spectrum(p, fg, fg, jk_region=jk_id, save_windows=False)
-        # gy
-        for fy in fields_y:
-            for fg in fields_g:
-                pu.get_power_spectrum(p, fy, fg, jk_region=jk_id, save_windows=False)
-        # yy
-        for fy in fields_y:
-            pu.get_power_spectrum(p, fy, fy, jk_region=jk_id, save_windows=False)
-        # dy
-        for fy in fields_y:
-            for fd in fields_d:
-                pu.get_power_spectrum(p, fy, fd, jk_region=jk_id, save_windows=False)
-        # dg
-        for fg in fields_g:
-            for fd in fields_d:
-                pu.get_power_spectrum(p, fg, fd, jk_region=jk_id, save_windows=False)
-        # dd
-        for fd in fields_d:
-            pu.get_power_spectrum(p, fd, fd, jk_region=jk_id, save_windows=False)
-        # gk
-        for fk in fields_k:
-            for fg in fields_g:
-                pu.get_power_spectrum(p, fk, fg, jk_region=jk_id, save_windows=False)
-        # kk
-        for fk in fields_k:
-            pu.get_power_spectrum(p, fk, fk, jk_region=jk_id, save_windows=False)
-        # dk
-        for fk in fields_k:
-            for fd in fields_d:
-                pu.get_power_spectrum(p, fk, fd, jk_region=jk_id, save_windows=False)
-        # yk
-        for fk in fields_k:
-            for fy in fields_y:
-                pu.get_power_spectrum(p, fk, fy, jk_region=jk_id, save_windows=False)
+        '''
+        # English is weird
+        ordinals = dict.fromkeys(range(10), 'th')
+        for N, c in zip([1,2,3], ['st','nd','rd']): ordinals[N] = c
+        suffix = 'th' if jk_id in [11,12,13] else ordinals[(jk_id+1)%10]
+        print("%d%s JK sample out of %d" % (jk_id+1, suffix, jk.npatches))
+        '''
+        # codegolf way to get the same result
+        S=lambda n:str(n)+'tsnrhtdd'[n%5*(n%100^15>4>n%10)::4]  # 54 bytes!
+        # https://stackoverflow.com/questions/9647202/ordinal-numbers-replacement
+        print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
+
+
+        msk = jk.get_jk_mask(jk_id)
+        [fields[ff][0].update_field(msk) for ff in fields]
+        pu.get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
 
         # Cleanup MCMs
         if not p.get('jk')['store_mcm']:
             os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
+
 
 """
     # Get covariances
@@ -192,7 +147,7 @@ if p.do_jk():
                                          fy.name, fd.name, fy.name, fd.name)
             cov.to_file(fname_out, n_samples=jk.npatches)
     print("OK")
-
+"""
     # Joint covariances
     print("Joint covariances...", end="")
     for fg in fields_g:
@@ -275,3 +230,66 @@ if p.do_jk():
             cvm_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'model_4pt'))
     print("OK")
 """
+
+# IMPLEMENTED
+# g_names = ["2mpz"] + ["wisc%d" % d for d in range(1, 6)]
+# y_names = ["y_milca", "y_nilc"]
+# k_names = ["lens"]
+# d_names = ["dust_545"]
+
+# fields_g = [fields[x][0] for x in g_names]
+# fields_y = [fields[x][0] for x in y_names]
+# fields_k = [fields[x][0] for x in k_names]
+# fields_d = [fields[x][0] for x in d_names]
+
+
+        # Update field
+#         for fg in fields_g:
+# #            print(" " + fg.name)
+#             fg.update_field(msk)
+#         for fy in fields_y:
+# #            print(" " + fy.name)
+#             fy.update_field(msk)
+#         for fd in fields_d:
+# #            print(" " + fy.name)
+#             fd.update_field(msk)
+
+
+
+        # # Compute spectra
+        # # gg
+        # for fg in fields_g:
+        #     pu.get_power_spectrum(p, fg, fg, jk_region=jk_id, save_windows=False)
+        # # gy
+        # for fy in fields_y:
+        #     for fg in fields_g:
+        #         pu.get_power_spectrum(p, fy, fg, jk_region=jk_id, save_windows=False)
+        # # yy
+        # for fy in fields_y:
+        #     pu.get_power_spectrum(p, fy, fy, jk_region=jk_id, save_windows=False)
+        # # dy
+        # for fy in fields_y:
+        #     for fd in fields_d:
+        #         pu.get_power_spectrum(p, fy, fd, jk_region=jk_id, save_windows=False)
+        # # dg
+        # for fg in fields_g:
+        #     for fd in fields_d:
+        #         pu.get_power_spectrum(p, fg, fd, jk_region=jk_id, save_windows=False)
+        # # dd
+        # for fd in fields_d:
+        #     pu.get_power_spectrum(p, fd, fd, jk_region=jk_id, save_windows=False)
+        # # gk
+        # for fk in fields_k:
+        #     for fg in fields_g:
+        #         pu.get_power_spectrum(p, fk, fg, jk_region=jk_id, save_windows=False)
+        # # kk
+        # for fk in fields_k:
+        #     pu.get_power_spectrum(p, fk, fk, jk_region=jk_id, save_windows=False)
+        # # dk
+        # for fk in fields_k:
+        #     for fd in fields_d:
+        #         pu.get_power_spectrum(p, fk, fd, jk_region=jk_id, save_windows=False)
+        # # yk
+        # for fk in fields_k:
+        #     for fy in fields_y:
+        #         pu.get_power_spectrum(p, fk, fy, jk_region=jk_id, save_windows=False)
