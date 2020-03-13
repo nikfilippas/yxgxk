@@ -25,14 +25,11 @@ pu.get_cov(p, fields, xcorr, mcorr,
 
 # Jackknives
 if args.jk:
-    pu.get_cov(p, fields, )
-
-JK = pu.jk_setup(p)
-
-print("Comuting jackknives...")
-for jk_id in range(JK.npatches):
-    pu.get_jk_xcorr(p, fields, JK, jk_id)
-pu.get_jk_cov(p, fields, JK)
+    print("Comuting jackknives...")
+    JK = pu.jk_setup(p)
+    for jk_id in range(JK.npatches):
+        pu.get_jk_xcorr(p, fields, JK, jk_id)
+    pu.get_jk_cov(p, fields, JK)
 
 
 
