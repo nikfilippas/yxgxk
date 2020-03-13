@@ -1,6 +1,6 @@
-import sys
 from argparse import ArgumentParser
 import numpy as np
+import pipeline_utils as pu
 from analysis.params import ParamRun
 from likelihood.yaml_handler import update_params, update_nsteps
 from likelihood.like import Likelihood
@@ -8,12 +8,12 @@ from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
 from model.hmcorr import HaloModCorrection
-from model.utils import selection_planck_erf, selection_planck_tophat
 
 
 parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
 parser.add_argument("-N", "--nsteps", help="MCMC steps", type=int)
+parser.add_argument("--jk", action="store_false", type=int, help="JK region")
 args = parser.parse_args()
 fname_params = args.fname_params
 if args.nsteps:
@@ -24,23 +24,12 @@ p = ParamRun(fname_params)
 kwargs = p.get_cosmo_pars()
 
 # Jackknives
-try:
-    # sys.argv = ['mcmc.py', 'params.yml', nsteps, jk_region]
-    jk_region = int(sys.argv[3])  # TODO: see pointers and fix this
-except IndexError:
-    jk_region = None
+jk_region = args.jk if args.jk is not False else None
 
 
 
-# Include selection function if needed
-sel = p.get('mcmc').get('selection_function')
-if sel is not None:
-    if sel == 'erf':
-        sel = selection_planck_erf
-    elif sel == 'tophat':
-        sel = selection_planck_tophat
-    elif sel == 'none':
-        sel = None
+sel = pu.selection_func(p)
+hm_correction = HaloModCorrection if p.get("mcmc").get("hm_correct") else None
 
 par = []
 for v in p.get('data_vectors'):
@@ -52,11 +41,7 @@ for v in p.get('data_vectors'):
     # Theory predictor wrapper
     def th(kwargs):
         d = DataManager(p, v, jk_region=jk_region, **kwargs)
-        # Include halo model correction if needed
-        if p.get('mcmc').get('hm_correct'):
-            hm_correction = HaloModCorrection
-        else:
-            hm_correction = None
+
         return get_theory(p, d,
                           hm_correction=hm_correction,
                           selection=sel,
