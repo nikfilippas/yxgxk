@@ -343,7 +343,6 @@ def get_cov(p, fields, xcorr, mcorr):
                     get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22)
                 # jackknife
                 if p.do_jk():
-                    print("doing JKs")
                     '''
                     ## English is weird ##
                     ordinals = dict.fromkeys(range(10), 'th')
