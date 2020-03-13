@@ -302,7 +302,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
 def jk_setup(p):
     """Sets-up the Jackknives."""
     if p.do_jk():
-        # Set union mask  # TODO: should we have a union mask or different masks?
+        # Set union mask
         nside = p.get_nside()
         msk_tot = np.ones(hp.nside2npix(nside))
         masks = p.get('masks')
@@ -315,7 +315,8 @@ def jk_setup(p):
         return jk
 
 
-def get_cov(p, fields, xcorr, mcorr):
+def get_cov(p, fields, xcorr, mcorr,
+            data=True, model=True, trispectrum=True, jackknife=True):
     """Computes the covariance of a pair of twopoints."""
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:
@@ -324,25 +325,23 @@ def get_cov(p, fields, xcorr, mcorr):
             for tp2 in dv["twopoints"]:
                 tr21, tr22 = tp2["tracers"]
                 f21, f22 = fields[tr21][0], fields[tr22][0]
-                # data
-                get_covariance(p, fields[tr11][0], fields[tr12][0],
-                               fields[tr21][0], fields[tr22][0], 'data',
-                               interpolate_spectra(p, xcorr[tr11][tr21]),
-                               interpolate_spectra(p, xcorr[tr11][tr22]),
-                               interpolate_spectra(p, xcorr[tr12][tr21]),
-                               interpolate_spectra(p, xcorr[tr12][tr22]))
-                # model
-                get_covariance(p, fields[tr11][0], fields[tr12][0],
-                               fields[tr21][0], fields[tr22][0], 'model',
-                               interpolate_spectra(p, mcorr[tr11][tr21]),
-                               interpolate_spectra(p, mcorr[tr11][tr22]),
-                               interpolate_spectra(p, mcorr[tr12][tr21]),
-                               interpolate_spectra(p, mcorr[tr12][tr22]))
-                # trispectrum
-                if (f11.name == f21.name) and (f12.name == f22.name):
+                if data:
+                    get_covariance(p, fields[tr11][0], fields[tr12][0],
+                                   fields[tr21][0], fields[tr22][0], 'data',
+                                   interpolate_spectra(p, xcorr[tr11][tr21]),
+                                   interpolate_spectra(p, xcorr[tr11][tr22]),
+                                   interpolate_spectra(p, xcorr[tr12][tr21]),
+                                   interpolate_spectra(p, xcorr[tr12][tr22]))
+                if model:
+                    get_covariance(p, fields[tr11][0], fields[tr12][0],
+                                   fields[tr21][0], fields[tr22][0], 'model',
+                                   interpolate_spectra(p, mcorr[tr11][tr21]),
+                                   interpolate_spectra(p, mcorr[tr11][tr22]),
+                                   interpolate_spectra(p, mcorr[tr12][tr21]),
+                                   interpolate_spectra(p, mcorr[tr12][tr22]))
+                if trispectrum:
                     get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22)
-                # jackknife
-                if p.do_jk():
+                if jackknife and p.do_jk():
                     '''
                     ## English is weird ##
                     ordinals = dict.fromkeys(range(10), 'th')
@@ -365,8 +364,9 @@ def get_cov(p, fields, xcorr, mcorr):
                         print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
 
                         msk = jk.get_jk_mask(jk_id)
-                        print("mask done")
-                        for ff in fields: fields[ff][0].update_field(msk)
+                        for ff in fields:
+                            print("updating mask for %s" % ff)
+                            fields[ff][0].update_field(msk)
                         print("fields updated")
                         get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
                         print("xcorr done")
