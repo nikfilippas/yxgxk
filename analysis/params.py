@@ -170,7 +170,7 @@ class ParamRun(object):
         return fname
 
 
-    def get_fname_cov(self, f1, f2, f3, f4, suffix):
+    def get_fname_cov(self, f1, f2, f3, f4, suffix, trispectrum=False):
         """
         Get file name for the the covariance matrix of power spectra
         involving 4 fields (f1-4).
@@ -184,11 +184,10 @@ class ParamRun(object):
         Returns:
             str: sampler file prefix
         """
-        fname = self.get_outdir()+"/cov_"+suffix+"_"
-        fname += f1.name+"_"
-        fname += f2.name+"_"
-        fname += f3.name+"_"
-        fname += f4.name+".npz"
+        prefix = "/cov_" if not trispectrum else "/dcov_"
+        fname = self.get_outdir()+prefix+suffix+"_"
+        fname += "_".join([f1.name, f2.name, f3.name, f4.name])
+        fname += ".npz"
         return fname
 
 
