@@ -256,49 +256,53 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                       zpoints_a=64, zlog_a=True,
                       zpoints_b=64, zlog_b=True):
     """Computes and saves the 1-halo covariance."""
-    # Global parameters
-    nside = p.get_nside()
-    leff = xcorr[f11.name][f11.name].leff
-    # Set-up profiles
-    flds = [f11, f12, f21, f22]
-    profile_types = [fields[F.name][1] for F in flds]
-    profiles = [types[x] for x in profile_types]
-    for i, (pr, pt, fd) in enumerate(zip(profiles, profile_types, flds)):
-        if pt == 'g':
-            profiles[i] = pr(nz_file=fd.dndz)
-        else:
-            profiles[i] = pr()
-    p11, p12, p21, p22 = profiles
+    fname_cov = p.get_fname_cov(f11, f12, f21, f22, "1h4pt", trispectrum=True)
+    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, "1h4pt", trispectrum=True)
+    print(fname_cov)
+    if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
+        # Global parameters
+        nside = p.get_nside()
+        leff = xcorr[f11.name][f11.name].leff
+        # Set-up profiles
+        flds = [f11, f12, f21, f22]
+        profile_types = [fields[F.name][1] for F in flds]
+        profiles = [types[x] for x in profile_types]
+        for i, (pr, pt, fd) in enumerate(zip(profiles, profile_types, flds)):
+            if pt == 'g':
+                profiles[i] = pr(nz_file=fd.dndz)
+            else:
+                profiles[i] = pr()
+        p11, p12, p21, p22 = profiles
 
-    # Additional parameters
-    fsky = np.mean(f11.mask*f12.mask*f21.mask*f22.mask)
-    zrange_a = get_zrange(fields, f11, f12)
-    zrange_b = get_zrange(fields, f21, f22)
-    # Get models
-    models_a = p.get_models()[f11.name]
-    models_b = p.get_models()[f12.name]
-    models_b = models_a if models_b is None else models_b
+        # Additional parameters
+        fsky = np.mean(f11.mask*f12.mask*f21.mask*f22.mask)
+        zrange_a = get_zrange(fields, f11, f12)
+        zrange_b = get_zrange(fields, f21, f22)
+        # Get models
+        models_a = p.get_models()[f11.name]
+        models_b = p.get_models()[f12.name]
+        models_b = models_a if models_b is None else models_b
 
-    dcov = hm_ang_1h_covariance(fsky, leff, (p11, p12), (p21, p22),
-                                zrange_a=zrange_a, zpoints_a=64, zlog_a=True,
-                                zrange_b=zrange_b, zpoints_b=64, zlog_b=True,
-                                selection=selection_func(p),
-                                kwargs_a=models_a, kwargs_b=models_b)
+        dcov = hm_ang_1h_covariance(fsky, leff, (p11, p12), (p21, p22),
+                                    zrange_a=zrange_a, zpoints_a=64, zlog_a=True,
+                                    zrange_b=zrange_b, zpoints_b=64, zlog_b=True,
+                                    selection=selection_func(p),
+                                    kwargs_a=models_a, kwargs_b=models_b)
 
-    B1 = Beam(profile_types[:2], leff, nside)
-    B2 = Beam(profile_types[2:], leff, nside)
-    dcov *= B1[:, None]*B2[None, :]
-    cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
-    cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
-                f11.name + "_" + f12.name + "_" +
-                f21.name + "_" + f22.name + ".npz")
+        B1 = Beam(profile_types[:2], leff, nside)
+        B2 = Beam(profile_types[2:], leff, nside)
+        dcov *= B1[:, None]*B2[None, :]
+        cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
+        cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
+                    f11.name + "_" + f12.name + "_" +
+                    f21.name + "_" + f22.name + ".npz")
     return None
 
 
 def jk_setup(p):
     """Sets-up the Jackknives."""
     if p.do_jk():
-        # Set union mask
+        # Set union mask  # TODO: should we have a union mask or different masks?
         nside = p.get_nside()
         msk_tot = np.ones(hp.nside2npix(nside))
         masks = p.get('masks')
@@ -334,12 +338,12 @@ def get_cov(p, fields, xcorr, mcorr):
                                interpolate_spectra(p, mcorr[tr11][tr22]),
                                interpolate_spectra(p, mcorr[tr12][tr21]),
                                interpolate_spectra(p, mcorr[tr12][tr22]))
-
+                # trispectrum
                 if (f11.name == f21.name) and (f12.name == f22.name):
-                    get_1h_covariance(p, fields, xcorr,
-                                      f11, f12, f21, f22)
+                    get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22)
                 # jackknife
                 if p.do_jk():
+                    print("doing JKs")
                     '''
                     ## English is weird ##
                     ordinals = dict.fromkeys(range(10), 'th')
@@ -358,11 +362,15 @@ def get_cov(p, fields, xcorr, mcorr):
                                    for x in os.listdir(p.get_outdir())]):
                             print("Found %d" % (jk_id+1))
                             continue
+
                         print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
 
                         msk = jk.get_jk_mask(jk_id)
+                        print("mask done")
                         for ff in fields: fields[ff][0].update_field(msk)
+                        print("fields updated")
                         get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
+                        print("xcorr done")
                         # Cleanup MCMs
                         if not p.get('jk')['store_mcm']:
                             os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
