@@ -6,6 +6,7 @@ from analysis.params import ParamRun
 
 parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
+parser.add_argument("--jk", action="store_false")
 args = parser.parse_args()
 fname_params = args.fname_params
 
@@ -19,7 +20,20 @@ xcorr = pu.get_xcorr(p, fields); print("OK")
 print("Generating theory power spectra")
 mcorr = pu.model_xcorr(p, fields, xcorr)
 print("Computing covariances...")
-pu.get_cov(p, fields, xcorr, mcorr)
+pu.get_cov(p, fields, xcorr, mcorr,
+           data=True, model=True, trispectrum=True, jackknife=False)
+
+# Jackknives
+if args.jk:
+    pu.get_cov(p, fields, )
+
+JK = pu.jk_setup(p)
+
+print("Comuting jackknives...")
+for jk_id in range(JK.npatches):
+    pu.get_jk_xcorr(p, fields, JK, jk_id)
+pu.get_jk_cov(p, fields, JK)
+
 
 
 
