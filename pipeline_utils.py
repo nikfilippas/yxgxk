@@ -326,55 +326,73 @@ def get_cov(p, fields, xcorr, mcorr,
                 tr21, tr22 = tp2["tracers"]
                 f21, f22 = fields[tr21][0], fields[tr22][0]
                 if data:
-                    get_covariance(p, fields[tr11][0], fields[tr12][0],
-                                   fields[tr21][0], fields[tr22][0], 'data',
+                    get_covariance(p, f11, f12, f21, f22, 'data',
                                    interpolate_spectra(p, xcorr[tr11][tr21]),
                                    interpolate_spectra(p, xcorr[tr11][tr22]),
                                    interpolate_spectra(p, xcorr[tr12][tr21]),
                                    interpolate_spectra(p, xcorr[tr12][tr22]))
-                if model:
-                    get_covariance(p, fields[tr11][0], fields[tr12][0],
-                                   fields[tr21][0], fields[tr22][0], 'model',
+                if model and (mcorr is not None):
+                    get_covariance(p, f11, f12, f21, f22, 'model',
                                    interpolate_spectra(p, mcorr[tr11][tr21]),
                                    interpolate_spectra(p, mcorr[tr11][tr22]),
                                    interpolate_spectra(p, mcorr[tr12][tr21]),
                                    interpolate_spectra(p, mcorr[tr12][tr22]))
                 if trispectrum:
                     get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22)
-                if jackknife and p.do_jk():
-                    '''
-                    ## English is weird ##
-                    ordinals = dict.fromkeys(range(10), 'th')
-                    for N, c in zip([1,2,3], ['st','nd','rd']): ordinals[N] = c
-                    suffix = 'th' if jk_id in [11,12,13] else ordinals[(jk_id+1)%10]
-                    print("%d%s JK sample out of %d" % (jk_id+1, suffix, jk.npatches))
-                    '''
-                    # codegolf way to get the same result
-                    S=lambda n:str(n)+'tsnrhtdd'[n%5*(n%100^15>4>n%10)::4]  # 54 bytes!
-                    # https://stackoverflow.com/questions/9647202/ordinal-numbers-replacement
-
-                    jk = jk_setup(p)
-                    for jk_id in tqdm(range(jk.npatches), desc="Jackknives"):
-
-                        if np.any(["jk%d" %jk_id in x
-                                   for x in os.listdir(p.get_outdir())]):
-                            print("Found %d" % (jk_id+1))
-                            continue
-
-                        print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
-
-                        msk = jk.get_jk_mask(jk_id)
-                        for ff in fields:
-                            print("updating mask for %s" % ff)
-                            fields[ff][0].update_field(msk)
-                        print("fields updated")
-                        get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
-                        print("xcorr done")
-                        # Cleanup MCMs
-                        if not p.get('jk')['store_mcm']:
-                            os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
-                            get_covariance(p, fields[tr11][0], fields[tr12][0],
-                                           fields[tr21][0], fields[tr22][0], 'jk', jk=jk)
-
-
     return None
+
+
+def get_jk_xcorr(p, fields, jk, jk_id):
+    """
+    Calculates the jackknife cross-correlation from the yaml file.
+
+    ## English is weird ##
+    ordinals = dict.fromkeys(range(10), 'th')
+    for N, c in zip([1,2,3], ['st','nd','rd']): ordinals[N] = c
+    suffix = 'th' if jk_id in [11,12,13] else ordinals[(jk_id+1)%10]
+    print("%d%s JK sample out of %d" % (jk_id+1, suffix, jk.npatches))
+
+    Codegolf way to get the same result: defined function `S` below.
+    https://stackoverflow.com/questions/9647202/ordinal-numbers-replacement
+    """
+    S=lambda n:str(n)+'tsnrhtdd'[n%5*(n%100^15>4>n%10)::4]  # 54 bytes!
+
+    if not p.do_jk():
+        print('`do_jk` set to `False` in the parameters file. Exiting.')
+        return None
+
+    for dv in p.get("data_vectors"):
+        for tp1 in dv["twopoints"]:
+            for tp2 in dv["twopoints"]:
+
+                # check if jackknife exists; continue if it does
+                if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
+                    print("Found %d" % (jk_id+1))
+                    return None
+
+                print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
+                msk = jk.get_jk_mask(jk_id)
+                for ff in fields:
+                    print("updating mask for %s" % ff)
+                    fields[ff][0].update_field(msk)
+                print("fields updated")
+                get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
+                print("xcorr done")
+                # Cleanup MCMs
+                if not p.get('jk')['store_mcm']:
+                    os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
+    return None
+
+
+def get_jk_cov(p, fields, jk):
+    """Gives an estimate of the covariance using defined jackknife regions."""
+    for dv in p.get("data_vectors"):
+        for tp1 in dv["twopoints"]:
+            tr11, tr12 = tp1["tracers"]
+            f11, f12 = fields[tr11][0], fields[tr12][0]
+            for tp2 in dv["twopoints"]:
+                tr21, tr22 = tp2["tracers"]
+                f21, f22 = fields[tr21][0], fields[tr22][0]
+                get_covariance(p, f11, f12, f21, f22, 'jk', jk=jk)
+    return None
+
