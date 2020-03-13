@@ -7,6 +7,7 @@ Handles running the MCMC.
       * runs the minimizer to find best-fit values;
       * replaces the best-fit values in params.yml;
       * runs `mcmc.py` for the full MCMC.
+  - `--jk`   : runs from the jackknives only (e.g. parameter error estimation)
 """
 
 import os
@@ -17,6 +18,7 @@ parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
 parser.add_argument("--full", help="run, update parameters and run again?",
                     action="store_true")
+parser.add_argument("--jk", action="store_true")
 
 args = parser.parse_args()
 
@@ -28,5 +30,7 @@ if args.full:
     os.system("python mcmc.py %s -N 0" % fname)
     if nsteps > 0:
         os.system("python mcmc.py %s -N %d" % (fname, nsteps))
+elif args.jk:
+    os.system("python mcmc.py %s --jk" % fname)
 else:
     os.system("python mcmc.py %s" % fname)
