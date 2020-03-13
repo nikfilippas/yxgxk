@@ -1,6 +1,5 @@
 from __future__ import print_function
 import os
-import numpy as np
 from argparse import ArgumentParser
 import pipeline_utils as pu
 from analysis.params import ParamRun
