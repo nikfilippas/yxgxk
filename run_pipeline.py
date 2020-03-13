@@ -8,6 +8,7 @@ Handles running the pipeline (measuring Cells & computing covar matrices).
       * runs minimizer and replaces best-fit values in `params.yml`;
       * re-runs `pipeline.py` replacing with more accurate covar matrices.
   - `--full`  : runs `--covar` and then `run_mcmc.py --full` (full analysis).
+  - `--jk`    : runs `pipeline.py` only for the Jackknife covariance.
 """
 
 import os
@@ -19,6 +20,7 @@ parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
 parser.add_argument("--covar", action="store_true")
 parser.add_argument("--full", action="store_true")
+parser.add_argument("--jk", action="store_true")
 
 args = parser.parse_args()
 fname = args.fname_params
@@ -46,5 +48,7 @@ if args.covar:
 elif args.full:
     arg_algo(fname)
     os.system("python run_mcmc.py --full")
+elif args.jk:
+    os.system("python pipeline.py %s --jk" % fname)
 else:
     os.system("python pipeline.py %s" % fname)
