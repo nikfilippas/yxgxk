@@ -80,6 +80,7 @@ LSD[2][5] = np.load("output_default/cls_wisc5_lens.npz")
 L = np.geomspace(6, 3000, 50)
 from model.power_spectrum import hm_ang_power_spectrum
 from model.profile2D import HOD, Arnaud, Lensing
+import pipeline_utils as pu
 g = []
 g.append(HOD(nz_file="data/dndz/2MPZ_bin1.txt"))
 for i in range(5):
@@ -109,14 +110,17 @@ for i in range(6):
                                      hm_correction=hm_correction,
                                      z_range=z_range, zpoints=64,
                                      **{**kwargs[i], **cosmo_pars})
+    TT[0][i] *= pu.Beam(("g", "g"), L, 2048)
     TT[1][i] = hm_ang_power_spectrum(L, (y, g[i]),
                                      hm_correction=hm_correction,
                                      z_range=[1e-6, 6], zpoints=64,
                                      **{**kwargs[i], **cosmo_pars})
+    TT[1][i] *= pu.Beam(("g", "y"), L, 2048)
     TT[2][i] = hm_ang_power_spectrum(L, (k, g[i]),
                                      hm_correction=hm_correction,
                                      z_range=[1e-6, 6],
                                      **{**kwargs[i], **cosmo_pars})
+    TT[2][i] *= pu.Beam(("g", "k"), L, 2048)
 
 
 
@@ -183,4 +187,4 @@ fig.tight_layout(h_pad=0, w_pad=0)
 
 
 fig.savefig("comparison.pdf")
-# plt.close()
+plt.close()
