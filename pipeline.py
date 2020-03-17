@@ -16,7 +16,7 @@ p = ParamRun(fname_params)
 os.system('mkdir -p ' + p.get_outdir())
 fields = pu.read_fields(p)
 
-if not args.jk_id:
+if args.jk_id is not None:
     print("Computing power spectra...", end="")
     xcorr = pu.get_xcorr(p, fields); print("OK")
     print("Generating theory power spectra")
@@ -30,8 +30,9 @@ if args.jk_id:
     jk_id = args.jk_id
     print("Comuting jackknives...")
     JK = pu.jk_setup(p)
+    print("JK object computed")
     pu.get_jk_xcorr(p, fields, JK, jk_id)
-    pu.get_jk_cov(p, fields, JK)
+    #pu.get_jk_cov(p, fields, JK)
 
 
 
