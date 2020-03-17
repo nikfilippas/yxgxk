@@ -12,11 +12,11 @@ from model.hmcorr import HaloModCorrection
 
 parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
-parser.add_argument("-N", "--nsteps", help="MCMC steps", type=int)
-parser.add_argument("--jk", action="store_false", type=int, help="JK region")
+parser.add_argument("--nsteps", help="MCMC steps", type=int)
+parser.add_argument("--jk-id", action="store_true", type=int, help="JK region")
 args = parser.parse_args()
 fname_params = args.fname_params
-if args.nsteps:
+if args.nsteps is not None:
     update_nsteps(fname_params, args.nsteps)
     print("Updated MCMC to %d steps." % args.nsteps)
 
@@ -24,9 +24,7 @@ p = ParamRun(fname_params)
 kwargs = p.get_cosmo_pars()
 
 # Jackknives
-jk_region = args.jk if args.jk is not False else None
-
-
+jk_region = args.jk_id
 
 sel = pu.selection_func(p)
 hm_correction = HaloModCorrection if p.get("mcmc").get("hm_correct") else None
