@@ -13,8 +13,9 @@ output_backup/
 *.npz
 *.mcm
 *.cmcm
+*.out
 
 # Others
 .bashrc
-job.sh.sh
+job*.sh.sh
 python.sh
