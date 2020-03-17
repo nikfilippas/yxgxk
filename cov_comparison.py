@@ -2,6 +2,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 zbins = ["2mpz"] + ["wisc%d" % i for i in range(1, 6)]
+zbins = None
 
 
 def diff_cov(string):
@@ -39,4 +40,4 @@ for zbin in zbins:
 ax[0].set_ylabel("delta_cov_gg")
 ax[1].set_ylabel("delta_cov_gy")
 plt.legend(loc="best", ncol=2)
-plt.savefig("comparison_cov.pdf")
+plt.savefig("comparison_cov_overplot_data.pdf")
