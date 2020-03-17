@@ -39,3 +39,4 @@ for zbin in zbins:
 ax[0].set_ylabel("delta_cov_gg")
 ax[1].set_ylabel("delta_cov_gy")
 plt.legend(loc="best", ncol=2)
+plt.savefig("comparison_cov.pdf")
