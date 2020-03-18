@@ -299,24 +299,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
     return None
 
 
-def jk_setup(p):
-    """Sets-up the Jackknives."""
-    if p.do_jk():
-        # Set union mask
-        nside = p.get_nside()
-        msk_tot = np.ones(hp.nside2npix(nside))
-        masks = p.get('masks')
-        for k in masks:
-            if k != 'mask_545':
-                msk_tot *= hp.ud_grade(hp.read_map(masks[k], verbose=False),
-                                       nside_out=nside)
-        # Set jackknife regions
-        jk = JackKnife(p.get('jk')['nside'], msk_tot)
-        return jk
-
-
-def get_cov(p, fields, xcorr, mcorr,
-            data=True, model=True, trispectrum=True, jackknife=True):
+def get_cov(p, fields, xcorr, mcorr, data=True, model=True, trispectrum=True):
     """Computes the covariance of a pair of twopoints."""
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:
@@ -340,6 +323,22 @@ def get_cov(p, fields, xcorr, mcorr,
                 if trispectrum:
                     get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22)
     return None
+
+
+def jk_setup(p):
+    """Sets-up the Jackknives."""
+    if p.do_jk():
+        # Set union mask
+        nside = p.get_nside()
+        msk_tot = np.ones(hp.nside2npix(nside))
+        masks = p.get('masks')
+        for k in masks:
+            if k != 'mask_545':
+                msk_tot *= hp.ud_grade(hp.read_map(masks[k], verbose=False),
+                                       nside_out=nside)
+        # Set jackknife regions
+        jk = JackKnife(p.get('jk')['nside'], msk_tot)
+        return jk
 
 
 def get_jk_xcorr(p, fields, jk, jk_id):
