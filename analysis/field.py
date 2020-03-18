@@ -77,7 +77,7 @@ class Field(object):
                     t = hp.ud_grade(hp.read_map(sname, verbose=False),
                                     nside_out=nside)
                     t_mean = np.sum(t * self.mask)/np.sum(self.mask)
-                    temp.append([mask_bn * (t- t_mean)])
+                    temp.append([mask_bn * (t-t_mean)])
 
         # Generate NmtField
         self.field = nmt.NmtField(self.mask, [map], templates=temp)
@@ -93,8 +93,5 @@ class Field(object):
         Args:
             new_mask (float or array): new mask.
         """
-        maps = self.field.get_maps()
-        templates = self.field.get_templates()
-        self.field = None  # gbc clears variable before new assignment
-        self.field = nmt.NmtField(self.mask * new_mask, maps,
-                                  templates=templates)
+        self.field = nmt.NmtField(self.mask * new_mask, self.field.get_maps(),
+                                  templates=self.field.get_templates())
