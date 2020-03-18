@@ -372,11 +372,8 @@ def get_jk_xcorr(p, fields, jk, jk_id):
                 print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
                 msk = jk.get_jk_mask(jk_id)
                 for ff in fields:
-                    print("updating mask for %s" % ff)
                     fields[ff][0].update_field(msk)
-                print("fields updated")
                 get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
-                print("xcorr done")
                 # Cleanup MCMs
                 if not p.get('jk')['store_mcm']:
                     os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
