@@ -83,11 +83,11 @@ def get_power_spectrum(p, f1, f2, jk_region=None, save_windows=True):
     try:
         fname = p.get_fname_cls(f1, f2, jk_region=jk_region)
         Cls = Spectrum.from_file(fname, f1.name, f2.name)
-    except:
+    except FileNotFoundError:
         bpw = p.get_bandpowers()
         wsp = get_mcm(p, f1, f2, jk_region=jk_region)
         Cls = Spectrum.from_fields(f1, f2, bpw, wsp, save_windows=save_windows)
-        Cls.to_file(p.get_fname_cls(f1, f2, jk_region=jk_region))
+        Cls.to_file(fname)
     return Cls
 
 
@@ -366,7 +366,7 @@ def get_jk_xcorr(p, fields, jk, jk_id):
 
                 # check if jackknife exists; continue if it does
                 if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
-                    print("Found %d" % (jk_id+1))
+                    print("Found JK #%d" % (jk_id+1))
                     return None
 
                 print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
