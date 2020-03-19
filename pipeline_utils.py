@@ -360,24 +360,21 @@ def get_jk_xcorr(p, fields, jk, jk_id):
         print('`do_jk` set to `False` in the parameters file. Exiting.')
         return None
 
-    for dv in p.get("data_vectors"):
-        for tp1 in dv["twopoints"]:
-            for tp2 in dv["twopoints"]:
-                print(tp1, tp2)
+    # check if jackknife exists; continue if it does
+    if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
+        print("Found JK #%d" % (jk_id+1))
+        return None
 
-                # check if jackknife exists; continue if it does
-                if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
-                    print("Found JK #%d" % (jk_id+1))
-                    return None
+    print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
+    msk = jk.get_jk_mask(jk_id)
+    for ff in fields:
+        fields[ff][0].update_field(msk)
+    get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
 
-                print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
-                msk = jk.get_jk_mask(jk_id)
-                for ff in fields:
-                    fields[ff][0].update_field(msk)
-                get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
-                # Cleanup MCMs
-                if not p.get('jk')['store_mcm']:
-                    os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
+    # Cleanup MCMs
+    if not p.get('jk')['store_mcm']:
+        os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
+
     return None
 
 
