@@ -35,15 +35,15 @@ class Field(object):
         # Read mask
         self.mask = hp.ud_grade(hp.read_map(fname_mask, field=field_mask,
                                             verbose=False, dtype=np.float64),
-                                nside_out=nside)
+                                nside_out=nside, dtype=np.float64)
         # Read map
         map0 = hp.read_map(fname_map, field=field_map,
-                           verbose=False, dtype=np.float64)
+                           verbose=False, dtype=np.float64, partial=False)
         self.nside_original = hp.npix2nside(len(map0))
         if is_ndens:
             map0 = hp.alm2map(hp.map2alm(map0), nside, verbose=False)
         else:
-            map0 = hp.ud_grade(map0, nside_out=nside)
+            map0 = hp.ud_grade(map0, nside_out=nside, dtype=np.float64)
 
         mask_bn = np.ones_like(self.mask)
         mask_bn[self.mask <= 0] = 0  # Binary mask
@@ -77,8 +77,9 @@ class Field(object):
                         temp = []
                     t = hp.ud_grade(hp.read_map(sname,
                                                 verbose=False,
-                                                dtype=np.float64),
-                                    nside_out=nside)
+                                                dtype=np.float64,
+                                                partial=False),
+                                    nside_out=nside, dtype=np.float64)
                     t_mean = np.sum(t * self.mask)/np.sum(self.mask)
                     temp.append([mask_bn * (t-t_mean)])
 
