@@ -403,7 +403,8 @@ def load_cov(p, f11, f12, f21, f22, suffix, trispectrum=False):
         fname = fname_cov_T
         f11, f12, f21, f22 = f21, f22, f11, f12
     else:
-        print("Covariance does not exist. Calculate and save it first!")
+        msg = "Covariance does not exist. Calculate and save it first!"
+        raise FileNotFoundError(msg)
 
     cov = Covariance.from_file(fname, f11.name, f12.name, f21.name, f22.name)
     return cov
@@ -421,12 +422,27 @@ def get_joint_cov(p):
                 tr21, tr22 = tp2["tracers"]
                 f21, f22 = fields[tr21][0], fields[tr22][0]
 
+                # loading, constructing, saving
                 cov_m = load_cov(p, f11, f12, f21, f22, 'model')
                 trisp = load_cov(p, f11, f12, f21, f22, '1h4pt', trispectrum=True)
                 cov_d = load_cov(p, f11, f12, f21, f22, 'data')
                 get_jk_cov(p, fields, jk)
                 cov_j = load_cov(p, f11, f12, f21, f22, 'jk')
+                # 4-points
+                cov_m4pt = Covariance(f11.name, f12.name, f21.name, f22.name,
+                                      cov_m.covar + trisp.covar)
+                cov_m4pt.to_file(p.get_fname_cov(f11, f12, f21, f22, 'model_4pt'))
 
+                cov_d4pt = Covariance(f11.name, f12.name, f21.name, f22.name,
+                                      cov_d.covar + trisp.covar)
+                cov_d4pt.to_file(p.get_fname_cov(f11, f12, f21, f22, 'data_4pt'))
+                # joint
+                cov = Covariance.from_options([cov_m4pt, cov_d4pt, cov_j],
+                                              cov_m4pt, cov_m4pt)
+                cov.to_file(p.get_fname_cov(f11, f12, f21, f22, 'comb_m'))
 
+                cov = Covariance.from_options([cov_m4pt, cov_d4pt, cov_j],
+                                              cov_j, cov_j)
+                cov.to_file(p.get_fname_cov(f11, f12, f21, f22, 'comb_j'))
 
     return None
