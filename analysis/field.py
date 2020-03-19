@@ -33,7 +33,7 @@ class Field(object):
         self.fname_mask = fname_mask
         self.is_ndens = is_ndens  # True if this is a delta_gal map
         # Read mask
-        self.mask = hp.ud_grade(hp.read_map(fname_mask, field=field_mask
+        self.mask = hp.ud_grade(hp.read_map(fname_mask, field=field_mask,
                                             verbose=False, dtype=np.float64),
                                 nside_out=nside)
         # Read map
