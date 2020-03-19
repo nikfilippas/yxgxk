@@ -29,12 +29,13 @@ else:  # Jackknives
     print("Comuting jackknives...")
     JK = pu.jk_setup(p)
     pu.get_jk_xcorr(p, fields, JK, jk_id)
-    #pu.get_jk_cov(p, fields, JK)
 
 
 
 
 """
+pu.get_jk_cov(p, fields, JK)
+
     # Joint covariances
     print("Joint covariances...", end="")
     for fg in fields_g:
@@ -117,3 +118,4 @@ else:  # Jackknives
             cvm_gygy.to_file(p.get_fname_cov(fg, fy, fg, fy, 'model_4pt'))
     print("OK")
 """
+#"""
