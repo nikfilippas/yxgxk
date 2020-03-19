@@ -97,5 +97,7 @@ class Field(object):
         Args:
             new_mask (float or array): new mask.
         """
+        temps = self.field.get_templates()
+        temp = None if temps.size == 0 else temps
         self.field = nmt.NmtField(self.mask * new_mask, self.field.get_maps(),
-                                  templates=self.field.get_templates())
+                                  templates=temp)
