@@ -99,6 +99,7 @@ def get_xcorr(p, fields, jk_region=None, save_windows=True):
         xcorr[name1] = {}
         f1 = fields[name1][0]
         for name2 in fields:
+            print(name1, name2)
             f2 = fields[name2][0]
             try:
                 Cls = xcorr[name2][name1]
@@ -369,6 +370,7 @@ def get_jk_xcorr(p, fields, jk, jk_id):
     msk = jk.get_jk_mask(jk_id)
     for ff in fields:
         fields[ff][0].update_field(msk)
+    print("all masks updated")
     get_xcorr(p, fields, jk_region=jk_id, save_windows=False)
 
     # Cleanup MCMs
