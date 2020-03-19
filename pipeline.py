@@ -1,7 +1,7 @@
 import os
 from argparse import ArgumentParser
-import pipeline_utils as pu
 from analysis.params import ParamRun
+from analysis import pipeline_utils as pu
 
 
 parser = ArgumentParser()
