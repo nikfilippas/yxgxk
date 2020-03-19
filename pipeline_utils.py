@@ -363,6 +363,7 @@ def get_jk_xcorr(p, fields, jk, jk_id):
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:
             for tp2 in dv["twopoints"]:
+                print(tp1, tp2)
 
                 # check if jackknife exists; continue if it does
                 if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
