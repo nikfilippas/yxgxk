@@ -241,11 +241,11 @@ maps:
       beam: 10.
       systematics:
         - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "dust_545"
-      type: "d"
-      map: "data/maps/HFI_SkyMap_545_2048_R2.02_full.fits"
-      mask: "mask_545"
-      beam: 10.
+    # - name: "dust_545"
+    #   type: "d"
+    #   map: "data/maps/HFI_SkyMap_545_2048_R2.02_full.fits"
+    #   mask: "mask_545"
+    #   beam: 10.
     - name: "lens"
       type: "k"
       ns_independent: false
