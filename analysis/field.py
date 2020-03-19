@@ -33,14 +33,15 @@ class Field(object):
         self.fname_mask = fname_mask
         self.is_ndens = is_ndens  # True if this is a delta_gal map
         # Read mask
-        self.mask = hp.ud_grade(hp.read_map(fname_mask, verbose=False,
-                                            field=field_mask), nside_out=nside)
+        self.mask = hp.ud_grade(hp.read_map(fname_mask, field=field_mask
+                                            verbose=False, dtype=np.float64),
+                                nside_out=nside)
         # Read map
-        map0 = hp.read_map(fname_map, verbose=False,
-                           field=field_map)
+        map0 = hp.read_map(fname_map, field=field_map,
+                           verbose=False, dtype=np.float64)
         self.nside_original = hp.npix2nside(len(map0))
         if is_ndens:
-            map0 = hp.alm2map(hp.map2alm(map0), nside)
+            map0 = hp.alm2map(hp.map2alm(map0), nside, verbose=False)
         else:
             map0 = hp.ud_grade(map0, nside_out=nside)
 
@@ -74,7 +75,9 @@ class Field(object):
                 if os.path.isfile(sname):
                     if temp is None:
                         temp = []
-                    t = hp.ud_grade(hp.read_map(sname, verbose=False),
+                    t = hp.ud_grade(hp.read_map(sname,
+                                                verbose=False,
+                                                dtype=np.float64),
                                     nside_out=nside)
                     t_mean = np.sum(t * self.mask)/np.sum(self.mask)
                     temp.append([mask_bn * (t-t_mean)])
