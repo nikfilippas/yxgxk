@@ -3,7 +3,7 @@ global:
     # Healpix resolution
     nside: 2048
     # Output directory
-    output_dir: 'output_default'
+    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_default'
 
 jk:
     # Do you want to do jackknives?
