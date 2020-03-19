@@ -360,10 +360,10 @@ def get_jk_xcorr(p, fields, jk, jk_id):
         print('`do_jk` set to `False` in the parameters file. Exiting.')
         return None
 
-    # check if jackknife exists; continue if it does
-    if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
-        print("Found JK #%d" % (jk_id+1))
-        return None
+    # # check if jackknife exists; continue if it does
+    # if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
+    #     print("Found JK #%d" % (jk_id+1))
+    #     return None
 
     print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
     msk = jk.get_jk_mask(jk_id)
