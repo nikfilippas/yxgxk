@@ -26,11 +26,9 @@ if args.jk_id is None:
                data=True, model=True, trispectrum=True, jackknife=False)
 else:  # Jackknives
     jk_id = args.jk_id
-    print("Comuting jackknives...")
+    print("Computing jackknives...")
     JK = pu.jk_setup(p)
     pu.get_jk_xcorr(p, fields, JK, jk_id)
 
 
-
-# pu.get_jk_cov(p, fields, JK)
 # pu.get_joint_cov(p)
