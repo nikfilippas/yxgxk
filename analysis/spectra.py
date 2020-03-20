@@ -84,7 +84,7 @@ class Spectrum(object):
                 the total power spectrum and the bandpower window functions.
             name1, name2 (str): names of the two fields correlated
         """
-        d = np.load(fname)
+        d = np.load(fname, allow_pickle=True)
         return Spectrum(name1, name2, d['ls'], d['nls'], d['cls'],
                         d['windows'])
 
