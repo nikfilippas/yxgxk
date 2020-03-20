@@ -38,19 +38,6 @@ def selection_func(p):
     return sel
 
 
-def unravel_maps(p):
-    """Constructs dictionary of tracer types
-    containing dictionary of tracer names, and all other attributes as values.
-    """
-    maps = {}
-    for M in p.get("maps"):
-        if not maps.get(M["type"]):
-            maps[M["type"]] = {}
-
-        maps[M["type"]][M["name"]] = M
-    return maps
-
-
 def read_fields(p):
     """Constructs a dictionary of classified fields."""
     nside = p.get_nside()
