@@ -204,8 +204,8 @@ class HOD(object):
     def kernel(self, a, **kwargs):
         """The galaxy number overdensity window function."""
         cosmo = COSMO_ARGS(kwargs)
-        unit_norm = 3.3356409519815204e-04  # 1/c
-        Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]
+        unit_norm = 3.3356409519815204e-04       # 100/c
+        Hz = ccl.h_over_h0(cosmo, a)*cosmo["h"]  # Hz/100
 
         z = 1/a - 1
         w = kwargs["width"]
@@ -287,7 +287,7 @@ class HOD(object):
 
 
 class Lensing(object):
-    """Calculates a CMB lensing profile objerct of a halo."""
+    """Calculates a CMB lensing profile object of a halo."""
     def __init__(self, name="lens"):
         self.name = name
         self.Delta = 500
@@ -299,17 +299,18 @@ class Lensing(object):
 
         H0 = cosmo["h"]
         Om0 = cosmo["Omega_m"]
-        chi = ccl.comoving_radial_distance
+        chi = ccl.comoving_radial_distance(cosmo, a)
+        chi_CMB = ccl.comoving_radial_distance(cosmo, 1/(1101))
 
-        N = 3*H0**2*Om0/(2*299792.458**2)
-        r = (1/a)*chi(cosmo, a)*(1 - chi(cosmo, a)/chi(cosmo, 1/(1+1100)))
+        N = 3*H0**2*Om0/(2*299792.458**2 * ccl.h_over_h0(cosmo, a))
+        # N = 3*H0*Om0/(2*299792.458**2)/ccl.h_over_h0(cosmo, a)
+        r = (1/a)*chi*(1 - chi/chi_CMB)
         return N*r
 
     def profnorm(self, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
         return np.ones_like(a)
-
 
     def fourier_profiles(self, k, M, a, squeeze=True, **kwargs):
         """Computes the Fourier transform of the lensing profile."""
