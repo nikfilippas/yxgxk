@@ -61,7 +61,10 @@ def get_mcm(p, f1, f2, jk_region=None):
     except:
         bpw = p.get_bandpowers()
         mcm.compute_coupling_matrix(f1.field, f2.field, bpw.bn)
-        mcm.write_to(fname)
+        try:
+            mcm.write_to(fname)
+        except RuntimeError:
+            pass  # it's okay if glamdring complains, can do without it
     return mcm
 
 
@@ -152,7 +155,7 @@ def model_xcorr(p, fields, xcorr):
                         kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.59}}
 
                     l = mcorr[name1][name2].leff
-                    cl = hm_ang_power_spectrum(l, (prof1, prof2),
+                    cl = hm_ang_power_spectrum(l, (prof1, prof2),  # TODO: zranges
                                                hm_correction=hm_correction,
                                                **kwargs1)
                     bl = Beam((type1, type2), l, p.get_nside())
