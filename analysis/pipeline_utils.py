@@ -138,8 +138,9 @@ def model_xcorr(p, fields, xcorr):
     for name1 in mcorr:
         for name2 in mcorr[name1]:
             print(name1, name2, end='')
-            type1 = fields[name1][1]
-            type2 = fields[name2][1]
+            f1, type1 = fields[name1]
+            f2, type2 = fields[name2]
+            zrange = get_zrange(fields, f1, f2)
             is_model = np.array([type1 in types, type2 in types])
             if is_model.all():
                 if mcorr[name2][name1].cell is not None:
@@ -155,7 +156,7 @@ def model_xcorr(p, fields, xcorr):
                         kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.59}}
 
                     l = mcorr[name1][name2].leff
-                    cl = hm_ang_power_spectrum(l, (prof1, prof2),  # TODO: zranges
+                    cl = hm_ang_power_spectrum(l, (prof1, prof2), zrange=zrange,
                                                hm_correction=hm_correction,
                                                **kwargs1)
                     bl = Beam((type1, type2), l, p.get_nside())
