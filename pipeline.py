@@ -7,6 +7,7 @@ from analysis import pipeline_utils as pu
 parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
 parser.add_argument("--jk-id", type=int)
+parser.add_argument("--joint-cov", action="store_true")
 args = parser.parse_args()
 fname_params = args.fname_params
 
@@ -31,4 +32,6 @@ else:  # Jackknives
     pu.get_jk_xcorr(p, fields, JK, jk_id)
 
 
-# pu.get_joint_cov(p)
+if joint_cov:
+    assert jk_id is None, "No joint covs after completing a single JK!""
+    pu.get_joint_cov(p)  # joint covariances
