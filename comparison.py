@@ -29,12 +29,12 @@ kwargs[5] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigma_lnM': 0.15, 'M1': 
 
 
 ## HM CORRECTION
-# old
-from model.hmcorr import HalomodCorrection_old
-hm_correction = HalomodCorrection_old(cosmo).rk_interp
+# # old
+# from model.hmcorr import HalomodCorrection_old
+# hm_correction = HalomodCorrection_old(cosmo).rk_interp
 # new
 from model.hmcorr import HaloModCorrection
-# hm_correction = HaloModCorrection
+hm_correction = HaloModCorrection
 
 
 ## PREVIOUS ANALYSIS ##
@@ -186,5 +186,5 @@ fig.tight_layout(h_pad=0, w_pad=0)
 #ax[0].legend(loc="upper right")
 
 
-fig.savefig("comparison.pdf")
-plt.close()
+# fig.savefig("comparison.pdf")
+# plt.close()
