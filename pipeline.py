@@ -24,7 +24,7 @@ if args.jk_id is None:
     mcorr = pu.model_xcorr(p, fields, xcorr)
     print("Computing covariances...")
     pu.get_cov(p, fields, xcorr, mcorr,
-               data=True, model=True, trispectrum=True, jackknife=False)
+               data=True, model=True, trispectrum=True)
 else:  # Jackknives
     jk_id = args.jk_id
     print("Computing jackknives...")
