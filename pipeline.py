@@ -32,6 +32,6 @@ else:  # Jackknives
     pu.get_jk_xcorr(p, fields, JK, jk_id)
 
 
-if joint_cov:
+if args.joint_cov:
     assert jk_id is None, "No joint covs after completing a single JK!"
     pu.get_joint_cov(p)  # joint covariances
