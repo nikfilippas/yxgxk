@@ -249,7 +249,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
     """Computes and saves the 1-halo covariance."""
     fname_cov = p.get_fname_cov(f11, f12, f21, f22, "1h4pt", trispectrum=True)
     fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, "1h4pt", trispectrum=True)
-    print(fname_cov)
+    # print(fname_cov)
     if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
         # Global parameters
         nside = p.get_nside()
