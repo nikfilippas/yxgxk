@@ -2,7 +2,6 @@ import healpy as hp
 from astropy.io import fits
 import numpy as np
 import pyccl as ccl
-from scipy.special import erf
 RHOCRIT0=2.7744948E11
 HH=0.6766
 cosmo=ccl.Cosmology(Omega_c=0.26066676,
