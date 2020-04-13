@@ -21,6 +21,7 @@ parser.add_argument("fname_params", help="yaml target parameter file")
 parser.add_argument("--covar", action="store_true")
 parser.add_argument("--full", action="store_true")
 parser.add_argument("--jk-id", type=int)
+parser.add_argument("--joint-cov", action="store_true")
 
 args = parser.parse_args()
 fname = args.fname_params
@@ -50,5 +51,7 @@ elif args.full:
     os.system("python run_mcmc.py --full")
 elif args.jk_id is not None:
     os.system("python pipeline.py %s --jk-id %d" % (fname, args.jk_id))
+elif args.joint_cov:
+    os.system("python pipeline.py %s --joint-cov" % fname)
 else:
     os.system("python pipeline.py %s" % fname)
