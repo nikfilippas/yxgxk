@@ -31,9 +31,9 @@ bandpowers:
 masks:
     # Given each mask a unique name (key)
     mask_lowz: "data/maps/mask_v3.fits"
-    mask_tsz: "data/maps/mask_planck60.fits"
-    mask_545: "data/maps/mask_planck20.fits"
-    mask_lens_2015: "data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits"
+    # mask_tsz: "data/maps/mask_planck60.fits"
+    # mask_545: "data/maps/mask_planck20.fits"
+    # mask_lens_2015: "data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits"
     # mask_lens_2018: "data/maps/COM_Lensing_4096_R3.00_mask.fits"
     # mask_lens_SZ_2018: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits"
 
