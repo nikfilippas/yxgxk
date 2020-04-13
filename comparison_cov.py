@@ -77,4 +77,4 @@ ax[1, 0].set_ylabel(r"$\mathrm{Cov} (g,y)$", fontsize=12)
 [ax[0, j].text(0.40, 1.02, zbins[j], fontsize=14, transform=ax[0,j].transAxes) for j in range(6)]
 # plt.legend(loc="best", ncol=2)
 fig.tight_layout(w_pad=0., h_pad=0.)
-plt.savefig("comparison_cov_overplot_data.pdf")
+plt.savefig("comparison_cov.pdf")
