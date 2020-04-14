@@ -162,7 +162,7 @@ def model_xcorr(p, fields, xcorr):
                     # bl = Beam((type1, type2), l, p.get_nside())
                     # cl *= bl
                     if type1 == type2 == 'g':
-                        nl = np.load(p.get_fname_cls(f1, f2)+'.npz')['nls']
+                        nl = np.load(p.get_fname_cls(f1, f2))['nls']
                         cl += nl
 
                     print('\n', end='')
@@ -255,7 +255,6 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
     # print(fname_cov)
     if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
         # Global parameters
-        nside = p.get_nside()
         leff = xcorr[f11.name][f11.name].leff
         # Set-up profiles
         flds = [f11, f12, f21, f22]
@@ -282,7 +281,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                                     zrange_b=zrange_b, zpoints_b=zpoints_b, zlog_b=zlog_b,
                                     selection=selection_func(p),
                                     kwargs_a=models_a, kwargs_b=models_b)
-
+        # nside = p.get_nside()
         # B1 = Beam(profile_types[:2], leff, nside)
         # B2 = Beam(profile_types[2:], leff, nside)
         # dcov *= B1[:, None]*B2[None, :]
