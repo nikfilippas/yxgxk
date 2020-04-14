@@ -159,8 +159,11 @@ def model_xcorr(p, fields, xcorr):
                     cl = hm_ang_power_spectrum(l, (prof1, prof2), zrange=zrange,
                                                hm_correction=hm_correction,
                                                **kwargs1)
-                    bl = Beam((type1, type2), l, p.get_nside())
-                    cl *= bl
+                    # bl = Beam((type1, type2), l, p.get_nside())
+                    # cl *= bl
+                    if type1 == type2 == 'g':
+                        nl = np.load(p.get_fname_cls(f1, f2)+'.npz')['nls']
+                        cl += nl
 
                     print('\n', end='')
 
@@ -280,9 +283,9 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                                     selection=selection_func(p),
                                     kwargs_a=models_a, kwargs_b=models_b)
 
-        B1 = Beam(profile_types[:2], leff, nside)
-        B2 = Beam(profile_types[2:], leff, nside)
-        dcov *= B1[:, None]*B2[None, :]
+        # B1 = Beam(profile_types[:2], leff, nside)
+        # B2 = Beam(profile_types[2:], leff, nside)
+        # dcov *= B1[:, None]*B2[None, :]
         cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
         cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
                     f11.name + "_" + f12.name + "_" +
