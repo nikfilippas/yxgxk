@@ -56,17 +56,17 @@ maps:
       # Best-fit model parameters describing this map
       model:
           # HOD and tSZ parameters
-          M0:  12.01
-          M1:  13.44
+          M0:  11.60
+          M1:  12.93
           Mmin:  12.01
           alpha:  1.0
-          b_hydro:  0.6842
+          b_hydro:  0.6628
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.3287
+          r_corr:  0.127
           sigma_lnM:  0.15
-          width: 0.8305
+          width: 1.200
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
