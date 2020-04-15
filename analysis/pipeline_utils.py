@@ -193,7 +193,6 @@ def get_covariance(p, f11, f12, f21, f22, suffix,
     """Checks if covariance exists; otherwise it creates it."""
     fname_cov = p.get_fname_cov(f11, f12, f21, f22, suffix)
     fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, suffix)
-    #print(fname_cov)
     if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
         mcm_1 = get_mcm(p, f11, f12)
         mcm_2 = get_mcm(p, f21, f22)
@@ -202,7 +201,7 @@ def get_covariance(p, f11, f12, f21, f22, suffix,
             cov = Covariance.from_fields(f11, f12, f21, f22, mcm_1, mcm_2,
                                          cl11, cl12, cl21, cl22,
                                          cwsp=cmcm)
-            cov.to_file(fname_cov)
+            cov.to_file(fname_cov); print(fname_cov)
         else:
             prefix1 = p.get_prefix_cls(f11, f12) + "_jk"
             prefix2 = p.get_prefix_cls(f21, f22) + "_jk"
