@@ -141,8 +141,7 @@ def model_xcorr(p, fields, xcorr):
             f1, type1 = fields[name1]
             f2, type2 = fields[name2]
             zrange = get_zrange(fields, f1, f2)
-            is_model = np.array([type1 in types, type2 in types])
-            if is_model.all():
+            if (type1 and type2) in types:
                 if mcorr[name2][name1].cell is not None:
                     cl = mcorr[name2][name1].cell
                     print('  <---  %s %s' % (name2, name1))
