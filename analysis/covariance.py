@@ -110,24 +110,27 @@ class Covariance(object):
             name1, name2, name3, name4 (str): names of the 4 fields
                 contributing to this covariance matrix.
         """
-        def get_fname(ii, jk_id):
-            if ii == 1:
-                return prefix1+"%d" % jk_id+suffix
-            else:
-                return prefix2+"%d" % jk_id+suffix
+        get_fname = lambda prefix, jk_id: prefix + "%d" % jk_id + suffix
 
         # Initialize data from all jackknife files
-        cls1 = np.array([np.load(get_fname(1, jk_id))['cls']
-                         for jk_id in range(njk)])
-        cls2 = np.array([np.load(get_fname(2, jk_id))['cls']
-                         for jk_id in range(njk)])
+        cls1 = []; cls2 = []
+        for jk_id in range(njk):
+            try:
+                cls1.append(np.load(get_fname(prefix1, jk_id))['cls'])
+                cls2.append(np.load(get_fname(prefix2, jk_id))['cls'])
+            except FileNotFoundError:
+                print("Jackknife %d not found." % jk_id)
+                continue
+        cls1, cls2 = np.array(cls1), np.array(cls2)
+
         # Compute mean
         cls1_mean = np.mean(cls1, axis=0)
         cls2_mean = np.mean(cls2, axis=0)
         # Compute covariance
         cov = np.sum((cls1 - cls1_mean[None, :])[:, :, None] *
                      (cls2 - cls2_mean[None, :])[:, None, :], axis=0)
-        cov *= (njk - 1.) / njk
+        njk_found = len(cov)
+        cov *= (njk_found - 1.) / njk_found
 
         return Covariance(name1, name2, name3, name4, cov)
 
