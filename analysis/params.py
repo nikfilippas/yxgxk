@@ -147,7 +147,7 @@ class ParamRun(object):
         if jk_region is not None:
             fname += "_jk%d" % jk_region
         fname += ".npz"
-        print(fname)
+        # print(fname)
         return fname
 
 
