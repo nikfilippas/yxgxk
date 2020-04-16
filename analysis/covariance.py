@@ -116,8 +116,10 @@ class Covariance(object):
         cls1 = []; cls2 = []
         for jk_id in range(njk):
             try:
-                cls1.append(np.load(get_fname(prefix1, jk_id))['cls'])
-                cls2.append(np.load(get_fname(prefix2, jk_id))['cls'])
+                C1 = np.load(get_fname(prefix1, jk_id))['cls']
+                C2 = np.load(get_fname(prefix2, jk_id))['cls']
+                cls1.append(C1)
+                cls2.append(C2)
             except FileNotFoundError:
                 print("Jackknife %d not found." % jk_id)
                 continue
