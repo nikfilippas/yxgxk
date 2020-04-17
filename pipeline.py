@@ -33,5 +33,5 @@ else:  # Jackknives
 
 
 if args.joint_cov:
-    assert jk_id is None, "No joint covs after completing a single JK!"
+    assert args.jk_id is None, "No joint covs after completing a single JK!"
     pu.get_joint_cov(p)  # joint covariances
