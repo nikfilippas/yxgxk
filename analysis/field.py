@@ -22,13 +22,15 @@ class Field(object):
         is_ndens (bool): set to True if this is a number
             density tracer.
         syst_list (list): list of systematic maps.
+        n_iter (int): number of alm iterations in ``pymaster.Field``
     """
     def __init__(self, nside, name, mask_id,
                  fname_mask, fname_map, fname_dndz,
                  field_mask=0, field_map=0, is_ndens=True,
-                 syst_list=None):
+                 syst_list=None, n_iter=3):
         self.name = name
         self.nside = nside
+        self.n_iter = n_iter
         self.mask_id = mask_id
         self.fname_mask = fname_mask
         self.is_ndens = is_ndens  # True if this is a delta_gal map
@@ -84,7 +86,7 @@ class Field(object):
                     temp.append([mask_bn * (t-t_mean)])
 
         # Generate NmtField
-        self.field = nmt.NmtField(self.mask, [map], templates=temp)
+        self.field = nmt.NmtField(self.mask, [map], templates=temp, n_iter=n_iter)
 
 
     def update_field(self, new_mask=1.):
@@ -100,4 +102,4 @@ class Field(object):
         temps = self.field.get_templates()
         temp = None if temps.size == 0 else temps
         self.field = nmt.NmtField(self.mask * new_mask, self.field.get_maps(),
-                                  templates=temp)
+                                  templates=temp, n_iter=self.n_iter)

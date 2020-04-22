@@ -63,6 +63,16 @@ class ParamRun(object):
         return self.p['global']['output_dir']
 
 
+    def get_niter(self):
+        """
+        Get ``pymaster.Field`` number of alm iterations.
+
+        Returns:
+            int: integer number of iterations
+        """
+        return self.p['global']['n_iter']
+
+
     def get_sampler_prefix(self, data_name):
         """
         Get file prefix for sampler-related files.

@@ -2,6 +2,8 @@
 global:
     # Healpix resolution
     nside: 2048
+    # Number of alm iterations in ``pymaster.Field``
+    n_iter: 3
     # Output directory
     output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_default'
 

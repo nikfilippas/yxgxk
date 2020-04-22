@@ -45,7 +45,7 @@ def read_fields(p):
     for d in tqdm(p.get("maps"), desc="Reading fields"):
         f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
                   d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
-                  syst_list = d.get('systematics'))
+                  syst_list = d.get('systematics'), n_iter=p.get_niter())
         fields[d["name"]] = []
         fields[d["name"]].append(f)
         fields[d["name"]].append(d["type"])
