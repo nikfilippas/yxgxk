@@ -60,7 +60,10 @@ class ParamRun(object):
         Returns:
             str: output directory
         """
-        return self.p['global']['output_dir']
+        outdir = self.p['global']['output_dir']
+        if outdir[-1] != "/":
+            outdir += "/"
+        return outdir
 
 
     def get_niter(self):
@@ -80,7 +83,7 @@ class ParamRun(object):
         Returns:
             str: sampler file prefix
         """
-        fname = self.get_outdir() + "/sampler_"
+        fname = self.get_outdir() + "sampler_"
         fname += self.get('mcmc')['run_name'] + "_"
         fname += data_name + "_"
         return fname
@@ -122,7 +125,7 @@ class ParamRun(object):
         Returns:
             str: sampler file prefix
         """
-        fname = self.get_outdir()+"/mcm_"+f1.mask_id+"_"+f2.mask_id
+        fname = self.get_outdir()+"mcm_"+f1.mask_id+"_"+f2.mask_id
         if jk_region is not None:
             fname += "_jk%d" % jk_region
         fname += ".mcm"
@@ -139,7 +142,7 @@ class ParamRun(object):
         Returns:
             str: file prefix.
         """
-        return self.get_outdir()+"/cls_"+f1.name+"_"+f2.name
+        return self.get_outdir()+"cls_"+f1.name+"_"+f2.name
 
 
     def get_fname_cls(self, f1, f2, jk_region=None):
@@ -172,7 +175,7 @@ class ParamRun(object):
         Returns:
             str: sampler file prefix
         """
-        fname = self.get_outdir()+"/cmcm_"
+        fname = self.get_outdir()+"cmcm_"
         fname += f1.mask_id+"_"
         fname += f2.mask_id+"_"
         fname += f3.mask_id+"_"
@@ -194,7 +197,7 @@ class ParamRun(object):
         Returns:
             str: sampler file prefix
         """
-        prefix = "/cov_" if suffix != "1h4pt" else "/dcov_"
+        prefix = "cov_" if suffix != "1h4pt" else "dcov_"
         fname = self.get_outdir()+prefix+suffix+"_"
         fname += "_".join([f1.name, f2.name, f3.name, f4.name])
         fname += ".npz"
