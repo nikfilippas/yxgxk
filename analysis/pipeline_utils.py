@@ -140,7 +140,7 @@ def Beam(X, larr, nside):
 
 def get_mcm(p, f1, f2, jk_region=None):
     """Computes mode coupling matrix."""
-    fname = p.get_fname_mcm(f1, f2, jk_region=jk_region)
+    fname = p.get_fname_mcm(f1.mask_id, f2.mask_id, jk_region=jk_region)
     mcm = nmt.NmtWorkspace()
     try:
         mcm.read_from(fname)
@@ -155,7 +155,7 @@ def get_mcm(p, f1, f2, jk_region=None):
 
 
 def get_cmcm(p, f1, f2, f3, f4):
-    fname = p.get_fname_cmcm(f1, f2, f3, f4)
+    fname = p.get_fname_cmcm(f1.mask_id, f2.mask_id, f3.mask_id, f4.mask_id)
     cmcm = nmt.NmtCovarianceWorkspace()
     try:
         cmcm.read_from(fname)
@@ -172,7 +172,7 @@ def get_cmcm(p, f1, f2, f3, f4):
 def get_power_spectrum(p, f1, f2, jk_region=None, save_windows=True):
     """Computes and saves the power spectrum of two fields."""
     try:
-        fname = p.get_fname_cls(f1, f2, jk_region=jk_region)
+        fname = p.get_fname_cls(f1.name, f2.name, jk_region=jk_region)
         Cls = Spectrum.from_file(fname, f1.name, f2.name)
     except FileNotFoundError:
         bpw = p.get_bandpowers()
@@ -237,7 +237,7 @@ def model_xcorr(p, fields, xcorr):
                                                hm_correction=hm_correction,
                                                **kwargs1)
                     if type1 == type2 == 'g':
-                        nl = np.load(p.get_fname_cls(f1, f2))['nls']
+                        nl = np.load(p.get_fname_cls(f1.name, f2.name))['nls']
                         cl += nl
 
                     print('\n', end='')
@@ -250,34 +250,27 @@ def model_xcorr(p, fields, xcorr):
 
 
 def get_covariance(p, f11, f12, f21, f22, suffix,
-                   cl11=None, cl12=None, cl21=None, cl22=None,
-                   jk=None):
+                   cl11=None, cl12=None, cl21=None, cl22=None):
     """Checks if covariance exists; otherwise it creates it."""
-    fname_cov = p.get_fname_cov(f11, f12, f21, f22, suffix)
-    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, suffix)
+    fname_cov = p.get_fname_cov(f11.name, f12.name, f21.name, f22.name, suffix)
+    fname_cov_T = p.get_fname_cov(f21.name, f22.name, f11.name, f12.name, suffix)
     if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
         mcm_1 = get_mcm(p, f11, f12)
         mcm_2 = get_mcm(p, f21, f22)
         cmcm = get_cmcm(p, f11, f12, f21, f22)
-        if suffix != "jk":
-            cov = Covariance.from_fields(f11, f12, f21, f22, mcm_1, mcm_2,
-                                         cl11, cl12, cl21, cl22,
-                                         cwsp=cmcm)
-            cov.to_file(fname_cov); print(fname_cov)
-        else:
-            prefix1 = p.get_prefix_cls(f11, f12) + "_jk"
-            prefix2 = p.get_prefix_cls(f21, f22) + "_jk"
-            cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
-                                     f11.name, f12.name, f21.name, f22.name)
-            cov.to_file(fname_cov, n_samples=jk.npatches)  # TODO: npatches not always correct
+        cov = Covariance.from_fields(f11, f12, f21, f22,
+                                     mcm_1, mcm_2,
+                                     cl11, cl12, cl21, cl22,
+                                     cwsp=cmcm)
+        cov.to_file(fname_cov); print(fname_cov)
 
 
 def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                       zpoints_a=64, zlog_a=True,
                       zpoints_b=64, zlog_b=True):
     """Computes and saves the 1-halo covariance."""
-    fname_cov = p.get_fname_cov(f11, f12, f21, f22, "1h4pt")
-    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, "1h4pt")
+    fname_cov = p.get_fname_cov(f11.name, f12.name, f21.name, f22.name, "1h4pt")
+    fname_cov_T = p.get_fname_cov(f21.name, f22.name, f11.name, f12.name, "1h4pt")
     # print(fname_cov)
     if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
         # Global parameters
@@ -375,67 +368,70 @@ def get_jk_xcorr(p, fields, jk, jk_id):
         os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
 
 
-def get_jk_cov(p, fields, jk):
+def get_jk_cov(p, jk):
     """Gives an estimate of the covariance using defined jackknife regions."""
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:
             tr11, tr12 = tp1["tracers"]
-            f11, f12 = fields[tr11][0], fields[tr12][0]
             for tp2 in dv["twopoints"]:
                 tr21, tr22 = tp2["tracers"]
-                f21, f22 = fields[tr21][0], fields[tr22][0]
-                get_covariance(p, f11, f12, f21, f22, 'jk', jk=jk)
+                fname_cov = p.get_fname_cov(tr11, tr12, tr21, tr22, "jk")
+                fname_cov_T = p.get_fname_cov(tr21, tr22, tr11, tr12, "jk")
+                if not (os.path.isfile(fname_cov) or os.path.isfile(fname_cov_T)):
+                    prefix1 = p.get_prefix_cls(tr11, tr12) + "_jk"
+                    prefix2 = p.get_prefix_cls(tr21, tr22) + "_jk"
+                    cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
+                                             tr11, tr12, tr21, tr22)
+                    cov.to_file(fname_cov, n_samples=jk.npatches)  # TODO: npatches not always correct
 
 
-def load_cov(p, f11, f12, f21, f22, suffix):
+def load_cov(p, name1, name2, name3, name4, suffix):
     """Loads saved covariance."""
     # naming conventions & retrieve the correct files
-    fname_cov = p.get_fname_cov(f11, f12, f21, f22, suffix)
-    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, suffix)
+    fname_cov = p.get_fname_cov(name1, name2, name3, name4, suffix)
+    fname_cov_T = p.get_fname_cov(name3, name4, name1, name2, suffix)
 
     if os.path.isfile(fname_cov):
         fname = fname_cov
     elif os.path.isfile(fname_cov_T):
         fname = fname_cov_T
-        f11, f12, f21, f22 = f21, f22, f11, f12
+        name1, name2, name3, name4 = name3, name4, name1, name2
     else:
         msg = "Covariance does not exist. Calculate and save it first!"
         raise FileNotFoundError(msg)
 
-    cov = Covariance.from_file(fname, f11.name, f12.name, f21.name, f22.name)
+    cov = Covariance.from_file(fname, name1, name2, name3, name4)
     return cov
 
 
-def get_joint_cov(p, fields):
+def get_joint_cov(p):
     """Estimates joint covariances from a number of options."""
     jk = jk_setup(p)
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:
             tr11, tr12 = tp1["tracers"]
-            f11, f12 = fields[tr11][0], fields[tr12][0]
             for tp2 in dv["twopoints"]:
                 tr21, tr22 = tp2["tracers"]
-                f21, f22 = fields[tr21][0], fields[tr22][0]
 
                 # loading, constructing, saving
-                cov_m = load_cov(p, f11, f12, f21, f22, 'model')
-                trisp = load_cov(p, f11, f12, f21, f22, '1h4pt')
-                cov_d = load_cov(p, f11, f12, f21, f22, 'data')
-                get_jk_cov(p, fields, jk)
-                cov_j = load_cov(p, f11, f12, f21, f22, 'jk')
+                cov_m = load_cov(p, tr11, tr12, tr21, tr22, 'model')
+                trisp = load_cov(p, tr11, tr12, tr21, tr22, '1h4pt')
+                cov_d = load_cov(p, tr11, tr12, tr21, tr22, 'data')
+                get_jk_cov(p, jk)
+                cov_j = load_cov(p, tr11, tr12, tr21, tr22, 'jk')
                 # 4-points
-                cov_m4pt = Covariance(f11.name, f12.name, f21.name, f22.name,
+                cov_m4pt = Covariance(tr11, tr12, tr21, tr22,
                                       cov_m.covar + trisp.covar)
-                cov_m4pt.to_file(p.get_fname_cov(f11, f12, f21, f22, 'model_4pt'))
+                cov_m4pt.to_file(p.get_fname_cov(tr11,tr12, tr21, tr22, 'model_4pt'))
 
-                cov_d4pt = Covariance(f11.name, f12.name, f21.name, f22.name,
+                cov_d4pt = Covariance(tr11, tr12, tr21, tr22,
                                       cov_d.covar + trisp.covar)
-                cov_d4pt.to_file(p.get_fname_cov(f11, f12, f21, f22, 'data_4pt'))
+                cov_d4pt.to_file(p.get_fname_cov(tr11, tr12, tr21, tr22, 'data_4pt'))
                 # joint
                 cov = Covariance.from_options([cov_m4pt, cov_d4pt, cov_j],
                                               cov_m4pt, cov_m4pt)
-                cov.to_file(p.get_fname_cov(f11, f12, f21, f22, 'comb_m'))
+                cov.to_file(p.get_fname_cov(tr11, tr12, tr21, tr22, 'comb_m'))
 
                 cov = Covariance.from_options([cov_m4pt, cov_d4pt, cov_j],
                                               cov_j, cov_j)
-                cov.to_file(p.get_fname_cov(f11, f12, f21, f22, 'comb_j'))
+                cov.to_file(p.get_fname_cov(tr11, tr12, tr21, tr22, 'comb_j'))

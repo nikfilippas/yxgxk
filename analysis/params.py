@@ -2,13 +2,11 @@ import yaml
 import pyccl as ccl
 from .bandpowers import Bandpowers
 from model.cosmo_utils import COSMO_KEYS
-# from cosmoHammer.util import Params
 
 
 
 class ParamRun(object):
-    """
-    Param file manager.
+    """Param file manager.
 
     Args:
         fname (str): path to YAML file.
@@ -38,24 +36,9 @@ class ParamRun(object):
         """Get default cosmology."""
         return ccl.Cosmology(**self.get_cosmo_pars())
 
-    # # FIXME: replace with cobaya
-    # def get_params(self):
-    #     """Convert to cosmoHammer Params format."""
-    #     KEYS = [par for par in COSMO_KEYS if par != "mass_function"]
-    #     # build dictionary of cosmological parameters
-    #     pars = {par["name"]: [par["value"],               # center
-    #                           par["prior"]["values"][0],  # min
-    #                           par["prior"]["values"][1],  # max
-    #                           par["width"]]               # width
-    #             for par in self.p.get("params") if par["name"] in KEYS}
-    #     # convert dictionary to list of key-value pair tuples
-    #     pars = tuple(zip(list(pars.keys()), list(pars.values())))
-    #     return Params(*pars)
-
 
     def get_outdir(self):
-        """
-        Get output directory
+        """Get output directory
 
         Returns:
             str: output directory
@@ -67,8 +50,7 @@ class ParamRun(object):
 
 
     def get_niter(self):
-        """
-        Get ``pymaster.Field`` number of alm iterations.
+        """Get ``pymaster.Field`` number of alm iterations.
 
         Returns:
             int: integer number of iterations
@@ -77,8 +59,7 @@ class ParamRun(object):
 
 
     def get_sampler_prefix(self, data_name):
-        """
-        Get file prefix for sampler-related files.
+        """Get file prefix for sampler-related files.
 
         Returns:
             str: sampler file prefix
@@ -90,8 +71,7 @@ class ParamRun(object):
 
 
     def get_bandpowers(self):
-        """
-        Create a `Bandpowers` object from input.
+        """Create a `Bandpowers` object from input.
 
         Returns:
             :obj:`Bandpowers`: bandpowers.
@@ -101,8 +81,7 @@ class ParamRun(object):
 
 
     def get_models(self):
-        """
-        Compile set of models from input.
+        """Compile set of models from input.
 
         Returns:
             dictionary: models for each sky map.
@@ -113,50 +92,47 @@ class ParamRun(object):
         return models
 
 
-    def get_fname_mcm(self, f1, f2, jk_region=None):
-        """
-        Get file name for the mode-coupling matrix associated with
+    def get_fname_mcm(self, mask1, mask2, jk_region=None):
+        """Get file name for the mode-coupling matrix associated with
         the power spectrum of two fields.
 
         Args:
-            f1, f2 (:obj:`Field`): fields being correlated.
+            mask1, mask2 (str): names of fields being correlated.
             jk_region (int): number of JK region (if using JKs).
 
         Returns:
             str: sampler file prefix
         """
-        fname = self.get_outdir()+"mcm_"+f1.mask_id+"_"+f2.mask_id
+        fname = self.get_outdir()+"mcm_"+mask1+"_"+mask2
         if jk_region is not None:
             fname += "_jk%d" % jk_region
         fname += ".mcm"
         return fname
 
 
-    def get_prefix_cls(self, f1, f2):
-        """
-        Get file prefix for power spectra.
+    def get_prefix_cls(self, name1, name2):
+        """Get file prefix for power spectra.
 
         Args:
-            f1, f2 (:obj:`Field`): fields being correlated.
+            name1, name2 (str): names of fields being correlated.
 
         Returns:
             str: file prefix.
         """
-        return self.get_outdir()+"cls_"+f1.name+"_"+f2.name
+        return self.get_outdir()+"cls_"+name1+"_"+name2
 
 
-    def get_fname_cls(self, f1, f2, jk_region=None):
-        """
-        Get file name for power spectra.
+    def get_fname_cls(self, name1, name2, jk_region=None):
+        """Get file name for power spectra.
 
         Args:
-            f1, f2 (:obj:`Field`): fields being correlated.
+            name1, name2 (str): names of fields being correlated.
             jk_region (int): number of JK region (if using JKs).
 
         Returns:
             str: file prefix.
         """
-        fname = self.get_prefix_cls(f1, f2)
+        fname = self.get_prefix_cls(name1, name2)
         if jk_region is not None:
             fname += "_jk%d" % jk_region
         fname += ".npz"
@@ -164,33 +140,29 @@ class ParamRun(object):
         return fname
 
 
-    def get_fname_cmcm(self, f1, f2, f3, f4):
-        """
-        Get file name for the coupling coefficients associated with
+    def get_fname_cmcm(self, mask1, mask2, mask3, mask4):
+        """Get file name for the coupling coefficients associated with
         the calculation of a covariance matrix.
 
         Args:
-            f1, f2, f3, f4 (:obj:`Field`): fields being correlated.
+            mask1..4 (str): IDs of field masks being correlated.
 
         Returns:
             str: sampler file prefix
         """
         fname = self.get_outdir()+"cmcm_"
-        fname += f1.mask_id+"_"
-        fname += f2.mask_id+"_"
-        fname += f3.mask_id+"_"
-        fname += f4.mask_id+".cmcm"
+        fname += "_".join([mask1, mask2, mask3, mask4])
+        fname += ".cmcm"
         return fname
 
 
-    def get_fname_cov(self, f1, f2, f3, f4, suffix):
-        """
-        Get file name for the the covariance matrix of power spectra
+    def get_fname_cov(self, name1, name2, name3, name4, suffix):
+        """Get file name for the the covariance matrix of power spectra
         involving 4 fields (f1-4).
         the calculation of a covariance matrix.
 
         Args:
-            f1, f2, f3, f4 (:obj:`Field`): fields being correlated.
+            name1..4 (str): names of fields being correlated.
             suffix (str): suffix to add to the file name to distinguish
                 it from other covariance files.
 
@@ -199,27 +171,21 @@ class ParamRun(object):
         """
         prefix = "cov_" if suffix != "1h4pt" else "dcov_"
         fname = self.get_outdir()+prefix+suffix+"_"
-        fname += "_".join([f1.name, f2.name, f3.name, f4.name])
+        fname += "_".join([name1, name2, name3, name4])
         fname += ".npz"
         return fname
 
 
     def get(self, k):
-        """
-        Return a section of the param file from its name.
-        """
+        """Return a section of the param file from its name."""
         return self.p.get(k)
 
 
     def do_jk(self):
-        """
-        Return true if JKs are requested.
-        """
+        """Return true if JKs are requested."""
         return self.p['jk']['do']
 
 
     def get_nside(self):
-        """
-        Return HEALPix resolution
-        """
+        """Return HEALPix resolution."""
         return self.p['global']['nside']
