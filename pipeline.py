@@ -15,8 +15,14 @@ fname_params = args.fname_params
 p = ParamRun(fname_params)
 # Create output directory if needed
 os.system('mkdir -p ' + p.get_outdir())
-fields = pu.read_fields(p)
 
+if args.joint_cov:
+    assert args.jk_id is None, "No joint covs after completing a single JK!"
+    pu.get_joint_cov(p)  # joint covariances
+    import sys
+    sys.exit(0)
+
+fields = pu.read_fields(p)
 if args.jk_id is None:
     print("Computing power spectra...", end="")
     xcorr = pu.get_xcorr(p, fields); print("OK")
@@ -29,8 +35,3 @@ else:  # Jackknives
     print("Computing jackknives...")
     JK = pu.jk_setup(p)
     pu.get_jk_xcorr(p, fields, JK, jk_id)
-
-
-if args.joint_cov:
-    assert args.jk_id is None, "No joint covs after completing a single JK!"
-    pu.get_joint_cov(p)  # joint covariances
