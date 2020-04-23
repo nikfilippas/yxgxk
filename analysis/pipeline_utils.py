@@ -276,8 +276,8 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                       zpoints_a=64, zlog_a=True,
                       zpoints_b=64, zlog_b=True):
     """Computes and saves the 1-halo covariance."""
-    fname_cov = p.get_fname_cov(f11, f12, f21, f22, "1h4pt", trispectrum=True)
-    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, "1h4pt", trispectrum=True)
+    fname_cov = p.get_fname_cov(f11, f12, f21, f22, "1h4pt")
+    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, "1h4pt")
     # print(fname_cov)
     if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
         # Global parameters
@@ -362,8 +362,8 @@ def get_jk_xcorr(p, fields, jk, jk_id):
     https://stackoverflow.com/questions/9647202/ordinal-numbers-replacement
     """
     S=lambda n:str(n)+'tsnrhtdd'[n%5*(n%100^15>4>n%10)::4]  # 54 bytes!
-
     print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
+
     msk = jk.get_jk_mask(jk_id)
     for ff in fields:
         fields[ff][0].update_field(msk)
@@ -387,11 +387,11 @@ def get_jk_cov(p, fields, jk):
                 get_covariance(p, f11, f12, f21, f22, 'jk', jk=jk)
 
 
-def load_cov(p, f11, f12, f21, f22, suffix, trispectrum=False):
+def load_cov(p, f11, f12, f21, f22, suffix):
     """Loads saved covariance."""
     # naming conventions & retrieve the correct files
-    fname_cov = p.get_fname_cov(f11, f12, f21, f22, suffix, trispectrum)
-    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, suffix, trispectrum)
+    fname_cov = p.get_fname_cov(f11, f12, f21, f22, suffix)
+    fname_cov_T = p.get_fname_cov(f21, f22, f11, f12, suffix)
 
     if os.path.isfile(fname_cov):
         fname = fname_cov
@@ -420,7 +420,7 @@ def get_joint_cov(p):
 
                 # loading, constructing, saving
                 cov_m = load_cov(p, f11, f12, f21, f22, 'model')
-                trisp = load_cov(p, f11, f12, f21, f22, '1h4pt', trispectrum=True)
+                trisp = load_cov(p, f11, f12, f21, f22, '1h4pt')
                 cov_d = load_cov(p, f11, f12, f21, f22, 'data')
                 get_jk_cov(p, fields, jk)
                 cov_j = load_cov(p, f11, f12, f21, f22, 'jk')
