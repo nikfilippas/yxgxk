@@ -5,7 +5,7 @@ global:
     # Number of alm iterations in ``pymaster.Field``
     n_iter: 3
     # Output directory
-    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_new'
+    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_default'
 
 jk:
     # Do you want to do jackknives?
