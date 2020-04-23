@@ -406,9 +406,8 @@ def load_cov(p, f11, f12, f21, f22, suffix):
     return cov
 
 
-def get_joint_cov(p):
+def get_joint_cov(p, fields):
     """Estimates joint covariances from a number of options."""
-    fields = read_fields(p)
     jk = jk_setup(p)
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:

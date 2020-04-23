@@ -15,6 +15,7 @@ fname_params = args.fname_params
 p = ParamRun(fname_params)
 # Create output directory if needed
 os.system('mkdir -p ' + p.get_outdir())
+fields = pu.read_fields(p)
 
 if args.joint_cov:
     assert args.jk_id is None, "No joint covs after completing a single JK!"
@@ -22,7 +23,6 @@ if args.joint_cov:
     import sys
     sys.exit(0)
 
-fields = pu.read_fields(p)
 if args.jk_id is None:
     print("Computing power spectra...", end="")
     xcorr = pu.get_xcorr(p, fields); print("OK")
