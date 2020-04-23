@@ -45,7 +45,7 @@ for i, (col, zbin) in enumerate(zip(colors, zbins)):
     plot_wrapper("model", "-")
     plot_wrapper("data", "--")
     plot_wrapper("1h4pt", ":")
-    # plot_wrapper("jk", "-.")
+    plot_wrapper("jk", "-.")
 
 
 ax[0, 0].set_ylabel(r"$\mathrm{Cov} (g,g)$", fontsize=12)
@@ -55,4 +55,4 @@ ax[1, 0].set_ylabel(r"$\mathrm{Cov} (g,y)$", fontsize=12)
                fontsize=14, transform=ax[0,j].transAxes) for j in range(6)]
 # plt.legend(loc="best", ncol=2)
 fig.tight_layout(w_pad=0., h_pad=0.)
-# plt.savefig("comparison_cov.pdf")
+plt.savefig("comparison_cov.pdf")
