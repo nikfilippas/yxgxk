@@ -124,6 +124,7 @@ class Covariance(object):
                 print("Jackknife %d not found." % jk_id)
                 continue
         cls1, cls2 = np.array(cls1), np.array(cls2)
+        assert len(cls1) == len(cls2), "Different number of JKs in Covariance!"
 
         # Compute mean
         cls1_mean = np.mean(cls1, axis=0)
@@ -131,7 +132,7 @@ class Covariance(object):
         # Compute covariance
         cov = np.sum((cls1 - cls1_mean[None, :])[:, :, None] *
                      (cls2 - cls2_mean[None, :])[:, None, :], axis=0)
-        njk_found = len(cov)
+        njk_found = len(cls1)
         cov *= (njk_found - 1.) / njk_found
 
         return Covariance(name1, name2, name3, name4, cov)
