@@ -23,8 +23,7 @@ if args.jk_id is None:
     print("Generating theory power spectra")
     mcorr = pu.model_xcorr(p, fields, xcorr)
     print("Computing covariances...")
-    pu.get_cov(p, fields, xcorr, mcorr,
-               data=True, model=True, trispectrum=True)
+    pu.get_cov(p, fields, xcorr, mcorr)
 else:  # Jackknives
     jk_id = args.jk_id
     print("Computing jackknives...")
