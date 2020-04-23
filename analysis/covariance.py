@@ -132,8 +132,8 @@ class Covariance(object):
         # Compute covariance
         cov = np.sum((cls1 - cls1_mean[None, :])[:, :, None] *
                      (cls2 - cls2_mean[None, :])[:, None, :], axis=0)
-        njk_found = len(cls1)
-        cov *= (njk_found - 1.) / njk_found
+        njk_eff = len(cls1)
+        cov *= (njk_eff - 1.) / njk_eff
 
         return Covariance(name1, name2, name3, name4, cov)
 
