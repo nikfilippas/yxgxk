@@ -3,8 +3,7 @@ import numpy as np
 
 
 class Covariance(object):
-    """
-    A class used to build covariance matrices.
+    """A class used to build covariance matrices.
 
     Args:
         name1, name2, name3, name4 (str): names of the 4 fields contributing
@@ -16,17 +15,14 @@ class Covariance(object):
         self.covar = covariance
 
     def diag(self):
-        """
-        return: covariance matrix diagonal.
-        """
+        """Returns covariance matrix diagonal."""
         return np.diag(self.covar)
 
     @classmethod
     def from_fields(Covariance, field_a1, field_a2,
                     field_b1, field_b2, wsp_a, wsp_b,
                     cla1b1, cla1b2, cla2b1, cla2b2, cwsp=None):
-        """
-        Creator from a set of fields.
+        """Creator from a set of fields.
 
         Args:
             field_a1, field_a2 (:obj:`Field`): the two fields
@@ -65,8 +61,7 @@ class Covariance(object):
 
     @classmethod
     def from_file(Covariance, fname, name1, name2, name3, name4):
-        """
-        Creator from a .npz file.
+        """Creator from a .npz file.
 
         Args:
             fname (str): path to input file. The input file should
@@ -78,8 +73,7 @@ class Covariance(object):
         return Covariance(name1, name2, name3, name4, d['cov'])
 
     def to_file(self, fname, n_samples=None):
-        """
-        Save to .npz file.
+        """Save to .npz file.
 
         Args:
             fname (str): path to output file, including the `.npz`
@@ -95,8 +89,7 @@ class Covariance(object):
     @classmethod
     def from_jk(Covariance, njk, prefix1, prefix2, suffix,
                 name1, name2, name3, name4):
-        """
-        Creator from jackknife samples.
+        """Creator from jackknife samples.
 
         Args:
             njk (int): number of jacknife samples.
@@ -140,8 +133,7 @@ class Covariance(object):
     @classmethod
     def from_options(Covariance, covars, cov_corr, cov_diag,
                      covars2=None, cov_diag2=None):
-        """
-        Creator for hybrid covariances.
+        """Creator for hybrid covariances.
 
         Args:
             covars (array): list of 2D arrays corresponding to the
