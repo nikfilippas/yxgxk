@@ -38,11 +38,37 @@ def selection_func(p):
     return sel
 
 
+def which_maps(p):
+    """Determine which maps (Fields) are used."""
+    maps = set()
+    # load 'dust_545' if it exists
+    for d in p.get("maps"):
+        if d["name"] == "dust_545":
+            maps.add("dust_545")
+    for dv in p.get("data_vectors"):
+        for tp in dv["twopoints"]:
+            for tr in tp["tracers"]:
+                maps.add(tr)
+    return maps
+
+
+def which_masks(p):
+    """Determine which masks are used."""
+    maps = which_maps(p)
+    masks = set()
+    for d in p.get("maps"):
+        if d["name"] in maps:
+            masks.add(d["mask"])
+    return masks
+
+
 def read_fields(p):
     """Constructs a dictionary of classified fields."""
     nside = p.get_nside()
+    maps = which_maps(p)
     fields = {}
     for d in tqdm(p.get("maps"), desc="Reading fields"):
+        if d["name"] not in maps: continue
         f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
                   d['map'], d.get('dndz'), is_ndens=d['type'] == 'g',
                   syst_list = d.get('systematics'), n_iter=p.get_niter())
@@ -50,6 +76,66 @@ def read_fields(p):
         fields[d["name"]].append(f)
         fields[d["name"]].append(d["type"])
     return fields
+
+
+def get_profile(p, name_p, type_p):
+    if type_p == 'g':
+        for M in p.get('maps'):
+            if M['name'] == name_p:
+                dndz = M['dndz']
+                prof = types[type_p](nz_file=dndz)
+                kwargs = {**p.get_models()[name_p], **p.get_cosmo_pars()}
+    else:
+        prof = types[type_p]()
+        kwargs = p.get_cosmo_pars()
+    return prof, kwargs
+
+
+def merge_models(models1, models2):
+    """Merges dictionaries of model parameters."""
+    models = models1.copy()
+    for par in models:
+        models[par] = [models1[par], models2[par]]
+    return models
+
+
+def get_zrange(fields, f1, f2):
+    """Returns effective redshift range (zrange) for a cross-correlation."""
+    for i, F in enumerate([f1, f2]):
+        field_type = fields[F.name][1]
+        if field_type == 'g':
+            zrange = F.zrange
+            break
+        if i == 1:
+            zrange = (1e-6, 6)
+    return zrange
+
+
+def interpolate_spectra(p, spectrum):
+    """
+    Creates a power spectrum interpolated at all ells.
+    'Covariance.from_fields()' requires that the power spectrum
+    is sampled at every multipole up to '3*nside-1'.
+    """
+    larr = np.arange(3*p.get_nside())
+    leff, cell = spectrum.leff, spectrum.cell
+    clf = interp1d(leff, cell,
+                   bounds_error=False,
+                   fill_value=(cell[0], cell[-1]))  # constant beyond boundary
+    clo = clf(larr)
+    return clo
+
+
+def Beam(X, larr, nside):
+    """Computes the beam of a combination of two profiles."""
+    bmg = beam_hpix(larr, ns=512)
+    bmh = beam_hpix(larr, nside)
+    bmy = beam_gaussian(larr, 10.)
+
+    bb = np.ones_like(larr).astype(float)
+    bb *= (bmh*bmg)**(X.count('g'))
+    bb *= (bmh*bmy)**(X.count('y'))
+    return bb
 
 
 def get_mcm(p, f1, f2, jk_region=None):
@@ -64,8 +150,23 @@ def get_mcm(p, f1, f2, jk_region=None):
         try:
             mcm.write_to(fname)
         except RuntimeError:
-            pass  # it's okay if glamdring complains, can do without it
+            pass
     return mcm
+
+
+def get_cmcm(p, f1, f2, f3, f4):
+    fname = p.get_fname_cmcm(f1, f2, f3, f4)
+    cmcm = nmt.NmtCovarianceWorkspace()
+    try:
+        cmcm.read_from(fname)
+    except:
+        cmcm.compute_coupling_coefficients(f1.field, f2.field,
+                                           f3.field, f4.field)
+        try:
+            cmcm.write_to(fname)
+        except RuntimeError:
+            pass
+    return cmcm
 
 
 def get_power_spectrum(p, f1, f2, jk_region=None, save_windows=True):
@@ -97,31 +198,6 @@ def get_xcorr(p, fields, jk_region=None, save_windows=True):
                                          save_windows=save_windows)
             xcorr[name1][name2] = Cls
     return xcorr
-
-
-def get_profile(p, name_p, type_p):
-    if type_p == 'g':
-        for M in p.get('maps'):
-            if M['name'] == name_p:
-                dndz = M['dndz']
-                prof = types[type_p](nz_file=dndz)
-                kwargs = {**p.get_models()[name_p], **p.get_cosmo_pars()}
-    else:
-        prof = types[type_p]()
-        kwargs = p.get_cosmo_pars()
-    return prof, kwargs
-
-
-def Beam(X, larr, nside):
-    """Computes the beam of a combination of two profiles."""
-    bmg = beam_hpix(larr, ns=512)
-    bmh = beam_hpix(larr, nside)
-    bmy = beam_gaussian(larr, 10.)
-
-    bb = np.ones_like(larr).astype(float)
-    bb *= (bmh*bmg)**(X.count('g'))
-    bb *= (bmh*bmy)**(X.count('y'))
-    return bb
 
 
 def model_xcorr(p, fields, xcorr):
@@ -160,8 +236,6 @@ def model_xcorr(p, fields, xcorr):
                     cl = hm_ang_power_spectrum(l, (prof1, prof2), zrange=zrange,
                                                hm_correction=hm_correction,
                                                **kwargs1)
-                    # bl = Beam((type1, type2), l, p.get_nside())
-                    # cl *= bl
                     if type1 == type2 == 'g':
                         nl = np.load(p.get_fname_cls(f1, f2))['nls']
                         cl += nl
@@ -173,18 +247,6 @@ def model_xcorr(p, fields, xcorr):
                 mcorr[name1][name2] = xcorr[name1][name2]
                 print('  ##  not modelled')
     return mcorr
-
-
-def get_cmcm(p, f1, f2, f3, f4):
-    fname = p.get_fname_cmcm(f1, f2, f3, f4)
-    cmcm = nmt.NmtCovarianceWorkspace()
-    try:
-        cmcm.read_from(fname)
-    except:
-        cmcm.compute_coupling_coefficients(f1.field, f2.field,
-                                           f3.field, f4.field)
-        cmcm.write_to(fname)
-    return cmcm
 
 
 def get_covariance(p, f11, f12, f21, f22, suffix,
@@ -208,42 +270,6 @@ def get_covariance(p, f11, f12, f21, f22, suffix,
             cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
                                      f11.name, f12.name, f21.name, f22.name)
             cov.to_file(fname_cov, n_samples=jk.npatches)
-    return None
-
-
-def interpolate_spectra(p, spectrum):
-    """
-    Creates a power spectrum interpolated at all ells.
-    'Covariance.from_fields()' requires that the power spectrum
-    is sampled at every multipole up to '3*nside-1'.
-    """
-    larr = np.arange(3*p.get_nside())
-    leff, cell = spectrum.leff, spectrum.cell
-    clf = interp1d(leff, cell,
-                   bounds_error=False,
-                   fill_value=(cell[0], cell[-1]))  # constant beyond boundary
-    clo = clf(larr)
-    return clo
-
-
-def merge_models(models1, models2):
-    """Merges dictionaries of model parameters."""
-    models = models1.copy()
-    for par in models:
-        models[par] = [models1[par], models2[par]]
-    return models
-
-
-def get_zrange(fields, f1, f2):
-    """Returns effective redshift range (zrange) for a cross-correlation."""
-    for i, F in enumerate([f1, f2]):
-        field_type = fields[F.name][1]
-        if field_type == 'g':
-            zrange = F.zrange
-            break
-        if i == 1:
-            zrange = (1e-6, 6)
-    return zrange
 
 
 def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
@@ -281,18 +307,13 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                                     zrange_b=zrange_b, zpoints_b=zpoints_b, zlog_b=zlog_b,
                                     selection=selection_func(p),
                                     kwargs_a=models_a, kwargs_b=models_b)
-        # nside = p.get_nside()
-        # B1 = Beam(profile_types[:2], leff, nside)
-        # B2 = Beam(profile_types[2:], leff, nside)
-        # dcov *= B1[:, None]*B2[None, :]
         cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
         cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
                     f11.name + "_" + f12.name + "_" +
                     f21.name + "_" + f22.name + ".npz")
-    return None
 
 
-def get_cov(p, fields, xcorr, mcorr, data=True, model=True, trispectrum=True):
+def get_cov(p, fields, xcorr, mcorr, which=["data", "model", "1h4pt"]):
     """Computes the covariance of a pair of twopoints."""
     for dv in p.get("data_vectors"):
         for tp1 in dv["twopoints"]:
@@ -301,21 +322,20 @@ def get_cov(p, fields, xcorr, mcorr, data=True, model=True, trispectrum=True):
             for tp2 in dv["twopoints"]:
                 tr21, tr22 = tp2["tracers"]
                 f21, f22 = fields[tr21][0], fields[tr22][0]
-                if data:
+                if "data" in which:
                     get_covariance(p, f11, f12, f21, f22, 'data',
                                    interpolate_spectra(p, xcorr[tr11][tr21]),
                                    interpolate_spectra(p, xcorr[tr11][tr22]),
                                    interpolate_spectra(p, xcorr[tr12][tr21]),
                                    interpolate_spectra(p, xcorr[tr12][tr22]))
-                if model and (mcorr is not None):
+                if ("model" in which) and (mcorr is not None):
                     get_covariance(p, f11, f12, f21, f22, 'model',
                                    interpolate_spectra(p, mcorr[tr11][tr21]),
                                    interpolate_spectra(p, mcorr[tr11][tr22]),
                                    interpolate_spectra(p, mcorr[tr12][tr21]),
                                    interpolate_spectra(p, mcorr[tr12][tr22]))
-                if trispectrum:
+                if ("1h4pt" in which):
                     get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22)
-    return None
 
 
 def jk_setup(p):
@@ -324,7 +344,7 @@ def jk_setup(p):
         # Set union mask
         nside = p.get_nside()
         msk_tot = np.ones(hp.nside2npix(nside))
-        masks = p.get('masks')
+        masks = {k: p.get("masks")[k] for k in which_masks(p)}
         for k in masks:
             if k != 'mask_545':
                 msk_tot *= hp.ud_grade(hp.read_map(masks[k], verbose=False),
@@ -338,25 +358,10 @@ def get_jk_xcorr(p, fields, jk, jk_id):
     """
     Calculates the jackknife cross-correlation from the yaml file.
 
-    ## English is weird ##
-    ordinals = dict.fromkeys(range(10), 'th')
-    for N, c in zip([1,2,3], ['st','nd','rd']): ordinals[N] = c
-    suffix = 'th' if jk_id in [11,12,13] else ordinals[(jk_id+1)%10]
-    print("%d%s JK sample out of %d" % (jk_id+1, suffix, jk.npatches))
-
-    Codegolf way to get the same result: defined function `S` below.
+    Codegolf way to get ordinals in English: defined function `S` below.
     https://stackoverflow.com/questions/9647202/ordinal-numbers-replacement
     """
     S=lambda n:str(n)+'tsnrhtdd'[n%5*(n%100^15>4>n%10)::4]  # 54 bytes!
-
-    if not p.do_jk():
-        print('`do_jk` set to `False` in the parameters file. Exiting.')
-        return None
-
-    # # check if jackknife exists; continue if it does
-    # if np.any(["jk%d" % jk_id in x for x in os.listdir(p.get_outdir())]):
-    #     print("Found JK #%d" % (jk_id+1))
-    #     return None
 
     print('%s JK sample out of %d' % (S(jk_id+1), jk.npatches))
     msk = jk.get_jk_mask(jk_id)
@@ -366,9 +371,8 @@ def get_jk_xcorr(p, fields, jk, jk_id):
 
     # Cleanup MCMs
     if not p.get('jk')['store_mcm']:
+        print('Cleaning JK MCMs...')
         os.system("rm " + p.get_outdir() + '/mcm_*_jk%d.mcm' % jk_id)
-
-    return None
 
 
 def get_jk_cov(p, fields, jk):
@@ -381,7 +385,6 @@ def get_jk_cov(p, fields, jk):
                 tr21, tr22 = tp2["tracers"]
                 f21, f22 = fields[tr21][0], fields[tr22][0]
                 get_covariance(p, f11, f12, f21, f22, 'jk', jk=jk)
-    return None
 
 
 def load_cov(p, f11, f12, f21, f22, suffix, trispectrum=False):
@@ -437,5 +440,3 @@ def get_joint_cov(p):
                 cov = Covariance.from_options([cov_m4pt, cov_d4pt, cov_j],
                                               cov_j, cov_j)
                 cov.to_file(p.get_fname_cov(f11, f12, f21, f22, 'comb_j'))
-
-    return None
