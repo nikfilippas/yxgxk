@@ -269,7 +269,7 @@ def get_covariance(p, f11, f12, f21, f22, suffix,
             prefix2 = p.get_prefix_cls(f21, f22) + "_jk"
             cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
                                      f11.name, f12.name, f21.name, f22.name)
-            cov.to_file(fname_cov, n_samples=jk.npatches)
+            cov.to_file(fname_cov, n_samples=jk.npatches)  # TODO: npatches not always correct
 
 
 def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
