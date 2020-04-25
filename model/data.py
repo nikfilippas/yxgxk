@@ -77,9 +77,7 @@ class Tracer(object):
 
 
 def choose_cl_file(p, tracers, jk_region=None):
-    """
-    Try to find the file name containing the power spectrum
-    of two tracers.
+    """Try to find the file name containing the power spectrum of two tracers.
 
     Args:
         p (:obj:`ParamRun`): parameters for this run.
@@ -90,7 +88,7 @@ def choose_cl_file(p, tracers, jk_region=None):
     """
     # Search for file with any possible ordering
     for tr in [tracers, tracers[::-1]]:
-        fname = p.get_fname_cls(tr[0], tr[1], jk_region=jk_region)
+        fname = p.get_fname_cls(tr[0].name, tr[1].name, jk_region=jk_region)
         if os.path.isfile(fname):
             return fname
 
@@ -101,8 +99,7 @@ def choose_cl_file(p, tracers, jk_region=None):
 
 
 def choose_cov_file(p, tracers1, tracers2, suffix):
-    """
-    Try to find the file name containing the covariance matrix for the
+    """Try to find the file name containing the covariance matrix for the
     power spectra of two pairs of tracers.
 
     Args:
@@ -121,7 +118,9 @@ def choose_cov_file(p, tracers1, tracers2, suffix):
                            [False, True]):
         for tr1 in [trs[0], trs[0][::-1]]:  # Each pair can appear reversed
             for tr2 in [trs[1], trs[1][::-1]]:
-                fname = p.get_fname_cov(tr1[0], tr1[1], tr2[0], tr2[1], suffix)
+                fname = p.get_fname_cov(tr1[0].name, tr1[1].name,
+                                        tr2[0].name, tr2[1].name,
+                                        suffix)
                 if os.path.isfile(fname):
                     return fname, transp
 
