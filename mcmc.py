@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 import numpy as np
-import pipeline_utils as pu
+import analysis.pipeline_utils as pu
 from analysis.params import ParamRun
 from likelihood.yaml_handler import update_params, update_nsteps
 from likelihood.like import Likelihood
