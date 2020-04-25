@@ -13,7 +13,7 @@ from model.hmcorr import HaloModCorrection
 parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
 parser.add_argument("--nsteps", help="MCMC steps", type=int)
-parser.add_argument("--jk-id", action="store_true", type=int, help="JK region")
+parser.add_argument("--jk-id", type=int, help="JK region")
 args = parser.parse_args()
 fname_params = args.fname_params
 if args.nsteps is not None:
