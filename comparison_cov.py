@@ -20,17 +20,17 @@ def cov_plot(string, cov_type=None):
     return (diag_old, diag_new), leff
 
 
-def plot_wrapper(cov_type, ls):
+def plot_wrapper(cov_type, ls, lw=1):
     # gxg
     string = "_".join([zbin]*4)
     dg, leff = cov_plot(string, cov_type=cov_type)
-    [ax[0, i].loglog(leff, dg[j], ls=ls,
+    [ax[0, i].loglog(leff, dg[j], ls=ls, lw=lw,
                      c=col, alpha=alphas[j % 2],
                      label="%s" % zbin) for j in range(2)]
     # gxy
     string = "_".join([zbin+"_y_milca"]*2)
     dy, _ = cov_plot(string, cov_type=cov_type)
-    [ax[1, i].loglog(leff, dy[j], ls=ls,
+    [ax[1, i].loglog(leff, dy[j], ls=ls, lw=lw,
                      c=col, alpha=alphas[j % 2],
                      label="%s" % zbin) for j in range(2)]
     return None
@@ -42,6 +42,8 @@ colors = ["red", "orange", "gold", "green", "blue", "violet"]
 alphas = [0.3, 1.0]
 for i, (col, zbin) in enumerate(zip(colors, zbins)):
 
+    plot_wrapper("comb_m", "-", lw=3)
+    plot_wrapper("comb_j", ":", lw=3)
     plot_wrapper("model", "-")
     plot_wrapper("data", "--")
     plot_wrapper("1h4pt", ":")
