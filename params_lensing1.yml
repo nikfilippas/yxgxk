@@ -443,8 +443,8 @@ data_vectors:
             lmin: 0
           - tracers: ['2mpz','y_milca']
             lmin: 0
-          - tracers: ['2mpz', 'lens']
-            lmin: 0
+          # - tracers: ['2mpz', 'lens']
+          #   lmin: 0
     - type: 'Cl'
       name: 'wisc1'
       covar_type: 'data'
@@ -453,8 +453,8 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc1','y_milca']
             lmin: 0
-          - tracers: ['wisc1', 'lens']
-            lmin: 0
+          # - tracers: ['wisc1', 'lens']
+          #   lmin: 0
     - type: 'Cl'
       name: 'wisc2'
       covar_type: 'data'
@@ -463,8 +463,8 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc2','y_milca']
             lmin: 0
-          - tracers: ['wisc2', 'lens']
-            lmin: 0
+          # - tracers: ['wisc2', 'lens']
+          #   lmin: 0
     - type: 'Cl'
       name: 'wisc3'
       covar_type: 'data'
@@ -473,8 +473,8 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc3','y_milca']
             lmin: 0
-          - tracers: ['wisc3', 'lens']
-            lmin: 0
+          # - tracers: ['wisc3', 'lens']
+          #   lmin: 0
     - type: 'Cl'
       name: 'wisc4'
       covar_type: 'data'
@@ -483,8 +483,8 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc4','y_milca']
             lmin: 0
-          - tracers: ['wisc4', 'lens']
-            lmin: 0
+          # - tracers: ['wisc4', 'lens']
+          #   lmin: 0
     - type: 'Cl'
       name: 'wisc5'
       covar_type: 'data'
@@ -493,5 +493,5 @@ data_vectors:
             lmin: 10
           - tracers: ['wisc5','y_milca']
             lmin: 0
-          - tracers: ['wisc5', 'lens']
-            lmin: 0
+          # - tracers: ['wisc5', 'lens']
+          #   lmin: 0
