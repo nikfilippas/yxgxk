@@ -80,7 +80,7 @@ LSD[2][5] = np.load("output_default/cls_wisc5_lens.npz")
 L = np.geomspace(6, 3000, 50)
 from model.power_spectrum import hm_ang_power_spectrum
 from model.profile2D import HOD, Arnaud, Lensing
-import pipeline_utils as pu
+import analysis.pipeline_utils as pu
 g = []
 g.append(HOD(nz_file="data/dndz/2MPZ_bin1.txt"))
 for i in range(5):
@@ -166,9 +166,9 @@ for j in range(3):
 
         if j < 2:
             if j == 0:
-                cov = np.load("legacy/data/cov_comb_m_%s_%s_%s_%s.npz" % ((zbins[i],)*4))
+                cov = np.load("../yxg/output_default/cov_comb_m_%s_%s_%s_%s.npz" % ((zbins[i],)*4))
             elif j == 1:
-                cov = np.load("legacy/data/cov_comb_m_%s_%s_%s_%s.npz" % ((zbins[i],"y_milca")*2))
+                cov = np.load("../yxg/output_default/cov_comb_m_%s_%s_%s_%s.npz" % ((zbins[i],"y_milca")*2))
 
             ax[j, i].set_ylim(ylims_min[j], ylims_max[j])
 
@@ -186,5 +186,5 @@ fig.tight_layout(h_pad=0, w_pad=0)
 #ax[0].legend(loc="upper right")
 
 
-fig.savefig("comparison_cell.pdf")
+# fig.savefig("comparison_cell.pdf")
 # plt.close()
