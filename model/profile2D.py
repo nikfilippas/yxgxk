@@ -297,20 +297,24 @@ class Lensing(object):
         """The lensing window function."""
         cosmo = COSMO_ARGS(kwargs)
 
-        H0 = cosmo["h"]
+        H0 = 100*cosmo["h"]
+        Hz = H0*ccl.h_over_h0(cosmo, a)
         Om0 = cosmo["Omega_m"]
         chi = ccl.comoving_radial_distance(cosmo, a)
         chi_CMB = ccl.comoving_radial_distance(cosmo, 1/(1101))
 
-        N = 3*H0**2*Om0/(2*299792.458**2 * ccl.h_over_h0(cosmo, a))
-        # N = 3*H0*Om0/(2*299792.458**2)/ccl.h_over_h0(cosmo, a)
-        r = (1/a)*chi*(1 - chi/chi_CMB)
+        N = 3*H0**2*Om0/(2*299792.458*Hz)  # 1809.04196
+        N = 3*H0**2*Om0/(2*299792.458**2)  # 1312.4525
+        unit_norm = 1.668975084080428e-11
+        N = unit_norm*H0**2*Om0  # optimised
+        r = (chi/a)*(1 - chi/chi_CMB)
+
         return N*r
 
     def profnorm(self, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
-        return np.ones_like(a)
+        return np.ones_like(a)*20000
 
     def fourier_profiles(self, k, M, a, squeeze=True, **kwargs):
         """Computes the Fourier transform of the lensing profile."""
