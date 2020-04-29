@@ -7,7 +7,7 @@ from scipy.integrate import simps
 from scipy.interpolate import interp1d
 import pyccl as ccl
 from .cosmo_utils import COSMO_ARGS
-from .utils import R_Delta, concentration_duffy
+from model.utils import R_Delta, concentration_duffy
 
 
 
@@ -314,14 +314,26 @@ class Lensing(object):
     def profnorm(self, a, squeeze=True, **kwargs):
         """Computes the overall profile normalisation for the angular cross-
         correlation calculation."""
-        return np.ones_like(a)*20000
+        a = np.atleast_1d(a)
+
+        logMmin, logMmax = (6, 17)  # log of min and max halo mass [Msun]
+        mpoints = int(64)           # number of integration points
+        M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
+
+        cosmo = COSMO_ARGS(kwargs)
+        # CCL uses delta_matter
+        Dm = self.Delta/ccl.omega_x(cosmo, a, "matter")
+        mfunc = [ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)]
+        dm = mfunc*M
+        mg = simps(dm, x=np.log10(M))
+        return mg.squeeze() if squeeze else mg
 
     def fourier_profiles(self, k, M, a, squeeze=True, **kwargs):
         """Computes the Fourier transform of the lensing profile."""
         # Input handling
         M, a, k = np.atleast_1d(M, a, k)
-
-        L, L2 = NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
+        M = M[..., None, None]
+        L, L2 = M*NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
         return (L.squeeze(), L2.squeeze()) if squeeze else (L, L2)
 
 
