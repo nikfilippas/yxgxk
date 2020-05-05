@@ -134,7 +134,7 @@ class Arnaud(object):
         # hydrostatic bias
         b = kwargs["b_hydro"]
         # R_Delta*(1+z)
-        R = R_Delta(M, a, self.Delta, squeeze=False) / a
+        R = R_Delta(M*(1-b), a, self.Delta, squeeze=False) / a
         # transform axes
         R = R[..., None]
 
