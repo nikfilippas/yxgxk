@@ -18,10 +18,10 @@ class ParamRun(object):
 
     def get_massfunc(self):
         """Get preferred mass function."""
-        for P in self.p["params"]:
-            if P["name"] == "mass_function":
-                return P["value"]
-        raise ValueError("Provide cosmological mass function as parameter.")
+        try:
+            return self.p['mcmc']['mfunc']
+        except KeyError:
+            raise ValueError("Provide cosmological mass function.")
 
 
     def get_cosmo_pars(self):
@@ -29,6 +29,8 @@ class ParamRun(object):
         # names of all possible cosmological parameters
         pars = {par["name"]: par["value"] for par in self.p.get("params") \
                                           if par["name"] in COSMO_KEYS}
+        # TODO: 'mass_function' is deprecated in `pyccl.Cosmology`
+        pars["mass_function"] = self.get_massfunc()
         return pars
 
 
