@@ -177,21 +177,77 @@ def hm_power_spectrum(k, a, profiles,
     return F.squeeze() if squeeze else F
 
 
-def hm_ang_power_spectrum(l, profiles, hm_correction=None, **kwargs):
+def hm_ang_power_spectrum(l, profiles,
+                          zrange=(1e-6, 6), zpoints=32, zlog=True,
+                          logMrange=(6, 17), mpoints=128,
+                          include_1h=True, include_2h=True,
+                          hm_correction=None, selection=None,
+                          **kwargs):
+    """Computes the angular cross power spectrum of two quantities.
+
+    Uses the halo model prescription for the 3D power spectrum to compute
+    the angular cross power spectrum of two profiles.
+
+    Parameters
+    ----------
+    l : array_like
+        The l-values (multipole number) of the cross power spectrum.
+    profiles : tuple of `profile2D._profile_` objects
+        The profiles for the two quantities being correlated.
+    zrange : tuple
+        Minimum and maximum redshift probed.
+    zpoints : int
+        Number or integration sampling points in redshift.
+    zlog : bool
+        Whether to use logarithmic spacing in redshifts.
+    logMrange : tuple
+        Logarithm (base-10) of the mass integration boundaries.
+    mpoints : int
+        Number or integration sampling points.
+    include_1h : bool
+        If True, includes the 1-halo contribution.
+    include_2h : bool
+        If True, includes the 2-halo contribution.
+    hm_correction (:func:`HalomodCorrection` or None):
+        Correction to the halo model in the transition regime.
+        If `None`, no correction is applied.
+    selection (function): selection function in (M,z) to include
+        in the calculation. Pass None if you don't want to select
+        a subset of the M-z plane.
+    **kwargs : keyword arguments
+        Parametrisation of the profiles and cosmology.
+    """
     cosmo = COSMO_ARGS(kwargs)
+    # Integration boundaries
+    zmin, zmax = zrange
+    # Distance measures & out-of-loop optimisations
+    if zlog:
+        z = np.geomspace(zmin, zmax, zpoints)
+        jac = z
+        x = np.log(z)
+    else:
+        z = np.linspace(zmin, zmax, zpoints)
+        jac = 1
+        x = z
+    a = 1/(1+z)
+    chi = ccl.comoving_radial_distance(cosmo, a)
 
-    # Set up halo model calculator
+    H_inv = 2997.92458 * jac/(ccl.h_over_h0(cosmo, a)*cosmo["h"])  # c*z/H(z)
 
-    # Set up profiles and tracers
-    for p in profiles:
-        p.update_params(cosmo, **kwargs)
+    # Window functions
+    p1, p2 = profiles
+    Wu = p1.kernel(a, **kwargs)
+    Wv = Wu if (p1.name == p2.name) else p2.kernel(a, **kwargs)
+    N = H_inv*Wu*Wv/chi**2  # overall normalisation factor
 
-    # Set up covariances
+    k = (l+1/2)/chi[..., None]
+    Puv = hm_power_spectrum(k, a, profiles, logMrange, mpoints,
+                            include_1h, include_2h, squeeze=False,
+                            hm_correction=hm_correction, selection=selection,
+                            **kwargs)
+    if Puv is None:
+        return None
+    integrand = N[..., None] * Puv
 
-    # Compute Pk2D
-
-    # Compute C_ell
-
-    return cl
-
-    
+    Cl = simps(integrand, x, axis=0)
+    return Cl
