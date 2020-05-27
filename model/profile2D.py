@@ -134,7 +134,7 @@ class Arnaud(object):
         # hydrostatic bias
         b = kwargs["b_hydro"]
         # R_Delta*(1+z)
-        R = R_Delta(M*(1-b), a, self.Delta, squeeze=False) / a
+        R = R_Delta(M*(1-b), a, self.Delta, squeeze=False, **kwargs) / a
         # transform axes
         R = R[..., None]
 
@@ -172,7 +172,7 @@ class NFW(object):
         bmax = kwargs["bmax"] if "bmax" in kwargs else 1
 
         c = concentration_duffy(M, a, is_D500=True, squeeze=False)
-        R = R_Delta(M, a, self.Delta, is_matter=False, squeeze=False)/(c*a)
+        R = R_Delta(M, a, self.Delta, is_matter=False, squeeze=False, **kwargs)/(c*a)
         x = k*R[..., None]
 
         c = c[..., None]*bmax
@@ -332,8 +332,10 @@ class Lensing(object):
         """Computes the Fourier transform of the lensing profile."""
         # Input handling
         M, a, k = np.atleast_1d(M, a, k)
+        L, L2 = NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
+
         M = M[..., None, None]
-        L, L2 = M*NFW().fourier_profiles(k, M, a, squeeze=False, **kwargs)
+        L, L2 = L*M, L2*M
         return (L.squeeze(), L2.squeeze()) if squeeze else (L, L2)
 
 
