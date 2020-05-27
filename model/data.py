@@ -6,25 +6,37 @@ from .utils import beam_gaussian, beam_hpix
 from .cosmo_utils import COSMO_ARGS
 
 
-def get_profile(m):
-    """
-    Assigns a profile based on a map dictionary.
+class ProfTracer(object):
+    def __init__(self, m):
+        self.type = m['type']
+        if m['type'] == 'y':
+            self.p = ccl.halos.HaloProfileArnaud()
+        else:
+            cM = ccl.halos.ConcentrationDuffy08M500c()
+        
+            if m['type'] == 'g':
+                self.z, self.nz = np.loadtxt(m['dndz'])
+                self.z_avg = np.average(self.z, weights=self.nz)
+                self.bz = np.ones(len(self.z))
+                self.p = ccl.halos.HaloProfileHOD(cM)
+            elif m['type'] == 'k':
+                self.p = ccl.halos.HaloProfileNFW(cM)
+        self.t = None
 
-    Args:
-        m (dict): dictionary defining a map in the
-            param file.
+    def update_parameters(self, cosmo, **kwargs):
+        self.p.update_parameters(**kwargs)
+        self.update_tracer(cosmo, **kwargs)
 
-    Returns:
-        :obj:`Profile`: Arnaud or HOD profile.
-    """
-
-    if m['type'] == 'y':
-        return Arnaud(name=m['name'])
-    elif m['type'] == 'g':
-        return HOD(name=m['name'], nz_file=m['dndz'],
-                   ns_independent=m.get('ns_independent'))
-    elif m['type'] == 'k':
-        return Lensing(name=m['name'])
+    def update_tracer(self, cosmo, **kwargs):
+        if self.type == 'g':
+            z = self.z_avg + (self.z - self.z_avg) / kwargs['width']
+            self.t = ccl.NumberCountsTracer(cosmo, False,
+                                            (z, self.nz),
+                                            (z, self.bz))
+        elif self.type == 'y':
+            self.t = ccl.SZTracer(cosmo)
+        elif self.type == 'k':
+            self.t = ccl.CMBLensingTracer(cosmo, 1100.)
 
 
 class Tracer(object):
@@ -55,7 +67,7 @@ class Tracer(object):
         else:
             self.z_range = [1E-6, 6]
             self.lmax = 100000
-        self.profile = get_profile(m)
+        self.profile = ProfTracer(m)
         self.syst = m.get('systematics')
 
     def get_beam(self, ls, ns):
