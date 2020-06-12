@@ -5,8 +5,8 @@ from .power_spectrum import hm_ang_power_spectrum
 
 def get_theory(p, dm, return_separated=False,
                include_1h=True, include_2h=True,
-               selection=None,
-               hm_correction=None, **kwargs):
+               hm_correction=None, selection=None,
+               **kwargs):
     """Computes the theory prediction used in the MCMC.
 
     Args:
@@ -54,11 +54,10 @@ def get_theory(p, dm, return_separated=False,
                 zpoints = nz_default
 
         cl = hm_ang_power_spectrum(ls, profiles,
-                                   zrange=zrange, zpoints=zpoints,
-                                   zlog=use_zlog, hm_correction=hm_correction,
+                                   hm_correction=hm_correction,
+                                   selection=selection,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
-                                   selection=selection,
                                    **kwargs)
         if cl is None:
             return None
