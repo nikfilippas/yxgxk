@@ -206,17 +206,20 @@ def hm_ang_power_spectrum(l, profiles,
         print('2pt covariance for %sx%s defaulting to 0' % (p1.type, p2.type))
 
 
-    zmin, zmax, zpoints = 1e-6, 6, 64
-    z = np.geomspace(zmin, zmax, zpoints)
-    a_arr = 1/(1+z)
-    chi = ccl.comoving_radial_distance(cosmo, a_arr)
-    k_arr = ((l+1/2)/chi[..., None]).flatten()[::len(l)]
+    k_arr = np.geomspace(1E-4, 1E2, 256)
+    a_arr = np.linspace(0.2, 1, 32)
 
     # TODO: why normprof=(True, False) for gy but (True, True) for gk?
-    hmcorr = lambda k, a: hm_correction(k, a, **kwargs)
+    if hm_correction is not None:
+        hmcorr = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
+    else:
+        hmcorr = None
+
+    normp1 = False if p1.type == 'y' else True
+    normp2 = False if p2.type == 'y' else True
     pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.p, prof2=p2.p,
                                 prof_2pt=p2pt,
-                                normprof1=True, normprof2=True,
+                                normprof1=normp1, normprof2=normp2,
                                 get_1h=include_1h, get_2h=include_2h,
                                 lk_arr=np.log(k_arr), a_arr=a_arr,
                                 f_ka=hmcorr)

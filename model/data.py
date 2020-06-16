@@ -30,9 +30,10 @@ class ProfTracer(object):
     def update_tracer(self, cosmo, **kwargs):
         if self.type == 'g':
             z = self.z_avg + (self.z - self.z_avg) / kwargs['width']
+            msk = z >= 0
             self.t = ccl.NumberCountsTracer(cosmo, False,
-                                            (z, self.nz),
-                                            (z, self.bz))
+                                            (z[msk], self.nz[msk]),
+                                            (z[msk], self.bz[msk]))
         elif self.type == 'y':
             self.t = ccl.SZTracer(cosmo)
         elif self.type == 'k':
