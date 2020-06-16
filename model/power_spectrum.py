@@ -1,6 +1,7 @@
 import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
+from pyccl.halos.halos_extra import HaloProfileHOD, HaloProfileArnaud, HaloProfileNFW
 from pyccl.errors import CCLError
 from model.cosmo_utils import COSMO_ARGS
 
@@ -177,21 +178,53 @@ def hm_power_spectrum(k, a, profiles,
     return F.squeeze() if squeeze else F
 
 
-def hm_ang_power_spectrum(l, profiles, hm_correction=None, **kwargs):
+
+def hm_ang_power_spectrum(l, profiles,
+                          include_1h=True, include_2h=True,
+                          hm_correction=None, selection=None,
+                          **kwargs):
+    """Angular power spectrum using CCL."""
     cosmo = COSMO_ARGS(kwargs)
+    p1, p2 = profiles
+    hmd = ccl.halos.MassDef(500, 'critical')
+    # Set up Halo Model calculator
+    nM = ccl.halos.MassFuncTinker08(cosmo, mass_def=hmd)
+    bM = ccl.halos.HaloBiasTinker10(cosmo, mass_def=hmd)
+    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
 
-    # Set up halo model calculator
+    # Set up covariance
+    if p1.type == p2.type == 'g':
+        p2pt = ccl.halos.Profile2ptHOD()
+    elif {'g', 'y'} == set([p1.type, p2.type]):
+        p2pt = ccl.halos.Profile2ptR(r_corr=kwargs['r_corr_gy'])
+    elif {'g', 'k'} == set([p1.type, p2.type]):
+        p2pt = ccl.halos.Profile2ptR(r_corr=kwargs['r_corr_gk'])
+    elif p1.type == p2.type == 'k':
+        p2pt = ccl.halos.Profile2ptR(r_corr=kwargs['r_corr_kk'])
+    else:
+        p2pt = ccl.halos.Profile2ptR(r_corr=0)
+        print('2pt covariance for %sx%s defaulting to 0' % (p1.type, p2.type))
 
-    # Set up profiles and tracers
-    for p in profiles:
-        p.update_params(cosmo, **kwargs)
 
-    # Set up covariances
+    zmin, zmax, zpoints = 1e-6, 6, 64
+    z = np.geomspace(zmin, zmax, zpoints)
+    a_arr = 1/(1+z)
+    chi = ccl.comoving_radial_distance(cosmo, a_arr)
+    k_arr = ((l+1/2)/chi[..., None]).flatten()[::len(l)]
 
-    # Compute Pk2D
+    # TODO: why normprof=(True, False) for gy but (True, True) for gk?
+    hmcorr = lambda k, a: hm_correction(k, a, **kwargs)
+    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.p, prof2=p2.p,
+                                prof_2pt=p2pt,
+                                normprof1=True, normprof2=True,
+                                get_1h=include_1h, get_2h=include_2h,
+                                lk_arr=np.log(k_arr), a_arr=a_arr,
+                                f_ka=hmcorr)
 
-    # Compute C_ell
+    p1.update_tracer(cosmo, **kwargs)
+    p2.update_tracer(cosmo, **kwargs)
+    cl = ccl.angular_cl(cosmo, p1.t, p2.t, l, pk)
+
 
     return cl
 
-    

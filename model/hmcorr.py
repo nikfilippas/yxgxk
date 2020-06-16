@@ -6,7 +6,7 @@ import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
-from scipy.optimize import curve_fit
+# from scipy.optimize import curve_fit
 
 
 class HalomodCorrection_old(object):

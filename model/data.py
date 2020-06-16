@@ -1,7 +1,6 @@
 import numpy as np
 import os
 import pyccl as ccl
-# from .profile2D import Arnaud, HOD, Lensing
 from .utils import beam_gaussian, beam_hpix
 from .cosmo_utils import COSMO_ARGS
 
@@ -12,10 +11,11 @@ class ProfTracer(object):
         if m['type'] == 'y':
             self.p = ccl.halos.HaloProfileArnaud()
         else:
-            cM = ccl.halos.ConcentrationDuffy08M500c()
+            hmd = ccl.halos.MassDef(500, 'critical')
+            cM = ccl.halos.ConcentrationDuffy08M500c(hmd)
 
             if m['type'] == 'g':
-                self.z, self.nz = np.loadtxt(m['dndz'])
+                self.z, self.nz = np.loadtxt(m['dndz']).T
                 self.z_avg = np.average(self.z, weights=self.nz)
                 self.bz = np.ones(len(self.z))
                 self.p = ccl.halos.HaloProfileHOD(cM)
