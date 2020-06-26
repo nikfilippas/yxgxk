@@ -68,122 +68,133 @@ def hm_bias(a, profile,
     return b2h.squeeze()
 
 
-def hm_power_spectrum(k, a, profiles,
-                      logMrange=(6, 17), mpoints=128,
-                      include_1h=True, include_2h=True,
-                      squeeze=True, hm_correction=None,
-                      selection=None,
-                      **kwargs):
-    """Computes the halo model prediction for the 3D cross-power
-    spectrum of two quantities.
+# def hm_power_spectrum(k, a, profiles,
+#                       logMrange=(6, 17), mpoints=128,
+#                       include_1h=True, include_2h=True,
+#                       squeeze=True, hm_correction=None,
+#                       selection=None,
+#                       **kwargs):
+#     """Computes the halo model prediction for the 3D cross-power
+#     spectrum of two quantities.
 
-    Args:
-        k (array): array of wavenumbers in units of Mpc^-1
-        a (array): array of scale factor values
-        profiles (tuple): tuple of two profile objects (currently
-            only Arnaud and HOD are implemented) corresponding to
-            the two quantities being correlated.
-        logMrange (tuple): limits of integration in log10(M/Msun)
-        mpoints (int): number of mass samples
-        include_1h (bool): whether to include the 1-halo term.
-        include_2h (bool): whether to include the 2-halo term.
-        hm_correction (:obj:`HalomodCorrection` or None):
-            Correction to the halo model in the transition regime.
-            If `None`, no correction is applied.
-        selection (function): selection function in (M,z) to include
-            in the calculation. Pass None if you don't want to select
-            a subset of the M-z plane.
-        **kwargs: Parametrisation of the profiles and cosmology.
-    """
-    # Input handling
-    a, k = np.atleast_1d(a), np.atleast_2d(k)
+#     Args:
+#         k (array): array of wavenumbers in units of Mpc^-1
+#         a (array): array of scale factor values
+#         profiles (tuple): tuple of two profile objects (currently
+#             only Arnaud and HOD are implemented) corresponding to
+#             the two quantities being correlated.
+#         logMrange (tuple): limits of integration in log10(M/Msun)
+#         mpoints (int): number of mass samples
+#         include_1h (bool): whether to include the 1-halo term.
+#         include_2h (bool): whether to include the 2-halo term.
+#         hm_correction (:obj:`HalomodCorrection` or None):
+#             Correction to the halo model in the transition regime.
+#             If `None`, no correction is applied.
+#         selection (function): selection function in (M,z) to include
+#             in the calculation. Pass None if you don't want to select
+#             a subset of the M-z plane.
+#         **kwargs: Parametrisation of the profiles and cosmology.
+#     """
+#     # Input handling
+#     a, k = np.atleast_1d(a), np.atleast_2d(k)
 
-    cosmo = COSMO_ARGS(kwargs)
-    # Profile normalisations
-    p1, p2 = profiles
-    Unorm = p1.profnorm(a, squeeze=False, **kwargs)
-    if p1.name == p2.name:
-        Vnorm = Unorm
-    else:
-        Vnorm = p2.profnorm(a, squeeze=False, **kwargs)
-    if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any():
-        return None  # zero division
-    Unorm, Vnorm = Unorm[..., None], Vnorm[..., None]  # transform axes
+#     cosmo = COSMO_ARGS(kwargs)
+#     # Profile normalisations
+#     p1, p2 = profiles
+#     Unorm = p1.profnorm(a, squeeze=False, **kwargs)
+#     if p1.name == p2.name:
+#         Vnorm = Unorm
+#     else:
+#         Vnorm = p2.profnorm(a, squeeze=False, **kwargs)
+#     if (Vnorm < 1e-16).any() or (Unorm < 1e-16).any():
+#         return None  # zero division
+#     Unorm, Vnorm = Unorm[..., None], Vnorm[..., None]  # transform axes
 
-    # Set up integration boundaries
-    logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
-    mpoints = int(mpoints)        # number of integration points
-    M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
+#     # Set up integration boundaries
+#     logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
+#     mpoints = int(mpoints)        # number of integration points
+#     M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
 
-    # Out-of-loop optimisations
-    Pl = np.array([ccl.linear_matter_power(cosmo, k[i], a)
-                   for i, a in enumerate(a)])
-    Dm = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
-    mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
-    if selection is not None:
-        select = np.array([selection(M,1./aa-1) for aa in a])
-        mfunc *= select
-    try:
-        bh = np.array([ccl.halo_bias(cosmo, M, A1, A2)
-                       for A1, A2 in zip(a, Dm)])
-    except CCLError:
-        kwargs_patch = kwargs.copy()
-        kwargs_patch["mass_function"] = "tinker10"
-        cosmo_patch = COSMO_ARGS(kwargs_patch)
-        bh = np.array([ccl.halo_bias(cosmo_patch, M, A1, A2)
-                       for A1, A2 in zip(a, Dm)])
+#     # Out-of-loop optimisations
+#     Pl = np.array([ccl.linear_matter_power(cosmo, k[i], a)
+#                    for i, a in enumerate(a)])
+#     Dm = p1.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
+#     mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
+#     if selection is not None:
+#         select = np.array([selection(M,1./aa-1) for aa in a])
+#         mfunc *= select
+#     try:
+#         bh = np.array([ccl.halo_bias(cosmo, M, A1, A2)
+#                        for A1, A2 in zip(a, Dm)])
+#     except CCLError:
+#         kwargs_patch = kwargs.copy()
+#         kwargs_patch["mass_function"] = "tinker10"
+#         cosmo_patch = COSMO_ARGS(kwargs_patch)
+#         bh = np.array([ccl.halo_bias(cosmo_patch, M, A1, A2)
+#                        for A1, A2 in zip(a, Dm)])
 
-    # shape transformations
-    mfunc, bh = mfunc.T[..., None], bh.T[..., None]
-    if selection is not None:
-        select = np.array([selection(M,1./aa-1) for aa in a])
-        select = select.T[..., None]
-    else:
-        select = 1
+#     # shape transformations
+#     mfunc, bh = mfunc.T[..., None], bh.T[..., None]
+#     if selection is not None:
+#         select = np.array([selection(M,1./aa-1) for aa in a])
+#         select = select.T[..., None]
+#     else:
+#         select = 1
 
-    U, UU = p1.fourier_profiles(k, M, a, squeeze=False, **kwargs)
-    # optimise for autocorrelation (no need to recompute)
-    if p1.name == p2.name:
-        V = U
-        UV = UU
-    else:
-        V, VV = p2.fourier_profiles(k, M, a, squeeze=False, **kwargs)
-        r = kwargs["r_corr"] if "r_corr" in kwargs else 0
-        UV = U*V*(1+r)
+#     U, UU = p1.fourier_profiles(k, M, a, squeeze=False, **kwargs)
+#     # optimise for autocorrelation (no need to recompute)
+#     if p1.name == p2.name:
+#         V = U
+#         UV = UU
+#     else:
+#         V, VV = p2.fourier_profiles(k, M, a, squeeze=False, **kwargs)
+#         r = kwargs["r_corr"] if "r_corr" in kwargs else 0
+#         UV = U*V*(1+r)
 
-    # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
-    P1h = simps(mfunc*select*UV, x=np.log10(M), axis=0)
-    b2h_1 = simps(bh*mfunc*select*U, x=np.log10(M), axis=0)
-    b2h_2 = simps(bh*mfunc*select*V, x=np.log10(M), axis=0)
+#     # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
+#     P1h = simps(mfunc*select*UV, x=np.log10(M), axis=0)
+#     b2h_1 = simps(bh*mfunc*select*U, x=np.log10(M), axis=0)
+#     b2h_2 = simps(bh*mfunc*select*V, x=np.log10(M), axis=0)
 
-    # Contribution from small masses (added in the beginning)
-    rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
-    dlM = (logMmax-logMmin) / (mpoints-1)
-    mfunc, bh = mfunc.squeeze(), bh.squeeze()  # squeeze extra dimensions
+#     # Contribution from small masses (added in the beginning)
+#     rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
+#     dlM = (logMmax-logMmin) / (mpoints-1)
+#     mfunc, bh = mfunc.squeeze(), bh.squeeze()  # squeeze extra dimensions
 
-    n0_1h = np.array((rhoM - np.dot(M, mfunc) * dlM)/M[0])[None, ..., None]
-    n0_2h = np.array((rhoM - np.dot(M, mfunc*bh) * dlM)/M[0])[None, ..., None]
+#     n0_1h = np.array((rhoM - np.dot(M, mfunc) * dlM)/M[0])[None, ..., None]
+#     n0_2h = np.array((rhoM - np.dot(M, mfunc*bh) * dlM)/M[0])[None, ..., None]
 
-    P1h += (n0_1h*U[0]*V[0]).squeeze()
-    b2h_1 += (n0_2h*U[0]).squeeze()
-    b2h_2 += (n0_2h*V[0]).squeeze()
+#     P1h += (n0_1h*U[0]*V[0]).squeeze()
+#     b2h_1 += (n0_2h*U[0]).squeeze()
+#     b2h_2 += (n0_2h*V[0]).squeeze()
 
-    F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
+#     F = (include_1h*P1h + include_2h*(Pl*b2h_1*b2h_2)) / (Unorm*Vnorm)
 
-    if hm_correction is not None:
-        if (p1.type == 'g') or (p2.type == 'g'):
-            for ia, (aa, kk) in enumerate(zip(a, k)):
-                F[ia, :] *= hm_correction(kk, aa, **kwargs)
+#     if hm_correction is not None:
+#         if (p1.type == 'g') or (p2.type == 'g'):
+#             for ia, (aa, kk) in enumerate(zip(a, k)):
+#                 F[ia, :] *= hm_correction(kk, aa, **kwargs)
 
-    return F.squeeze() if squeeze else F
+#     return F.squeeze() if squeeze else F
 
 
 
 def hm_ang_power_spectrum(l, profiles,
                           include_1h=True, include_2h=True,
-                          hm_correction=None, selection=None,
-                          **kwargs):
-    """Angular power spectrum using CCL."""
+                          hm_correction=None, **kwargs):
+    """Angular power spectrum using CCL.
+
+    Args:
+        l (`numpy.array`): effective multipoles to sample
+        profiles (`model.data.ProfTracer`): profile and tracer pair
+        include_1h (`bool`): whether to include the 1-halo term
+        include_2h (`bool`): whether to include the 2-halo term
+        hm_correction (`func`): multiplicative function of `k` and `a`
+        **kwagrs: Parametrisation of the profiles and cosmology.
+
+    Returns:
+        `numpy.array`: Angular power spectrum of input profiles.
+    """
     cosmo = COSMO_ARGS(kwargs)
     p1, p2 = profiles
     hmd = ccl.halos.MassDef(500, 'critical')
@@ -195,39 +206,33 @@ def hm_ang_power_spectrum(l, profiles,
     # Set up covariance
     if p1.type == p2.type == 'g':
         p2pt = ccl.halos.Profile2ptHOD()
-    elif {'g', 'y'} == set([p1.type, p2.type]):
-        p2pt = ccl.halos.Profile2ptR(r_corr=kwargs['r_corr_gy'])
-    elif {'g', 'k'} == set([p1.type, p2.type]):
-        p2pt = ccl.halos.Profile2ptR(r_corr=kwargs['r_corr_gk'])
-    elif p1.type == p2.type == 'k':
-        p2pt = ccl.halos.Profile2ptR(r_corr=kwargs['r_corr_kk'])
     else:
-        p2pt = ccl.halos.Profile2ptR(r_corr=0)
-        print('2pt covariance for %sx%s defaulting to 0' % (p1.type, p2.type))
+        r_corr = kwargs.get('r_corr_%s%s' % (p1.type, p2.type))
+        if r_corr is None:
+            r_corr = kwargs.get('r_corr_%s%s' % (p2.type, p1.type))
+            if r_corr is None:
+                r_corr = 0
+                print('2pt covariance for %sx%s defaulting to 0' % (p1.type,
+                                                                    p2.type))
+        p2pt = ccl.halos.ProfilewptR(r_corr=r_corr)
 
+    k_arr = np.geomspace(1e-4, 1e2, 256)
+    a_arr = np.linspace(0.2, 1, 64)
 
-    k_arr = np.geomspace(1E-4, 1E2, 256)
-    a_arr = np.linspace(0.2, 1, 32)
-
-    # TODO: why normprof=(True, False) for gy but (True, True) for gk?
     if hm_correction is not None:
-        hmcorr = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
-    else:
-        hmcorr = None
+        hm_correction = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
 
-    normp1 = False if p1.type == 'y' else True
-    normp2 = False if p2.type == 'y' else True
     pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.p, prof2=p2.p,
                                 prof_2pt=p2pt,
-                                normprof1=normp1, normprof2=normp2,
+                                normprof1=(p1.type!='y'),  # pressure profile
+                                normprof2=(p2.type!='y'),  # don't normalise
                                 get_1h=include_1h, get_2h=include_2h,
                                 lk_arr=np.log(k_arr), a_arr=a_arr,
-                                f_ka=hmcorr)
+                                f_ka=hm_correction)
 
     p1.update_tracer(cosmo, **kwargs)
     p2.update_tracer(cosmo, **kwargs)
     cl = ccl.angular_cl(cosmo, p1.t, p2.t, l, pk)
-
 
     return cl
 
