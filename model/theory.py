@@ -17,6 +17,9 @@ def get_theory(p, dm, return_separated=False,
             factor.
         **kwargs: Parametrisation of the profiles and cosmology.
     """
+    kwargs["mass_function"] = p.get("mcmc").get("mfunc")
+    kwargs["halo_bias"] = p.get("mcmc").get("hbias")
+
     cls_out = []
     for tr, ls, bms in zip(dm.tracers, dm.ells, dm.beams):
         profiles = (tr[0].profile, tr[1].profile)
