@@ -216,7 +216,6 @@ def model_xcorr(p, fields, xcorr):
             print(name1, name2, end='')
             f1, type1 = fields[name1]
             f2, type2 = fields[name2]
-            zrange = get_zrange(fields, f1, f2)
             is_model = np.array([type1 in types, type2 in types])
             is_yy = (type1, type2) == ('y', 'y')  # don't model yxy
             if is_model.all() and not is_yy:
@@ -233,7 +232,7 @@ def model_xcorr(p, fields, xcorr):
                         kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.59}}
 
                     l = mcorr[name1][name2].leff
-                    cl = hm_ang_power_spectrum(l, (prof1, prof2), zrange=zrange,
+                    cl = hm_ang_power_spectrum(l, (prof1, prof2),
                                                hm_correction=hm_correction,
                                                **kwargs1)
                     if type1 == type2 == 'g':
