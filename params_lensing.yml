@@ -288,6 +288,8 @@ mcmc:
     save_par: False
     # Halo mass function
     mfunc: "tinker"
+    # Halo bias model
+    hbias: "tinker10"
 
 
 # Model parameters
