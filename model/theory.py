@@ -1,4 +1,6 @@
 import numpy as np
+from pyccl.halos.hmfunc import mass_function_from_name
+from pyccl.halos.hbias import halo_bias_from_name
 from .power_spectrum import hm_ang_power_spectrum
 
 
@@ -17,8 +19,8 @@ def get_theory(p, dm, return_separated=False,
             factor.
         **kwargs: Parametrisation of the profiles and cosmology.
     """
-    kwargs["mass_function"] = p.get("mcmc").get("mfunc")
-    kwargs["halo_bias"] = p.get("mcmc").get("hbias")
+    kwargs["mass_function"] = mass_function_from_name(p.get("mcmc").get("mfunc"))
+    kwargs["halo_bias"] = halo_bias_from_name(p.get("mcmc").get("hbias"))
 
     cls_out = []
     for tr, ls, bms in zip(dm.tracers, dm.ells, dm.beams):
