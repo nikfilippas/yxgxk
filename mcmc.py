@@ -8,6 +8,7 @@ from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
 from model.hmcorr import HaloModCorrection
+from model.cosmo_utils import COSMO_ARGS
 
 
 parser = ArgumentParser()
@@ -22,12 +23,14 @@ if args.nsteps is not None:
 
 p = ParamRun(fname_params)
 kwargs = p.get_cosmo_pars()
+cosmo = COSMO_ARGS(kwargs)
 
 # Jackknives
 jk_region = args.jk_id
 
 sel = pu.selection_func(p)
-hm_correction = HaloModCorrection if p.get("mcmc").get("hm_correct") else None
+hm_correction = HaloModCorrection(cosmo).hm_correction \
+                if p.get("mcmc").get("hm_correct") else None
 
 par = []
 for v in p.get('data_vectors'):
