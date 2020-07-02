@@ -197,6 +197,8 @@ def hm_ang_power_spectrum(l, profiles,
     """
     cosmo = COSMO_ARGS(kwargs)
     p1, p2 = profiles
+    p1.update_parameters(cosmo, **kwargs)
+    p2.update_parameters(cosmo, **kwargs)
     hmd = ccl.halos.MassDef(500, 'critical')
     # Set up Halo Model calculator
     nM = ccl.halos.MassFuncTinker08(cosmo, mass_def=hmd)
@@ -214,7 +216,7 @@ def hm_ang_power_spectrum(l, profiles,
                 r_corr = 0
                 print('2pt covariance for %sx%s defaulting to 0' % (p1.type,
                                                                     p2.type))
-        p2pt = ccl.halos.ProfilewptR(r_corr=r_corr)
+        p2pt = ccl.halos.ProfileptR(r_corr=r_corr)
 
     k_arr = np.geomspace(1e-4, 1e2, 256)
     a_arr = np.linspace(0.2, 1, 64)
@@ -230,8 +232,6 @@ def hm_ang_power_spectrum(l, profiles,
                                 lk_arr=np.log(k_arr), a_arr=a_arr,
                                 f_ka=hm_correction)
 
-    p1.update_tracer(cosmo, **kwargs)
-    p2.update_tracer(cosmo, **kwargs)
     cl = ccl.angular_cl(cosmo, p1.t, p2.t, l, pk)
 
     return cl

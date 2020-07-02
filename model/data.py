@@ -6,6 +6,14 @@ from .cosmo_utils import COSMO_ARGS
 
 
 class ProfTracer(object):
+    """Provides a framework to update the profile and tracer
+    together as a pair.
+
+    Args:
+        m (`dict`): Dictionary of associated map, usually imported
+                    from `yaml` file using `analysis.ParamRun.get('maps')[N].
+
+    """
     def __init__(self, m):
         self.type = m['type']
         if m['type'] == 'y':
