@@ -1,8 +1,6 @@
 import numpy as np
 from scipy.integrate import simps
 import pyccl as ccl
-from pyccl.halos.halos_extra import HaloProfileHOD, HaloProfileArnaud, HaloProfileNFW
-from pyccl.errors import CCLError
 from model.cosmo_utils import COSMO_ARGS
 
 
@@ -94,6 +92,8 @@ def hm_ang_power_spectrum(l, profiles,
     nM = kwargs["mass_function"](cosmo, mass_def=hmd)
     bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
     hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
+    p1.update_parameters(cosmo, **kwargs)
+    p2.update_parameters(cosmo, **kwargs)
 
     # Set up covariance
     if p1.type == p2.type == 'g':
@@ -106,7 +106,7 @@ def hm_ang_power_spectrum(l, profiles,
                 r_corr = 0
                 print('2pt covariance for %sx%s defaulting to 0' % (p1.type,
                                                                     p2.type))
-        p2pt = ccl.halos.ProfileptR(r_corr=r_corr)
+        p2pt = ccl.halos.Profile2ptR(r_corr=r_corr)
 
     k_arr = np.geomspace(1e-4, 1e2, 256)
     a_arr = np.linspace(0.2, 1, 64)
