@@ -1,5 +1,7 @@
 import yaml
 import pyccl as ccl
+from pyccl.halos.hmfunc import mass_function_from_name
+from pyccl.halos.hbias import halo_bias_from_name
 from .bandpowers import Bandpowers
 from model.cosmo_utils import COSMO_KEYS
 
@@ -24,19 +26,30 @@ class ParamRun(object):
             raise ValueError("Provide cosmological mass function.")
 
 
+    def get_halobias(self):
+        """Get preferred halo bias model."""
+        try:
+            return self.p['mcmc']['hbias']
+        except KeyError:
+            raise ValueError("Provide halo bias model.")
+
+
     def get_cosmo_pars(self):
         """Extract cosmological parameters from yaml file."""
         # names of all possible cosmological parameters
         pars = {par["name"]: par["value"] for par in self.p.get("params") \
                                           if par["name"] in COSMO_KEYS}
-        # TODO: 'mass_function' is deprecated in `pyccl.Cosmology`
-        pars["mass_function"] = self.get_massfunc()
+        pars["mass_function"] = mass_function_from_name(self.get_massfunc())
+        pars["halo_bias"] = halo_bias_from_name(self.get_halobias())
         return pars
 
 
     def get_cosmo(self):
         """Get default cosmology."""
-        return ccl.Cosmology(**self.get_cosmo_pars())
+        pars = self.get_cosmo_pars()
+        pars.pop("halo_bias")
+        pars.pop("mass_function")  # mass function not needed
+        return ccl.Cosmology(**pars)
 
 
     def get_outdir(self):
