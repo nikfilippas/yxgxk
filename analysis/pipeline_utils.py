@@ -20,24 +20,6 @@ from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import beam_hpix, beam_gaussian
 
 
-def selection_func(p):
-    """Returns the selection function."""
-    sel = p.get('mcmc').get('selection_function')
-    if sel is not None:
-        if sel == 'erf':
-            from model.utils import selection_planck_erf
-            sel = selection_planck_erf
-        elif sel == 'tophat':
-            from model.utils import selection_planck_tophat
-            sel = selection_planck_tophat
-        elif sel.lower() == 'none':
-            sel = None
-        else:
-            raise Warning("Selection function not recognised. Defaulting to None")
-            sel = None
-    return sel
-
-
 def which_maps(p):
     """Determine which maps (Fields) are used."""
     maps = set()
@@ -264,6 +246,7 @@ def get_covariance(p, f11, f12, f21, f22, suffix,
         cov.to_file(fname_cov); print(fname_cov)
 
 
+# TODO: implement properly in new pipeline
 def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
                       zpoints_a=64, zlog_a=True,
                       zpoints_b=64, zlog_b=True):
@@ -297,7 +280,6 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
         dcov = hm_ang_1h_covariance(fsky, leff, (p11, p12), (p21, p22),
                                     zrange_a=zrange_a, zpoints_a=zpoints_a, zlog_a=zlog_a,
                                     zrange_b=zrange_b, zpoints_b=zpoints_b, zlog_b=zlog_b,
-                                    selection=selection_func(p),
                                     kwargs_a=models_a, kwargs_b=models_b)
         cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
         cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
