@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 import numpy as np
-import analysis.pipeline_utils as pu
 from analysis.params import ParamRun
 from likelihood.yaml_handler import update_params, update_nsteps
 from likelihood.like import Likelihood
@@ -28,8 +27,7 @@ cosmo = COSMO_ARGS(kwargs)
 # Jackknives
 jk_region = args.jk_id
 
-sel = pu.selection_func(p)
-hm_correction = HaloModCorrection(cosmo).hm_correction \
+hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
                 if p.get("mcmc").get("hm_correct") else None
 
 par = []
@@ -45,7 +43,6 @@ for v in p.get('data_vectors'):
 
         return get_theory(p, d,
                           hm_correction=hm_correction,
-                          selection=sel,
                           **kwargs)
 
     # Set up likelihood
