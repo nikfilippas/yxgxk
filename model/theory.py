@@ -30,8 +30,6 @@ def get_theory(p, dm, return_separated=False,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
                                    **kwargs)
-        if cl is None:
-            return None
 
         cl *= bms  # Multiply by beams
         if return_separated:
