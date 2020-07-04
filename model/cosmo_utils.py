@@ -33,7 +33,7 @@ COSMO_KEYS = ['Omega_c',                    # background parameters
               'transfer_function',          # model specifications
               'matter_power_spectrum',
               'baryons_power_spectrum',
-              'mass_function',
+              # 'mass_function',            # ! deprecated in CCL
               'halo_concentration',
               'm_nu_type',
               'emulator_neutrinos']
