@@ -2,12 +2,12 @@ import numpy as np
 from likelihood.chanal import chan
 
 
-fname_params = "params_wnarrow.yml"
+fname_params = "params_dam_wnarrow.yml"
 q = chan(fname_params)
 
 
-CHAINS = q.get_chains(["b_hydro", "by"])
-BF = q.get_best_fit(["b_hydro", "by"], chains=CHAINS)
+CHAINS = q.get_chains(["b_hydro"])
+BF = q.get_best_fit(["b_hydro"], chains=CHAINS)
 OBF = q.get_overall_best_fit("b_hydro")
 
 
