@@ -74,7 +74,7 @@ def hm_ang_power_spectrum(l, profiles,
 
     Args:
         l (`numpy.array`): effective multipoles to sample
-        profiles (`model.data.ProfTracer`): profile and tracer pair
+        profiles (tuple of `model.data.ProfTracer`): profile and tracer pair
         include_1h (`bool`): whether to include the 1-halo term
         include_2h (`bool`): whether to include the 2-halo term
         hm_correction (`func`): multiplicative function of `k` and `a`
