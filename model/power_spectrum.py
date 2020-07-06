@@ -112,7 +112,7 @@ def hm_ang_power_spectrum(l, profiles,
     a_arr = np.linspace(0.2, 1, 64)
 
     if hm_correction is not None:
-        hm_correction = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
+        hm_correction_mod = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
 
     pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.p, prof2=p2.p,
                                 prof_2pt=p2pt,
@@ -120,7 +120,7 @@ def hm_ang_power_spectrum(l, profiles,
                                 normprof2=(p2.type!='y'),  # don't normalise
                                 get_1h=include_1h, get_2h=include_2h,
                                 lk_arr=np.log(k_arr), a_arr=a_arr,
-                                f_ka=hm_correction)
+                                f_ka=hm_correction_mod)
 
     cl = ccl.angular_cl(cosmo, p1.t, p2.t, l, pk)
     return cl
