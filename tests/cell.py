@@ -45,7 +45,7 @@ cl_old = np.load("tests/cl_test.npz")["clgy"]
 assert (np.fabs(1-cl_new/cl_old) < 0.05).all()
 
 
-# Code to produce yxg cells
+# Code to reproduce yxg cells
 # import numpy as np
 # from analysis.params import ParamRun
 # from model.power_spectrum import hm_ang_power_spectrum
