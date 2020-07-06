@@ -12,7 +12,6 @@ from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import hm_bias
 from model.hmcorr import HaloModCorrection as HalomodCorrection
-from model.utils import selection_planck_erf, selection_planck_tophat
 from scipy.stats import norm
 _PP = norm.sf(-1)-norm.sf(1)
 
@@ -167,19 +166,6 @@ class chan(object):
         return hm_correction
 
 
-    def _selfunc(self, p):
-        # Include selection function if needed
-        sel = p.get('mcmc').get('selection_function')
-        if sel is not None:
-            if sel == 'erf':
-                sel = selection_planck_erf
-            elif sel == 'tophat':
-                sel = selection_planck_tophat
-            elif sel == 'none':
-                sel = None
-        return sel
-
-
     def _get_dndz(self, fname, width):
         """Get the modified galaxy number counts."""
         zd, Nd = np.loadtxt(fname, unpack=True)
@@ -194,7 +180,7 @@ class chan(object):
     def _th(self, pars):
         return get_theory(self.p, self.d, self.cosmo,
                           hm_correction=self.hm_correction,
-                          selection=self.sel, **pars)
+                          **pars)
 
 
     def get_chains(self, pars, **specargs):
