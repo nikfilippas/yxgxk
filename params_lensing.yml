@@ -58,23 +58,23 @@ maps:
       # Proposed model parameters describing this map
       model:
           # Cosmology, HOD, and tSZ parameters
-          M0:  12.01
-          M1:  13.44
-          Mmin:  12.01
+          lM0:  11.66317664
+          lM1:  12.99472018
+          lMmin:  11.66317664
           alpha:  1.0
-          b_hydro:  0.6842
+          b_hydro:  0.33652023
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.3287
-          sigma_lnM:  0.15
-          width: 0.8305
+          r_corr_gy:  -0.10361521
+          sigmaLogM:  0.15
+          width: 1.19939348
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
           sigma8: 0.8102
           n_s: 0.9665
-          a_HMcorr: 0.3614146096356469
+          a_HMcorr: 0.1958513
       # List of systematics
       systematics:
         - 'data/maps/lambda_sfd_ebv.fits'
@@ -86,23 +86,23 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          M0:  12.01
-          M1:  13.44
-          Mmin:  12.01
+          lM0:  11.59153793
+          lM1:  11.89126683
+          lMmin:  11.59153793
           alpha:  1.0
-          b_hydro:  0.3274
+          b_hydro:  0.11877272
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5759
-          sigma_lnM:  0.15
-          width: 1.031
+          r_corr_gy:  -0.65621202
+          sigmaLogM:  0.15
+          width: 0.81297445
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
           sigma8: 0.8102
           n_s: 0.9665
-          a_HMcorr: 0.3614146096356469
+          a_HMcorr: 0.21515478
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
@@ -115,23 +115,23 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          M0:  11.99
-          M1:  13.35
-          Mmin:  11.99
+          lM0:  10.48718201
+          lM1:  13.35
+          lMmin:  10.48718201
           alpha:  1.0
-          b_hydro:  0.3445
+          b_hydro:  0.16081615
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5263
-          sigma_lnM:  0.15
-          width: 1.060
+          r_corr_gy:  -0.61417099
+          sigmaLogM:  0.15
+          width: 0.8080167
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
           sigma8: 0.8102
           n_s: 0.9665
-          a_HMcorr: 0.3614146096356469
+          a_HMcorr: 0.23087286
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
@@ -144,23 +144,23 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          M0:  11.97
-          M1:  13.27
-          Mmin:  11.97
+          lM0:  11.32914985
+          lM1:  12.51536196
+          lMmin:  11.32914985
           alpha:  1.0
-          b_hydro:  0.3061
+          b_hydro:  0.19452851
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5975
-          sigma_lnM:  0.15
-          width: 1.097
+          r_corr_gy:  -0.62590662
+          sigmaLogM:  0.15
+          width: 0.96975127
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
           sigma8: 0.8102
           n_s: 0.9665
-          a_HMcorr: 0.3614146096356469
+          a_HMcorr: 0.24627099
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
@@ -173,23 +173,23 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          M0:  11.98
-          M1:  13.23
-          Mmin:  11.98
+          lM0:  11.99335452
+          lM1:  13.18622206
+          lMmin: 11.99335452
           alpha:  1.0
-          b_hydro:  0.3664
+          b_hydro:  0.26434493
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.5788
-          sigma_lnM:  0.15
+          r_corr_gy:  -0.5776713
+          sigmaLogM:  0.15
           width: 1.085
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
           sigma8: 0.8102
           n_s: 0.9665
-          a_HMcorr: 0.3614146096356469
+          a_HMcorr: 0.25827266
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
@@ -202,23 +202,23 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          M0:  11.98
-          M1:  12.78
-          Mmin:  11.98
+          lM0:  12.55077359
+          lM1:  13.43386643
+          lMmin:  12.55077359
           alpha:  1.0
-          b_hydro:  0.4399
+          b_hydro:  0.25261573
           beta_gal:  1.0
           beta_max:  1.0
           fc:  1.0
-          r_corr:  -0.6920
-          sigma_lnM:  0.15
-          width: 0.8969
+          r_corr_gy:  -0.68876424
+          sigmaLogM:  0.15
+          width: 0.18987421
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
           sigma8: 0.8102
           n_s: 0.9665
-          a_HMcorr: 0.3614146096356469
+          a_HMcorr: 0.27359295
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
@@ -290,11 +290,11 @@ mcmc:
 params:
 # Each item here corresponds to one of the parameters used in our model
 # Cosmological parameters must adopt the naming of CCL (see model.cosmo_utils)
-    - name: "M0"
+    - name: "lM0"
       # Label for plotting
       label: "M_0"
       # Is this the same as another parameter? If so, put its name here.
-      alias: "Mmin"
+      alias: "lMmin"
       # Is this a free parameter?
       vary: False
       # Fiducial value
@@ -306,14 +306,14 @@ params:
           # If "TopHat", put edges here.
           # If "Gaussian", put [mean,sigma].
           values: [10., 16.]
-    - name: "M1"
+    - name: "lM1"
       label: "M_1"
       vary: True
       value: 13.5
       prior:
           type: "TopHat"
           values: [10., 16.]
-    - name: "Mmin"
+    - name: "lMmin"
       label: "M_{\\rm min}"
       vary: True
       value: 12.
@@ -344,7 +344,7 @@ params:
       prior:
           type: "TopHat"
           values: [0.1, 10.]
-    - name: "sigma_lnM"
+    - name: "sigmaLogM"
       label: "\\sigma_{{\\rm ln}M}"
       vary: False
       value: 0.15
@@ -358,7 +358,7 @@ params:
       prior:
           type: "TopHat"
           values: [0., 1.]
-    - name: "r_corr"
+    - name: "r_corr_gy"
       label: "\\rho_{gy}"
       vary: True
       value: 0.
