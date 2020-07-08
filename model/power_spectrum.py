@@ -113,6 +113,8 @@ def hm_ang_power_spectrum(l, profiles,
 
     if hm_correction is not None:
         hm_correction_mod = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
+    else:
+        hm_correction_mod = None
 
     pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.p, prof2=p2.p,
                                 prof_2pt=p2pt,
