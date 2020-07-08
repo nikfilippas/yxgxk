@@ -116,10 +116,10 @@ def hm_ang_power_spectrum(l, profiles,
     else:
         hm_correction_mod = None
 
-    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.p, prof2=p2.p,
+    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.profile, prof2=p2.profile,
                                 prof_2pt=p2pt,
-                                normprof1=(p1.type!='y'),  # pressure profile
-                                normprof2=(p2.type!='y'),  # don't normalise
+                                normprof1=(p1.type!='y'),  # don't normalise
+                                normprof2=(p2.type!='y'),  # pressure profile
                                 get_1h=include_1h, get_2h=include_2h,
                                 lk_arr=np.log(k_arr), a_arr=a_arr,
                                 f_ka=hm_correction_mod)
