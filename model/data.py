@@ -16,14 +16,14 @@ class ProfTracer(object):
                     from `yaml` file using `analysis.ParamRun.get('maps')[N].
         kmax (int): Maximum wavenumber to probe.
     """
-    def __init__(self, m, kmax=None):
+    def __init__(self, m, kmax=np.inf):
         self.name = m['name']
         self.type = m['type']
         self.beam = m['beam']
         self.syst = m.get('systematics')
-        self.lmax = 30000.
+        self.lmax = np.inf
         if m['type'] == 'y':
-            self.p = ccl.halos.HaloProfileArnaud()
+            self.profile = ccl.halos.HaloProfileArnaud()
         else:
             hmd = ccl.halos.MassDef(500, 'critical')
             cM = ccl.halos.ConcentrationDuffy08M500c(hmd)
@@ -35,16 +35,15 @@ class ProfTracer(object):
                                     bounds_error=False, fill_value=0.)
                 self.z_avg = np.average(self.z, weights=self.nz)
                 # determine max ell
-                if kmax is not None:
-                    zmean = np.average(self.z, weights=self.nz)
-                    cosmo = COSMO_ARGS(m['model'])
-                    chimean = ccl.comoving_radial_distance(cosmo, 1/(1+zmean))
-                    self.lmax = kmax*chimean-0.5
+                zmean = np.average(self.z, weights=self.nz)
+                cosmo = COSMO_ARGS(m['model'])
+                chimean = ccl.comoving_radial_distance(cosmo, 1/(1+zmean))
+                self.lmax = kmax*chimean-0.5
 
                 self.bz = np.ones_like(self.z)
-                self.p = ccl.halos.HaloProfileHOD(cM)
+                self.profile = ccl.halos.HaloProfileHOD(cM)
             elif m['type'] == 'k':
-                self.p = ccl.halos.HaloProfileNFW(cM)
+                self.profile = ccl.halos.HaloProfileNFW(cM)
         self.t = None
 
     def get_beam(self, ls, ns):
@@ -76,7 +75,7 @@ class ProfTracer(object):
             self.t = ccl.CMBLensingTracer(cosmo, 1100.)
 
     def update_parameters(self, cosmo, **kwargs):
-        self.p.update_parameters(**kwargs)
+        self.profile.update_parameters(**kwargs)
         self.update_tracer(cosmo, **kwargs)
 
 
