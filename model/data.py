@@ -1,5 +1,7 @@
 import numpy as np
 import os
+from scipy.interpolate import interp1d
+from scipy.integrate import simps
 import pyccl as ccl
 from .utils import beam_gaussian, beam_hpix
 from .cosmo_utils import COSMO_ARGS
@@ -12,10 +14,14 @@ class ProfTracer(object):
     Args:
         m (`dict`): Dictionary of associated map, usually imported
                     from `yaml` file using `analysis.ParamRun.get('maps')[N].
-
+        kmax (int): Maximum wavenumber to probe.
     """
-    def __init__(self, m):
+    def __init__(self, m, kmax=None):
+        self.name = m['name']
         self.type = m['type']
+        self.beam = m['beam']
+        self.syst = m.get('systematics')
+        self.lmax = 30000.
         if m['type'] == 'y':
             self.p = ccl.halos.HaloProfileArnaud()
         else:
@@ -23,61 +29,23 @@ class ProfTracer(object):
             cM = ccl.halos.ConcentrationDuffy08M500c(hmd)
 
             if m['type'] == 'g':
+                # transpose N(z)'s
                 self.z, self.nz = np.loadtxt(m['dndz']).T
+                self.nzf = interp1d(self.z, self.nz, kind='cubic',
+                                    bounds_error=False, fill_value=0.)
                 self.z_avg = np.average(self.z, weights=self.nz)
-                self.bz = np.ones(len(self.z))
+                # determine max ell
+                if kmax is not None:
+                    zmean = np.average(self.z, weights=self.nz)
+                    cosmo = COSMO_ARGS(m['model'])
+                    chimean = ccl.comoving_radial_distance(cosmo, 1/(1+zmean))
+                    self.lmax = kmax*chimean-0.5
+
+                self.bz = np.ones_like(self.z)
                 self.p = ccl.halos.HaloProfileHOD(cM)
             elif m['type'] == 'k':
                 self.p = ccl.halos.HaloProfileNFW(cM)
         self.t = None
-
-    def update_parameters(self, cosmo, **kwargs):
-        self.p.update_parameters(**kwargs)
-        self.update_tracer(cosmo, **kwargs)
-
-    def update_tracer(self, cosmo, **kwargs):
-        if self.type == 'g':
-            z = self.z_avg + (self.z - self.z_avg) / kwargs['width']
-            msk = z >= 0
-            self.t = ccl.NumberCountsTracer(cosmo, False,
-                                            (z[msk], self.nz[msk]),
-                                            (z[msk], self.bz[msk]))
-        elif self.type == 'y':
-            self.t = ccl.SZTracer(cosmo)
-        elif self.type == 'k':
-            self.t = ccl.CMBLensingTracer(cosmo, 1100.)
-
-
-class Tracer(object):
-    """
-    Tracer object used to store information related to
-    the signal modelling.
-
-    Args:
-        m (dict): dictionary defining a map in the
-            param file.
-        kmax (float): maximum wavenumber in units of Mpc^-1
-        **kwargs: Parametrisation of the profiles and cosmology.
-    """
-    def __init__(self, m, kmax, **kwargs):
-        self.name = m['name']
-        self.type = m['type']
-        self.beam = m['beam']
-        self.dndz = m.get('dndz')
-        cosmo = COSMO_ARGS(kwargs)
-        # Estimate z-range and ell-max
-        if self.dndz is not None:
-            z, nz = np.loadtxt(self.dndz, unpack=True)
-            z_inrange = z[nz >= 0.005*np.amax(nz)]
-            self.z_range = [z_inrange[0], z_inrange[-1]]
-            zmean = np.sum(z*nz)/np.sum(nz)
-            chimean = ccl.comoving_radial_distance(cosmo, 1./(1+zmean))
-            self.lmax = kmax*chimean-0.5
-        else:
-            self.z_range = [1E-6, 6]
-            self.lmax = 100000
-        self.profile = ProfTracer(m)
-        self.syst = m.get('systematics')
 
     def get_beam(self, ls, ns):
         """
@@ -91,10 +59,25 @@ class Tracer(object):
             float or array: SHT of the beam for this tracer.
         """
         b0 = beam_hpix(ls, ns)
-        # b0 = np.ones_like(ls)
         if self.beam:
             b0 *= beam_gaussian(ls, self.beam)
         return b0
+
+    def update_tracer(self, cosmo, **kwargs):
+        if self.type == 'g':
+            nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs['width'])
+            nz_new /= simps(nz_new, x=self.z)
+            self.t = ccl.NumberCountsTracer(cosmo, False,
+                                            (self.z, nz_new),
+                                            (self.z, self.bz))
+        elif self.type == 'y':
+            self.t = ccl.SZTracer(cosmo)
+        elif self.type == 'k':
+            self.t = ccl.CMBLensingTracer(cosmo, 1100.)
+
+    def update_parameters(self, cosmo, **kwargs):
+        self.p.update_parameters(**kwargs)
+        self.update_tracer(cosmo, **kwargs)
 
 
 def choose_cl_file(p, tracers, jk_region=None):
@@ -169,7 +152,7 @@ class DataManager(object):
         nside = p.get_nside()
         kmax = np.inf if all_data else p.get('mcmc')['kmax']
         # Create tracers for all maps in the param file.
-        tracers = {m['name']: Tracer(m, kmax, **kwargs) for m in p.get('maps')}
+        tracers = {m['name']: ProfTracer(m, kmax) for m in p.get('maps')}
 
         self.tracers = []
         self.data_vector = []
@@ -208,7 +191,7 @@ class DataManager(object):
                 self.beams.append(bm)
                 # Contaminant templates
                 # Currently only supercosmos plate variations needed
-                temp=np.zeros(len(f['ls']))
+                temp=np.zeros_like(f['ls'])
                 if tr[0].name == tr[1].name: # Auto-correlation
                     if tr[0].syst is not None:
                         if 'scos_plates' in tr[0].syst:
