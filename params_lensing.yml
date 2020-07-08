@@ -86,9 +86,9 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          lM0:  11.59153793
+          lM0:  10.59153793
           lM1:  11.89126683
-          lMmin:  11.59153793
+          lMmin:  10.59153793
           alpha:  1.0
           b_hydro:  0.11877272
           beta_gal:  1.0
@@ -116,7 +116,7 @@ maps:
       beam: False
       model:
           lM0:  10.48718201
-          lM1:  13.35
+          lM1:  11.73255203
           lMmin:  10.48718201
           alpha:  1.0
           b_hydro:  0.16081615
@@ -183,7 +183,7 @@ maps:
           fc:  1.0
           r_corr_gy:  -0.5776713
           sigmaLogM:  0.15
-          width: 1.085
+          width: 1.15909897
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
@@ -212,7 +212,7 @@ maps:
           fc:  1.0
           r_corr_gy:  -0.68876424
           sigmaLogM:  0.15
-          width: 0.18987421
+          width: 1.18987421
           Omega_c: 0.26066676
           Omega_b: 0.048974682
           h: 0.6766
