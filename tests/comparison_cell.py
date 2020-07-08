@@ -10,16 +10,10 @@ p = ParamRun("params_lensing.yml")
 cosmo_pars = p.get_cosmo_pars()
 cosmo = p.get_cosmo()
 hm_correction = HaloModCorrection(cosmo, **cosmo_pars).hm_correction
-# hm_correction = HM_halofit(cosmo, **cosmo_pars).rk_interp
 
+zbins = ["2mpz"]+["wisc%d" % i for i in range(1, 6)]
 kwargs = [[] for i in range(6)]
-kwargs[0] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigmaLogM': 0.15, 'lM1': 12.99472018, 'lMmin': 11.66317664, 'b_hydro': 0.33652023, 'r_corr_gy': -0.10361521, 'width': 1.19939348, 'lM0': 11.66317664, 'beta_max': 1.0, 'a_HMcorr': 0.1958513}
-kwargs[1] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigmaLogM': 0.15, 'lM1': 11.89126683, 'lMmin': 10.59153793, 'b_hydro': 0.11877272, 'r_corr_gy': -0.65621202, 'width': 0.81297445, 'lM0': 11.59153793, 'beta_max': 1.0, 'a_HMcorr': 0.21515478}
-kwargs[2] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigmaLogM': 0.15, 'lM1': 11.73255203, 'lMmin': 10.48718201, 'b_hydro': 0.16081615, 'r_corr_gy': -0.61417099, 'width': 0.80801670, 'lM0': 10.48718201, 'beta_max': 1.0, 'a_HMcorr': 0.23087286}
-kwargs[3] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigmaLogM': 0.15, 'lM1': 12.51536196, 'lMmin': 11.32914985, 'b_hydro': 0.19452851, 'r_corr_gy': -0.62590662, 'width': 0.96975127, 'lM0': 11.32914985, 'beta_max': 1.0, 'a_HMcorr': 0.24627099}
-kwargs[4] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigmaLogM': 0.15, 'lM1': 13.18622206, 'lMmin': 11.99335452, 'b_hydro': 0.26434493, 'r_corr_gy': -0.57767130, 'width': 1.15909897, 'lM0': 11.99335452, 'beta_max': 1.0, 'a_HMcorr': 0.25827266}
-kwargs[5] = {'fc': 1.0, 'alpha': 1.0, 'beta_gal': 1.0, 'sigmaLogM': 0.15, 'lM1': 13.43386643, 'lMmin': 12.55077359, 'b_hydro': 0.25261573, 'r_corr_gy': -0.68876424, 'width': 1.18987421, 'lM0': 12.55077359, 'beta_max': 1.0, 'a_HMcorr': 0.27359295}
-
+kwargs = [p.get_models()[zbin] for zbin in zbins]
 
 ## PREVIOUS ANALYSIS ##
 lsd = [[[] for i in range(6)] for j in range(2)]
@@ -99,7 +93,6 @@ for i in range(6):
 
 
 ## FIGURE ###
-zbins = ["2mpz"] + ["wisc%d" % d for d in range(1, 6)]
 corrs = [r"$g \times g$", r"$g \times y$", r"$g \times \kappa$"]
 sci = [r"$\mathrm{2MPZ}$"] + \
       [r"$\mathrm{WI \times SC}$ - $\mathrm{%d}$" % i for i in range(1, 6)]
