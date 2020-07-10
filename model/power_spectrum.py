@@ -1,69 +1,31 @@
 import numpy as np
-from scipy.integrate import simps
 import pyccl as ccl
 from model.cosmo_utils import COSMO_ARGS
 
 
-def hm_bias(a, profile,
-            logMrange=(6, 17), mpoints=128,
-            selection=None,
-            **kwargs):
+def hm_bias(a, profile, **kwargs):
     """Computes the halo model prediction for the bias of a given
     tracer.
 
     Args:
-        a (array): array of scale factor values
-        profile (`Profile`): a profile. Only Arnaud and HOD are
-            implemented.
-        logMrange (tuple): limits of integration in log10(M/Msun)
-        mpoints (int): number of mass samples
-        selection (function): selection function in (M,z) to include
-            in the calculation. Pass None if you don't want to select
-            a subset of the M-z plane.
+        a (array): array of scale factor values.
+        profile (`model.data.ProfTracer`): a profile-tracer object.
         **kwargs: Parametrisation of the profiles and cosmology.
+
+    Returns:
+        `numpy.array`: The halo model bias for the input profile.
     """
-    # Input handling
-    a = np.atleast_1d(a)
-
     cosmo = COSMO_ARGS(kwargs)
-    # Profile normalisations
-    Unorm = profile.profnorm(a, squeeze=False, **kwargs)
-    Unorm = Unorm[..., None]
+    hmd = ccl.halos.MassDef(500, 'critical')
+    nM = kwargs["mass_function"](cosmo, mass_def=hmd)
+    bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
+    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
+    profile.update_parameters(cosmo, **kwargs)
 
-    # Set up integration boundaries
-    logMmin, logMmax = logMrange  # log of min and max halo mass [Msun]
-    mpoints = int(mpoints)        # number of integration points
-    M = np.logspace(logMmin, logMmax, mpoints)  # masses sampled
-
-    # Out-of-loop optimisations
-    Dm = profile.Delta/ccl.omega_x(cosmo, a, "matter")  # CCL uses Delta_m
-    mfunc = np.array([ccl.massfunc(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
-    bh = np.array([ccl.halo_bias(cosmo, M, A1, A2) for A1, A2 in zip(a, Dm)])
-    # shape transformations
-    mfunc, bh = mfunc.T[..., None], bh.T[..., None]
-    if selection is not None:
-        select = np.array([selection(M,1./aa-1) for aa in a])
-        select = select.T[..., None]
-    else:
-        select = 1
-
-    U, _ = profile.fourier_profiles(np.array([0.001]), M, a,
-                                    squeeze=False, **kwargs)
-
-    # Tinker mass function is given in dn/dlog10M, so integrate over d(log10M)
-    b2h = simps(bh*mfunc*select*U, x=np.log10(M), axis=0).squeeze()
-
-    # Contribution from small masses (added in the beginning)
-    rhoM = ccl.rho_x(cosmo, a, "matter", is_comoving=True)
-    dlM = (logMmax-logMmin) / (mpoints-1)
-    mfunc, bh = mfunc.squeeze(), bh.squeeze()  # squeeze extra dimensions
-
-    n0_2h = np.array((rhoM - np.dot(M, mfunc*bh) * dlM)/M[0])[None, ..., None]
-
-    b2h += (n0_2h*U[0]).squeeze()
-    b2h /= Unorm.squeeze()
-
-    return b2h.squeeze()
+    bias = ccl.halos.halomod_bias_1pt(cosmo, hmc, 0.0001, a,
+                                      profile.profile,
+                                      normprof=(profile.type!='y'))
+    return bias
 
 
 
@@ -92,8 +54,6 @@ def hm_ang_power_spectrum(l, profiles,
     nM = kwargs["mass_function"](cosmo, mass_def=hmd)
     bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
     hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
-    p1.update_parameters(cosmo, **kwargs)
-    p2.update_parameters(cosmo, **kwargs)
 
     # Set up covariance
     if p1.type == p2.type == 'g':
@@ -124,5 +84,5 @@ def hm_ang_power_spectrum(l, profiles,
                                 lk_arr=np.log(k_arr), a_arr=a_arr,
                                 f_ka=hm_correction_mod)
 
-    cl = ccl.angular_cl(cosmo, p1.t, p2.t, l, pk)
+    cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)
     return cl
