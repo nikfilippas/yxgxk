@@ -44,7 +44,7 @@ class ProfTracer(object):
                 self.profile = ccl.halos.HaloProfileHOD(cM)
             elif m['type'] == 'k':
                 self.profile = ccl.halos.HaloProfileNFW(cM)
-        self.t = None
+        self.tracer = None
 
     def get_beam(self, ls, ns):
         """
@@ -66,13 +66,13 @@ class ProfTracer(object):
         if self.type == 'g':
             nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs['width'])
             nz_new /= simps(nz_new, x=self.z)
-            self.t = ccl.NumberCountsTracer(cosmo, False,
+            self.tracer = ccl.NumberCountsTracer(cosmo, False,
                                             (self.z, nz_new),
                                             (self.z, self.bz))
         elif self.type == 'y':
-            self.t = ccl.SZTracer(cosmo)
+            self.tracer = ccl.SZTracer(cosmo)
         elif self.type == 'k':
-            self.t = ccl.CMBLensingTracer(cosmo, 1100.)
+            self.tracer = ccl.CMBLensingTracer(cosmo, 1100.)
 
     def update_parameters(self, cosmo, **kwargs):
         self.profile.update_parameters(**kwargs)
