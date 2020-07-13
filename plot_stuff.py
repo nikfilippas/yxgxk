@@ -6,8 +6,8 @@ from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
 import matplotlib.pyplot as plt
-from model.power_spectrum import HalomodCorrection, hm_bias
-from model.utils import selection_planck_erf, selection_planck_tophat
+from model.hmcorr import HaloModCorrection
+from model.power_spectrum import hm_bias
 
 try:
     fname_params = sys.argv[1]
@@ -19,22 +19,13 @@ run_name = p.get('mcmc')['run_name']
 
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
+kwargs = p.get_cosmo_pars()
 
 # Include halo model correction if needed
 if p.get('mcmc').get('hm_correct'):
-    hm_correction = HalomodCorrection(cosmo)
+    hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction
 else:
     hm_correction = None
-
-# Include selection function if needed
-sel = p.get('mcmc').get('selection_function')
-if sel is not None:
-    if sel == 'erf':
-        sel = selection_planck_erf
-    elif sel == 'tophat':
-        sel = selection_planck_tophat
-    elif sel == 'none':
-        sel = None
 
 
 zmeans = []
@@ -54,20 +45,17 @@ for v in p.get('data_vectors'):
     def th(pars):
         return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
-                          selection=sel,
                           **pars)
 
     def th1h(pars):
         return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
-                          selection=sel,
                           include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(pars):
         return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
-                          selection=sel,
                           include_2h=True, include_1h=False,
                           **pars)
 
@@ -85,9 +73,9 @@ for v in p.get('data_vectors'):
 
     # Compute galaxy bias
     zarr = np.linspace(zmean - sigz, zmean + sigz, 10)
-    bgchain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[0][0].profile,
+    bgchain = np.array([hm_bias(1./(1 + zarr), d.tracers[0][0],
                       **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
-    bychain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1].profile,
+    bychain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1],
                       **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
 
     bgmin, bg, bgmax = np.percentile(bgchain, [16, 50, 84])
