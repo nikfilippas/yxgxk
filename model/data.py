@@ -30,7 +30,8 @@ class ProfTracer(object):
 
             if m['type'] == 'g':
                 # transpose N(z)'s
-                self.z, self.nz = np.loadtxt(m['dndz']).T
+                self.dndz = m['dndz']
+                self.z, self.nz = np.loadtxt(self.dndz).T
                 self.nzf = interp1d(self.z, self.nz, kind='cubic',
                                     bounds_error=False, fill_value=0.)
                 self.z_avg = np.average(self.z, weights=self.nz)
