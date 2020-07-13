@@ -188,8 +188,8 @@ class chan(object):
 
         def bias_one(p0, num):
             """Calculates the halo model bias for a set of parameters."""
-            bb = hm_bias(self.cosmo, 1/(1+zarr),
-                         d.tracers[num][1].profile,
+            bb = hm_bias(1/(1+zarr),
+                         d.tracers[num][1],
                          **lik.build_kwargs(p0))
             return bb
 
@@ -221,7 +221,7 @@ class chan(object):
             except FileNotFoundError:
                 continue
 
-        if "bg" or "by" in fid_pars:
+        if ("bg" in fid_pars) or ("by" in fid_pars) or ("bk" in fid_pars):
             # skip every (for computationally expensive hm_bias)
             b_skip = specargs.get("reduce_by_factor")
             if b_skip is None:
@@ -229,7 +229,7 @@ class chan(object):
                 b_skip = 100
 
         for s, v in enumerate(self.p.get("data_vectors")):
-            d = DataManager(self.p, v, self.cosmo, all_data=False)
+            d = DataManager(self.p, v, all_data=False)
             self.d = d
             lik = Likelihood(self.p.get('params'),
                              d.data_vector, d.covar,
@@ -252,13 +252,15 @@ class chan(object):
             if "probs" in pars:
                 chains["probs"] = sam.probs
 
-            if ("by" or "bg") in fid_pars:
+            if ("bg" in fid_pars) or ("by" in fid_pars) or ("bk" in fid_pars):
                 sigz = np.sqrt(np.sum(NN * (zz - zmean)**2) / np.sum(NN))
                 zarr = np.linspace(zmean-sigz, zmean+sigz, 10)
                 if "bg" in pars:
                     chains["bg"] = bias_avg(num=0, skip=b_skip)
                 if "by" in pars:
                     chains["by"] = bias_avg(num=1, skip=b_skip)
+                if "bk" in pars:
+                    chains["bk"] = bias_avg(num=2, skip=b_skip)
 
 
             # Construct tomographic dictionary
@@ -272,6 +274,7 @@ class chan(object):
         # save bias chains to save time if not already saved
         if "bg" in fid_pars: np.save(fname("bg"), CHAINS["bg"])
         if "by" in fid_pars: np.save(fname("by"), CHAINS["by"])
+        if "bk" in fid_pars: np.save(fname("bk"), CHAINS["bk"])
 
         return {**preCHAINS, **CHAINS}
 
