@@ -182,7 +182,8 @@ class chan(object):
 
         def bias_one(p0, num):
             """Calculates the halo model bias for a set of parameters."""
-            bb = hm_bias(1/(1+zarr),
+            bb = hm_bias(self.cosmo,
+                         1/(1+zarr),
                          d.tracers[num][1],
                          **lik.build_kwargs(p0))
             return bb

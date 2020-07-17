@@ -70,7 +70,7 @@ for v in p.get('data_vectors'):
 
     # Compute galaxy bias
     zarr = np.linspace(zmean - sigz, zmean + sigz, 10)
-    bgchain = np.array([hm_bias(1./(1 + zarr), d.tracers[0][0],
+    bgchain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[0][0],
                       **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
     bychain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1],
                       **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
