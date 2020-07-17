@@ -1,15 +1,16 @@
 import numpy as np
 import pyccl as ccl
 from scipy.integrate import simps
-from .cosmo_utils import COSMO_ARGS
+from .cosmo_utils import COSMO_CHECK
 
 
-def hm_1h_trispectrum(k, profiles, **kwargs):
+def hm_1h_trispectrum(cosmo, k, profiles, **kwargs):
     """Computes the halo model prediction for the 1-halo 3D
     trispectrum of four profile quantities.
     """
+    COSMO_CHECK(cosmo, **kwargs)
+
     p1, p2, p3, p4 = profiles
-    cosmo = COSMO_ARGS(kwargs)
     p1.update_parameters(cosmo, **kwargs)
     p2.update_parameters(cosmo, **kwargs)
     p3.update_parameters(cosmo, **kwargs)
@@ -54,7 +55,7 @@ def hm_1h_trispectrum(k, profiles, **kwargs):
     return I04
 
 
-def hm_ang_1h_covariance(fsky, l, profiles, **kwargs):
+def hm_ang_1h_covariance(fsky, l, cosmo, profiles, **kwargs):
     """Computes the 1-h trispectrum contribution to the covariance of the
     angular cross power spectra involving two pairs of quantities.
 
@@ -66,13 +67,12 @@ def hm_ang_1h_covariance(fsky, l, profiles, **kwargs):
     fsky : float
         Sky fraction
     l (`numpy.array`): effective multipoles
+    cosmo (`~pyccl.core.Cosmology): a Cosmology object.
     profiles : tuple of `model.data.ProfTracer` objects
         The profiles of the four quantities being correlated.
     kwargs : parameter dictionary
         Parametrisation of the profiles and cosmology.
     """
-    cosmo = COSMO_ARGS(kwargs)
-
     a = np.linspace(0.2, 1-1e-6, 128)  # avoid zero division
     chi = ccl.comoving_radial_distance(cosmo, a)
 
@@ -84,6 +84,6 @@ def hm_ang_1h_covariance(fsky, l, profiles, **kwargs):
     N = w1*w2*w3*w4*H_inv/(4*np.pi*fsky*chi**6)
 
     k = (l+1/2)/chi[:, np.newaxis]
-    t1h = hm_1h_trispectrum(k, profiles, **kwargs)
+    t1h = hm_1h_trispectrum(cosmo, k, profiles, **kwargs)
     tl = simps(N[:, None, None] * t1h, np.log(1/a+1), axis=0)
     return tl

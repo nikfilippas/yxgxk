@@ -279,7 +279,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
         models_b = p.get_models()[f12.name]
         kwargs = merge_models(models_a, models_b)
         # Calculate covariace
-        dcov = hm_ang_1h_covariance(fsky, leff, profiles, **kwargs)
+        dcov = hm_ang_1h_covariance(fsky, leff, cosmo, profiles, **kwargs)
         cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
         cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
                     f11.name + "_" + f12.name + "_" +
