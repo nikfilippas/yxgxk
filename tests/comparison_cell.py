@@ -3,7 +3,7 @@
 import numpy as np
 from analysis.params import ParamRun
 from model.hmcorr import HaloModCorrection
-from model.hmcorr import HM_halofit
+from model.cosmo_utils import COSMO_ARGS
 
 
 p = ParamRun("params_lensing.yml")
@@ -77,15 +77,16 @@ z = np.linspace(0.0005, 6, 1000)
 
 TT = [[[] for i in range(6)] for j in range(3)]
 for i in range(6):
-    TT[0][i] = hm_ang_power_spectrum(L, (g[i], g[i]),
+    cosmo = COSMO_ARGS(cosmo_pars)
+    TT[0][i] = hm_ang_power_spectrum(cosmo, L, (g[i], g[i]),
                                      hm_correction=hm_correction,
                                      **{**kwargs[i], **cosmo_pars})
     TT[0][i] *= pu.Beam(("g", "g"), L, 2048)
-    TT[1][i] = hm_ang_power_spectrum(L, (y, g[i]),
+    TT[1][i] = hm_ang_power_spectrum(cosmo, L, (y, g[i]),
                                      hm_correction=hm_correction,
                                      **{**kwargs[i], **cosmo_pars})
     TT[1][i] *= pu.Beam(("g", "y"), L, 2048)
-    TT[2][i] = hm_ang_power_spectrum(L, (k, g[i]),
+    TT[2][i] = hm_ang_power_spectrum(cosmo, L, (k, g[i]),
                                      hm_correction=hm_correction,
                                      **{**kwargs[i], **cosmo_pars})
     TT[2][i] *= pu.Beam(("g", "k"), L, 2048)

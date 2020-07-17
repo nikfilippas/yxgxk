@@ -1,6 +1,6 @@
 import numpy as np
 from .power_spectrum import hm_ang_power_spectrum
-
+from .cosmo_utils import COSMO_ARGS
 
 
 def get_theory(p, dm, return_separated=False,
@@ -17,19 +17,20 @@ def get_theory(p, dm, return_separated=False,
             factor.
         **kwargs: Parametrisation of the profiles and cosmology.
     """
+    cosmo = COSMO_ARGS(kwargs)
     kwargs["mass_function"] = p.get_cosmo_pars()["mass_function"]
     kwargs["halo_bias"] = p.get_cosmo_pars()["halo_bias"]
 
     cls_out = []
     for tr, ls, bms in zip(dm.tracers, dm.ells, dm.beams):
         profiles = (tr[0].profile, tr[1].profile)
-        cl = hm_ang_power_spectrum(ls, profiles,
+        cl = hm_ang_power_spectrum(cosmo, ls, profiles,
                                    hm_correction=hm_correction,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
                                    **kwargs)
 
-        cl *= bms  # Multiply by beams
+        cl *= bms  # multiply by beams
         if return_separated:
             cls_out.append(cl)
         else:

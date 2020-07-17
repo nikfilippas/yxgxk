@@ -43,7 +43,6 @@ gat = DataManager(p, v, cosmo, all_data=True)
 def th(pars,d):
     return get_theory(p,
                       d,
-                      cosmo,
                       hm_correction=hm_correction,
                       selection=None,**pars)
 likd = Likelihood(p.get('params'), dat.data_vector, dat.covar, th,

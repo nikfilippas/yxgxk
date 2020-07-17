@@ -40,18 +40,18 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     def th(pars):
-        return get_theory(p, d, cosmo, return_separated=False,
+        return get_theory(p, d, return_separated=False,
                           hm_correction=hm_correction,
                           **pars)
 
     def th1h(pars):
-        return get_theory(p, d, cosmo, return_separated=False,
+        return get_theory(p, d, return_separated=False,
                           hm_correction=hm_correction,
                           include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(pars):
-        return get_theory(p, d, cosmo, return_separated=False,
+        return get_theory(p, d, return_separated=False,
                           hm_correction=hm_correction,
                           include_2h=True, include_1h=False,
                           **pars)

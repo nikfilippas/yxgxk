@@ -172,7 +172,7 @@ class chan(object):
 
 
     def _th(self, pars):
-        return get_theory(self.p, self.d, self.cosmo,
+        return get_theory(self.p, self.d,
                           hm_correction=self.hm_correction,
                           **pars)
 

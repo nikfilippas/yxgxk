@@ -9,6 +9,7 @@ from pyccl.halos.hbias import halo_bias_from_name
 from model.data import ProfTracer
 import numpy as np
 from model.power_spectrum import hm_ang_power_spectrum
+from model.cosmo_utils import COSMO_ARGS
 fname = "../yxg/params_dam_wnarrow.yml"
 p = ParamRun(fname)
 zbin = "wisc3"
@@ -34,7 +35,8 @@ p1 = p2 = ProfTracer(m, kmax)
 # msk = np.ones(100).astype(int)
 msk = tuple([l < p1.lmax])
 
-cl_new = hm_ang_power_spectrum(l, (p1, p2), **kwargs)
+cosmo = COSMO_ARGS(kwargs)
+cl_new = hm_ang_power_spectrum(cosmo, l, (p1, p2), **kwargs)
 cl_old = np.load("tests/cl_test_%s.npz" % zbin)["clgg"]
 import matplotlib.pyplot as plt
 plt.figure()
@@ -48,7 +50,7 @@ for n in p.get("maps"):
         break
 p2 = ProfTracer(n)
 
-cl_new = hm_ang_power_spectrum(l, (p1, p2), **kwargs)
+cl_new = hm_ang_power_spectrum(cosmo, l, (p1, p2), **kwargs)
 cl_old = np.load("tests/cl_test_%s.npz" % zbin)["clgy"]
 plt.figure()
 plt.loglog(l[msk], cl_old[msk])

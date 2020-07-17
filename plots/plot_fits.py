@@ -26,16 +26,16 @@ class thr(object):
         self.d = d
 
     def th(self, pars):
-        return get_theory(p, self.d, cosmo, hm_correction=hm_correction,
+        return get_theory(p, self.d, hm_correction=hm_correction,
                           selection=sel, **pars)
 
     def th1h(self, pars):
-        return get_theory(p, self.d, cosmo, hm_correction=hm_correction,
+        return get_theory(p, self.d, hm_correction=hm_correction,
                           selection=sel, include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(self, pars):
-        return get_theory(p, self.d, cosmo, hm_correction=hm_correction,
+        return get_theory(p, self.d, hm_correction=hm_correction,
                           selection=sel, include_2h=True, include_1h=False,
                           **pars)
 
