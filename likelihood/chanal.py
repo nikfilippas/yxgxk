@@ -154,7 +154,9 @@ class chan(object):
         self.p = ParamRun(fname_params)
         self.cosmo = self.p.get_cosmo()
         self.kwargs = self.p.get_cosmo_pars()
-        self.hm_correction = HaloModCorrection(self.kwargs).hm_correction \
+        self.hm_correction = HaloModCorrection(self.cosmo,
+                                               **self.kwargs
+                                               ).hm_correction \
                              if self.p.get("mcmc").get("hm_correct") else None
 
 

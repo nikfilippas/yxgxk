@@ -7,7 +7,6 @@ import pyccl as ccl
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from scipy.optimize import curve_fit
-from .cosmo_utils import COSMO_ARGS
 
 
 class HM_halofit(object):
@@ -80,12 +79,10 @@ class HaloModCorrection(object):
         nz (int): number of samples in redshift to use.
         kwargs (dict): mass function and halo bias models
     """
-    def __init__(self, k_range=[1E-1, 5], nlk=20,
-                       z_range=[0., 1.], nz=16,
-                       kwargs=None):
-        if kwargs is None:
-            raise ValueError('Provide mass function and halo bias models.')
-        cosmo = COSMO_ARGS(kwargs)
+    def __init__(self, cosmo,
+                 k_range=[1E-1, 5], nlk=20,
+                 z_range=[0., 1.], nz=16,
+                 **kwargs):
         hf = HM_halofit(cosmo, **kwargs).rk_interp
         k_arr = np.geomspace(k_range[0], k_range[1], nlk)
         a_arr = 1/(1+np.linspace(z_range[0], z_range[1], nz))

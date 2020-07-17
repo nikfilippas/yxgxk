@@ -21,7 +21,7 @@ if args.nsteps is not None:
 
 p = ParamRun(fname_params)
 kwargs = p.get_cosmo_pars()
-hm_correction = HaloModCorrection(kwargs).hm_correction \
+hm_correction = HaloModCorrection(**kwargs).hm_correction \
                 if p.get("mcmc").get("hm_correct") else None
 
 # Jackknives
