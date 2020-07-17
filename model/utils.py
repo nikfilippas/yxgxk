@@ -4,8 +4,7 @@ This file contains a series of convenience functions used in various parts of th
 
 import numpy as np
 import pyccl as ccl
-from scipy.special import erf
-from .cosmo_utils import COSMO_ARGS
+from .cosmo_utils import COSMO_CHECK
 
 
 # Halo sizes
@@ -46,7 +45,7 @@ def concentration_duffy(M, a, is_D500=False, squeeze=True):
     return c.squeeze() if squeeze else c
 
 
-def R_Delta(M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
+def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
     """
     Calculate the reference radius of a halo.
 
@@ -55,6 +54,8 @@ def R_Delta(M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
 
     Arguments
     ---------
+    cosmo: ~pyccl.core.Cosmology
+        Cosmology object.
     M : float or array_like
         Halo mass [Msun].
     a : float or array_like
@@ -73,10 +74,10 @@ def R_Delta(M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
     -------
     float or array_like : The halo reference radius in `Mpc`.
     """
+    COSMO_CHECK(cosmo, **kwargs)
     # Input handling
     M, a = np.atleast_1d(M, a)
 
-    cosmo = COSMO_ARGS(kwargs)
     if is_matter:
         omega_factor = ccl.omega_x(cosmo, a, "matter")
     else:
