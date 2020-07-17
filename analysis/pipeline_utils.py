@@ -15,39 +15,47 @@ from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
 from model.hmcorr import HaloModCorrection
 from model.trispectrum import hm_ang_1h_covariance
-from model.profile2D import types
 from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import beam_hpix, beam_gaussian
+from model.cosmo_utils import COSMO_ARGS, COSMO_DEFAULT
+from model.data import ProfTracer
 
 
-def which_maps(p):
-    """Determine which maps (Fields) are used."""
-    maps = set()
-    # load 'dust_545' if it exists
-    for d in p.get("maps"):
-        if d["name"] == "dust_545":
-            maps.add("dust_545")
-    for dv in p.get("data_vectors"):
-        for tp in dv["twopoints"]:
-            for tr in tp["tracers"]:
-                maps.add(tr)
-    return maps
+types = ['g', 'y', 'k']  # cross-correlation types
 
 
-def which_masks(p):
-    """Determine which masks are used."""
-    maps = which_maps(p)
-    masks = set()
-    for d in p.get("maps"):
-        if d["name"] in maps:
-            masks.add(d["mask"])
-    return masks
+class used(object):
+    """Determine which maps (Fields) and masks are used."""
+    def __init__(self, p):
+        self.p = p
+        self.maps = set()
+        # load 'dust_545' if it exists
+        for d in self.p.get("maps"):
+            if d["name"] == "dust_545":
+                self.maps.add("dust_545")
+        for dv in self.p.get("data_vectors"):
+            for tp in dv["twopoints"]:
+                for tr in tp["tracers"]:
+                    self.maps.add(tr)
+
+    def which_maps(self):
+        """Rerurn set of used maps."""
+        return self.maps
+
+    def which_masks(self):
+        """Return set of used masks."""
+        self.masks = set()
+        for d in self.p.get("maps"):
+            if d["name"] in self.maps:
+                self.masks.add(d["mask"])
+        return self.masks
+
 
 
 def read_fields(p):
     """Constructs a dictionary of classified fields."""
     nside = p.get_nside()
-    maps = which_maps(p)
+    maps = used(p).which_maps()
     fields = {}
     for d in tqdm(p.get("maps"), desc="Reading fields"):
         if d["name"] not in maps: continue
@@ -60,37 +68,27 @@ def read_fields(p):
     return fields
 
 
-def get_profile(p, name_p, type_p):
-    if type_p == 'g':
-        for M in p.get('maps'):
-            if M['name'] == name_p:
-                dndz = M['dndz']
-                prof = types[type_p](nz_file=dndz)
-                kwargs = {**p.get_models()[name_p], **p.get_cosmo_pars()}
+def get_profile(p, profname):
+    for m in p.get("maps"):
+        if m["name"] == profname:
+            break
+    prof = ProfTracer(m)
+    if prof.type == "g":
+        kwargs = m["model"]
+        cosmo = COSMO_ARGS(kwargs)
     else:
-        prof = types[type_p]()
-        kwargs = p.get_cosmo_pars()
+        kwargs = {**p.get_cosmo_pars(), **{"b_hydro": 0.75}}
+        cosmo = COSMO_DEFAULT()
+    prof.update_parameters(cosmo, **kwargs)
     return prof, kwargs
 
 
 def merge_models(models1, models2):
-    """Merges dictionaries of model parameters."""
+    '''Combine model dictionaries into a single average dictionary.'''
     models = models1.copy()
     for par in models:
-        models[par] = [models1[par], models2[par]]
+        models[par] = (models1[par]+models2[par])/2
     return models
-
-
-def get_zrange(fields, f1, f2):
-    """Returns effective redshift range (zrange) for a cross-correlation."""
-    for i, F in enumerate([f1, f2]):
-        field_type = fields[F.name][1]
-        if field_type == 'g':
-            zrange = F.zrange
-            break
-        if i == 1:
-            zrange = (1e-6, 6)
-    return zrange
 
 
 def interpolate_spectra(p, spectrum):
@@ -102,6 +100,7 @@ def interpolate_spectra(p, spectrum):
     larr = np.arange(3*p.get_nside())
     leff, cell = spectrum.leff, spectrum.cell
     clf = interp1d(leff, cell,
+                   kind='cubic',
                    bounds_error=False,
                    fill_value=(cell[0], cell[-1]))  # constant beyond boundary
     clo = clf(larr)
@@ -165,7 +164,7 @@ def get_power_spectrum(p, f1, f2, jk_region=None, save_windows=True):
 
 
 def get_xcorr(p, fields, jk_region=None, save_windows=True):
-    """Constructs a 2x2 cross-correlation matrix of all fields."""
+    """Constructs a 2-level dictionary of cross-correlations."""
     xcorr = {}
 
     for name1 in fields:
@@ -184,9 +183,8 @@ def get_xcorr(p, fields, jk_region=None, save_windows=True):
 
 def model_xcorr(p, fields, xcorr):
     """Models the angular power spectrum."""
-    cosmo = p.get_cosmo()
-    kwargs = p.get_cosmo_pars()
-    hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
+    hm_correction = HaloModCorrection(p.get_cosmo(),
+                                      p.get_cosmo_pars()).hm_correction \
                     if p.get("mcmc").get("hm_correct") else None
 
     # copy & reset shape
@@ -209,17 +207,19 @@ def model_xcorr(p, fields, xcorr):
                     print('  <---  %s %s' % (name2, name1))
                 else:
                     # model the cross correlation
-                    prof1, kwargs1 = get_profile(p, name1, type1)
-                    prof2, kwargs2 = get_profile(p, name2, type2)
+                    prof1, kwargs1 = get_profile(p, name1)
+                    prof2, kwargs2 = get_profile(p, name2)
 
                     # best fit from 1909.09102
                     if ('y' in (type1, type2)) and ('g' not in (type1, type2)):
-                        kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.59}}
+                        kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.75}}
 
+                    kwargs = merge_models(kwargs1, kwargs2)
+                    cosmo = COSMO_ARGS(kwargs)
                     l = mcorr[name1][name2].leff
-                    cl = hm_ang_power_spectrum(l, (prof1, prof2),
+                    cl = hm_ang_power_spectrum(cosmo, l, (prof1, prof2),
                                                hm_correction=hm_correction,
-                                               **kwargs1)
+                                               **kwargs)
                     if type1 == type2 == 'g':
                         nl = np.load(p.get_fname_cls(f1.name, f2.name))['nls']
                         cl += nl
@@ -249,41 +249,37 @@ def get_covariance(p, f11, f12, f21, f22, suffix,
         cov.to_file(fname_cov); print(fname_cov)
 
 
-# TODO: implement properly in new pipeline
-def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22,
-                      zpoints_a=64, zlog_a=True,
-                      zpoints_b=64, zlog_b=True):
-    """Computes and saves the 1-halo covariance."""
+def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
+    '''Computes and saves the 1-halo covariance.'''
     fname_cov = p.get_fname_cov(f11.name, f12.name, f21.name, f22.name, "1h4pt")
     fname_cov_T = p.get_fname_cov(f21.name, f22.name, f11.name, f12.name, "1h4pt")
     # print(fname_cov)
     if (not os.path.isfile(fname_cov)) and (not os.path.isfile(fname_cov_T)):
-        # Global parameters
+        fsky = np.mean(f11.mask*f12.mask*f21.mask*f22.mask)
         leff = xcorr[f11.name][f11.name].leff
         # Set-up profiles
+        profiles = [[], [], [], []]
         flds = [f11, f12, f21, f22]
-        profile_types = [fields[F.name][1] for F in flds]
-        profiles = [types[x] for x in profile_types]
-        for i, (pr, pt, fd) in enumerate(zip(profiles, profile_types, flds)):
-            if pt == 'g':
-                profiles[i] = pr(nz_file=fd.dndz)
-            else:
-                profiles[i] = pr()
-        p11, p12, p21, p22 = profiles
-
-        # Additional parameters
-        fsky = np.mean(f11.mask*f12.mask*f21.mask*f22.mask)
-        zrange_a = get_zrange(fields, f11, f12)
-        zrange_b = get_zrange(fields, f21, f22)
-        # Get models
+        for i, F in enumerate(flds):
+            # retrieve map parameters from param file
+            for m in p.get("maps"):
+                if m["name"] == F.name:
+                    break
+            # initialize profile and update it
+            prof = ProfTracer(m)
+            try:
+                kwargs = m["model"]
+                cosmo = COSMO_ARGS(kwargs)
+            except KeyError:
+                kwargs = {"b_hydro": 0.75}  # gNFW profile triggers exception
+                cosmo = COSMO_DEFAULT
+            prof.update_parameters(cosmo, **kwargs)
+        # Get single model parameter dictionary
         models_a = p.get_models()[f11.name]
         models_b = p.get_models()[f12.name]
-        models_b = models_a if models_b is None else models_b
-
-        dcov = hm_ang_1h_covariance(fsky, leff, (p11, p12), (p21, p22),
-                                    zrange_a=zrange_a, zpoints_a=zpoints_a, zlog_a=zlog_a,
-                                    zrange_b=zrange_b, zpoints_b=zpoints_b, zlog_b=zlog_b,
-                                    kwargs_a=models_a, kwargs_b=models_b)
+        kwargs = merge_models(models_a, models_b)
+        # Calculate covariace
+        dcov = hm_ang_1h_covariance(fsky, leff, profiles, **kwargs)
         cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
         cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
                     f11.name + "_" + f12.name + "_" +
@@ -321,7 +317,7 @@ def jk_setup(p):
         # Set union mask
         nside = p.get_nside()
         msk_tot = np.ones(hp.nside2npix(nside))
-        masks = {k: p.get("masks")[k] for k in which_masks(p)}
+        masks = {k: p.get("masks")[k] for k in used(p).which_masks()}
         for k in masks:
             if k != 'mask_545':
                 msk_tot *= hp.ud_grade(hp.read_map(masks[k], verbose=False),
@@ -366,7 +362,7 @@ def get_jk_cov(p, jk):
                     prefix2 = p.get_prefix_cls(tr21, tr22) + "_jk"
                     cov = Covariance.from_jk(jk.npatches, prefix1, prefix2, ".npz",
                                              tr11, tr12, tr21, tr22)
-                    cov.to_file(fname_cov, n_samples=jk.npatches)  # TODO: npatches not always correct
+                    cov.to_file(fname_cov, n_samples=jk.npatches)
 
 
 def load_cov(p, name1, name2, name3, name4, suffix):
