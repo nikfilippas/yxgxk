@@ -59,3 +59,24 @@ def COSMO_ARGS(kwargs):
         return COSMO_DEFAULT()
     else:
         return ccl.Cosmology(**cosmoargs)
+
+
+def COSMO_CHECK(cosmo, **kwargs):
+    """
+    Verifies that the cosmology object passed is in line
+    with the model parameters.
+
+    Parameters
+    ----------
+    cosmo : (~pyccl.core.Cosmology)
+        A cosmology object.
+    kwargs : dict
+        The dictionary including cosmological parameters.
+
+    Returns
+    -------
+    None.
+    """
+    for k in kwargs:
+        if k in COSMO_KEYS:
+            assert kwargs[k] == cosmo[k], 'Mismatch in %s passed.' % k
