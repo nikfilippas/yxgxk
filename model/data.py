@@ -187,7 +187,8 @@ class DataManager(object):
                 # Beam
                 bm = np.ones(np.sum(mask))
                 for t in tr:
-                    bm *= t.get_beam(f['ls'][mask], nside)
+                    nside_eff = 512 if t.type == 'g' else nside  # nside_g=512
+                    bm *= t.get_beam(f['ls'][mask], nside_eff)
                 self.beams.append(bm)
                 # Contaminant templates
                 # Currently only supercosmos plate variations needed
