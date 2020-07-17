@@ -1,13 +1,14 @@
 import numpy as np
 import pyccl as ccl
-from model.cosmo_utils import COSMO_ARGS
+from model.cosmo_utils import COSMO_CHECK
 
 
-def hm_bias(a, profile, **kwargs):
+def hm_bias(cosmo, a, profile, **kwargs):
     """Computes the halo model prediction for the bias of a given
     tracer.
 
     Args:
+        cosmo (~pyccl.core.Cosmology): a Cosmology object.
         a (array): array of scale factor values.
         profile (`model.data.ProfTracer`): a profile-tracer object.
         **kwargs: Parametrisation of the profiles and cosmology.
@@ -15,7 +16,7 @@ def hm_bias(a, profile, **kwargs):
     Returns:
         `numpy.array`: The halo model bias for the input profile.
     """
-    cosmo = COSMO_ARGS(kwargs)
+    COSMO_CHECK(cosmo, **kwargs)
     hmd = ccl.halos.MassDef(500, 'critical')
     nM = kwargs["mass_function"](cosmo, mass_def=hmd)
     bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
@@ -29,12 +30,13 @@ def hm_bias(a, profile, **kwargs):
 
 
 
-def hm_ang_power_spectrum(l, profiles,
+def hm_ang_power_spectrum(cosmo, l, profiles,
                           include_1h=True, include_2h=True,
                           hm_correction=None, **kwargs):
     """Angular power spectrum using CCL.
 
     Args:
+        cosmo (~pyccl.core.Cosmology): a Cosmology object.
         l (`numpy.array`): effective multipoles to sample
         profiles (tuple of `model.data.ProfTracer`): profile and tracer pair
         include_1h (`bool`): whether to include the 1-halo term
@@ -45,7 +47,7 @@ def hm_ang_power_spectrum(l, profiles,
     Returns:
         `numpy.array`: Angular power spectrum of input profiles.
     """
-    cosmo = COSMO_ARGS(kwargs)
+    COSMO_CHECK(cosmo, **kwargs)
     p1, p2 = profiles
     p1.update_parameters(cosmo, **kwargs)
     p2.update_parameters(cosmo, **kwargs)
