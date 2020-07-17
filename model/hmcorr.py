@@ -7,6 +7,7 @@ import pyccl as ccl
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from scipy.optimize import curve_fit
+from .cosmo_utils import COSMO_ARGS
 
 
 class HM_halofit(object):
@@ -67,23 +68,24 @@ class HM_halofit(object):
 class HaloModCorrection(object):
     """
     Approximates the halo model correction as a gaussian with mean ``mu``
-    and standard deviation ``sigma``.cha
+    and standard deviation ``sigma``.
 
     .. note: By using this method, we avoid obtaining any cosmological
               information from the halo model correction, which is a fluke.
 
     Args:
-        cosmo (`ccl.Cosmology`): cosmology.
         k_range (list): range of k to use (in Mpc^-1).
         nlk (int): number of samples in log(k) to use.
         z_range (list): range of redshifts to use.
         nz (int): number of samples in redshift to use.
-        **kwargs (dict): mass function and halo bias models
+        kwargs (dict): mass function and halo bias models
     """
-    def __init__(self, cosmo,
-                 k_range=[1E-1, 5], nlk=20,
-                 z_range=[0., 1.], nz=16,
-                 **kwargs):
+    def __init__(self, k_range=[1E-1, 5], nlk=20,
+                       z_range=[0., 1.], nz=16,
+                       kwargs=None):
+        if kwargs is None:
+            raise ValueError('Provide mass function and halo bias models.')
+        cosmo = COSMO_ARGS(kwargs)
         hf = HM_halofit(cosmo, **kwargs).rk_interp
         k_arr = np.geomspace(k_range[0], k_range[1], nlk)
         a_arr = 1/(1+np.linspace(z_range[0], z_range[1], nz))

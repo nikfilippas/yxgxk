@@ -20,12 +20,9 @@ run_name = p.get('mcmc')['run_name']
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
 kwargs = p.get_cosmo_pars()
+hm_correction = HaloModCorrection(kwargs).hm_correction \
+                if p.get("mcmc").get("hm_correct") else None
 
-# Include halo model correction if needed
-if p.get('mcmc').get('hm_correct'):
-    hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction
-else:
-    hm_correction = None
 
 
 zmeans = []

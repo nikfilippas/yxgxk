@@ -11,7 +11,7 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import hm_bias
-from model.hmcorr import HaloModCorrection as HalomodCorrection
+from model.hmcorr import HaloModCorrection
 from scipy.stats import norm
 _PP = norm.sf(-1)-norm.sf(1)
 
@@ -153,17 +153,9 @@ class chan(object):
     def __init__(self, fname_params):
         self.p = ParamRun(fname_params)
         self.cosmo = self.p.get_cosmo()
-        self.sel = self._selfunc(self.p)
-        self.hm_correction = self._halmodcor(self.p, self.cosmo)
-
-
-    def _halmodcor(self, p, cosmo):
-        # Include halo model correction if needed
-        if p.get('mcmc').get('hm_correct'):
-            hm_correction = HalomodCorrection(cosmo)
-        else:
-            hm_correction = None
-        return hm_correction
+        self.kwargs = self.p.get_cosmo_pars()
+        self.hm_correction = HaloModCorrection(self.kwargs).hm_correction \
+                             if self.p.get("mcmc").get("hm_correct") else None
 
 
     def _get_dndz(self, fname, width):
