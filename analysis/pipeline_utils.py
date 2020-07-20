@@ -185,7 +185,7 @@ def get_xcorr(p, fields, jk_region=None, save_windows=True):
 def model_xcorr(p, fields, xcorr):
     """Models the angular power spectrum."""
     hm_correction = HaloModCorrection(p.get_cosmo(),
-                                      p.get_cosmo_pars()).hm_correction \
+                                      **p.get_cosmo_pars()).hm_correction \
                     if p.get("mcmc").get("hm_correct") else None
 
     # copy & reset shape
