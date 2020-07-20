@@ -433,10 +433,10 @@ data_vectors:
           - tracers: ['2mpz','2mpz']
             # Minimum multipole to use in the analysis
             lmin: 0
-          - tracers: ['2mpz','y_milca']
-            lmin: 0
-          - tracers: ['2mpz', 'lens']
-            lmin: 0
+    #       - tracers: ['2mpz','y_milca']
+    #         lmin: 0
+    #       - tracers: ['2mpz', 'lens']
+    #         lmin: 0
     # - type: 'Cl'
     #   name: 'wisc1'
     #   covar_type: 'data'
