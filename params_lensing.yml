@@ -5,7 +5,7 @@ global:
     # Number of alm iterations in ``pymaster.Field``
     n_iter: 3
     # Output directory
-    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_new'
+    output_dir: 'output_default'
 
 jk:
     # Do you want to do jackknives?
@@ -437,53 +437,53 @@ data_vectors:
             lmin: 0
           - tracers: ['2mpz', 'lens']
             lmin: 0
-    - type: 'Cl'
-      name: 'wisc1'
-      covar_type: 'data'
-      twopoints:
-          - tracers: ['wisc1','wisc1']
-            lmin: 10
-          - tracers: ['wisc1','y_milca']
-            lmin: 0
-          - tracers: ['wisc1', 'lens']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc2'
-      covar_type: 'data'
-      twopoints:
-          - tracers: ['wisc2','wisc2']
-            lmin: 10
-          - tracers: ['wisc2','y_milca']
-            lmin: 0
-          - tracers: ['wisc2', 'lens']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc3'
-      covar_type: 'data'
-      twopoints:
-          - tracers: ['wisc3','wisc3']
-            lmin: 10
-          - tracers: ['wisc3','y_milca']
-            lmin: 0
-          - tracers: ['wisc3', 'lens']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc4'
-      covar_type: 'data'
-      twopoints:
-          - tracers: ['wisc4','wisc4']
-            lmin: 10
-          - tracers: ['wisc4','y_milca']
-            lmin: 0
-          - tracers: ['wisc4', 'lens']
-            lmin: 0
-    - type: 'Cl'
-      name: 'wisc5'
-      covar_type: 'data'
-      twopoints:
-          - tracers: ['wisc5','wisc5']
-            lmin: 10
-          - tracers: ['wisc5','y_milca']
-            lmin: 0
-          - tracers: ['wisc5', 'lens']
-            lmin: 0
+    # - type: 'Cl'
+    #   name: 'wisc1'
+    #   covar_type: 'data'
+    #   twopoints:
+    #       - tracers: ['wisc1','wisc1']
+    #         lmin: 10
+    #       - tracers: ['wisc1','y_milca']
+    #         lmin: 0
+    #       - tracers: ['wisc1', 'lens']
+    #         lmin: 0
+    # - type: 'Cl'
+    #   name: 'wisc2'
+    #   covar_type: 'data'
+    #   twopoints:
+    #       - tracers: ['wisc2','wisc2']
+    #         lmin: 10
+    #       - tracers: ['wisc2','y_milca']
+    #         lmin: 0
+    #       - tracers: ['wisc2', 'lens']
+    #         lmin: 0
+    # - type: 'Cl'
+    #   name: 'wisc3'
+    #   covar_type: 'data'
+    #   twopoints:
+    #       - tracers: ['wisc3','wisc3']
+    #         lmin: 10
+    #       - tracers: ['wisc3','y_milca']
+    #         lmin: 0
+    #       - tracers: ['wisc3', 'lens']
+    #         lmin: 0
+    # - type: 'Cl'
+    #   name: 'wisc4'
+    #   covar_type: 'data'
+    #   twopoints:
+    #       - tracers: ['wisc4','wisc4']
+    #         lmin: 10
+    #       - tracers: ['wisc4','y_milca']
+    #         lmin: 0
+    #       - tracers: ['wisc4', 'lens']
+    #         lmin: 0
+    # - type: 'Cl'
+    #   name: 'wisc5'
+    #   covar_type: 'data'
+    #   twopoints:
+    #       - tracers: ['wisc5','wisc5']
+    #         lmin: 10
+    #       - tracers: ['wisc5','y_milca']
+    #         lmin: 0
+    #       - tracers: ['wisc5', 'lens']
+    #         lmin: 0
