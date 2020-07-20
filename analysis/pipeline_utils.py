@@ -77,6 +77,9 @@ def get_profile(p, profname):
     if prof.type == "g":
         kwargs = m["model"]
         cosmo = COSMO_ARGS(kwargs)
+        cosmo_pars = p.get_cosmo_pars()
+        kwargs["mass_function"] = cosmo_pars["mass_function"]
+        kwargs["halo_bias"] = cosmo_pars["halo_bias"]
     else:
         kwargs = {**p.get_cosmo_pars(), **{"b_hydro": 0.75}}
         cosmo = COSMO_DEFAULT()
