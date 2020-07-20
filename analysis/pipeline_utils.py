@@ -56,8 +56,8 @@ def read_fields(p):
     """Constructs a dictionary of classified fields."""
     nside = p.get_nside()
     maps = used(p).which_maps()
-    fields = {}
     maps_eff = [d for d in p.get("maps") if d["name"] in maps]
+    fields = {}
     for d in tqdm(maps_eff, desc="Reading fields"):
         if d["name"] not in maps: continue
         f = Field(nside, d['name'], d['mask'], p.get('masks')[d['mask']],
