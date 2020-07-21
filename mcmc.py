@@ -7,6 +7,7 @@ from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
 from model.hmcorr import HaloModCorrection
+from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 
 
 parser = ArgumentParser()
@@ -21,6 +22,7 @@ if args.nsteps is not None:
 
 p = ParamRun(fname_params)
 cosmo = p.get_cosmo()
+cosmo_vary = COSMO_VARY(p)  # vary cosmology in this analysis?
 kwargs = p.get_cosmo_pars()
 hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
                 if p.get("mcmc").get("hm_correct") else None
@@ -33,13 +35,14 @@ for v in p.get('data_vectors'):
     print(v['name'])
 
     # Construct data vector and covariance
-    d = DataManager(p, v, jk_region=jk_region, **kwargs)
+    d = DataManager(p, v, jk_region=jk_region)
 
     # Theory predictor wrapper
     def th(kwargs):
-        d = DataManager(p, v, jk_region=jk_region, **kwargs)
-
-        return get_theory(p, d,
+        d = DataManager(p, v, jk_region=jk_region)
+        if cosmo_vary:
+            cosmo = COSMO_ARGS(kwargs)
+        return get_theory(p, d, cosmo,
                           hm_correction=hm_correction,
                           **kwargs)
 
