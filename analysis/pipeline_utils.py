@@ -91,7 +91,10 @@ def merge_models(models1, models2):
     '''Combine model dictionaries into a single average dictionary.'''
     models = models1.copy()
     for par in models:
-        models[par] = (models1[par]+models2[par])/2
+        try:
+            models[par] = (models1[par]+models2[par])/2
+        except TypeError:  # not integer
+            continue
     return models
 
 
