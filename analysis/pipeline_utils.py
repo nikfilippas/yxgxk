@@ -219,7 +219,7 @@ def model_xcorr(p, fields, xcorr):
 
                     # best fit from 1909.09102
                     if ('y' in (type1, type2)) and ('g' not in (type1, type2)):
-                        kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.75}}
+                        kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.25}}
 
                     kwargs = merge_models(kwargs1, kwargs2)
                     cosmo = COSMO_ARGS(kwargs)
@@ -278,7 +278,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
                 kwargs = m["model"]
                 cosmo = COSMO_ARGS(kwargs)
             except KeyError:
-                kwargs = {"b_hydro": 0.75}  # gNFW profile triggers exception
+                kwargs = {"b_hydro": 0.25}  # gNFW profile triggers exception
                 cosmo = COSMO_DEFAULT
             prof.update_parameters(cosmo, **kwargs)
             profiles[i] = prof
