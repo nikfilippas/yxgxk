@@ -84,10 +84,7 @@ class Sampler(object):
         self.chain = None
         self.probs = None
 
-        def chi2(p):
-            return -2 * self.lnprob(p)
-
-        self.chi2 = chi2
+        self.chi2 = lambda p: -2 * self.lnprob(p)
 
     def update_p0(self, p0):
         """
