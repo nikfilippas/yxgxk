@@ -80,3 +80,11 @@ def COSMO_CHECK(cosmo, **kwargs):
     for k in kwargs:
         if k in COSMO_KEYS:
             assert kwargs[k] == cosmo[k], 'Mismatch in %s passed.' % k
+
+
+def COSMO_VARY(p):
+    """
+    Checks if Cosmology varies in the current analysis.
+    """
+    vary = [par["vary"] for par in p.get("params") if par["name"] in COSMO_KEYS]
+    return any(vary)
