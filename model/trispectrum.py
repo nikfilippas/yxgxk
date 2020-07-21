@@ -12,12 +12,6 @@ def hm_1h_trispectrum(cosmo, k, profiles, **kwargs):
     COSMO_CHECK(cosmo, **kwargs)
 
     p1, p2, p3, p4 = profiles
-    # these lines are redundant because it should have
-    # already been called in `hm_ang_1h_covariance`
-    # p1.update_parameters(cosmo, **kwargs)
-    # p2.update_parameters(cosmo, **kwargs)
-    # p3.update_parameters(cosmo, **kwargs)
-    # p4.update_parameters(cosmo, **kwargs)
     # Set up Halo Model Calculator
     hmd = ccl.halos.MassDef(500, 'critical')
     nM = kwargs["mass_function"](cosmo, mass_def=hmd)
@@ -54,17 +48,18 @@ def hm_ang_1h_covariance(fsky, l, cosmo, profiles, **kwargs):
     kwargs : parameter dictionary
         Parametrisation of the profiles and cosmology.
     """
-    a = np.linspace(0.2, 1-1e-6, 128)  # avoid zero division
+    z = np.linspace(1e-6, 4, 128)  # avoid zero division
+    a = 1/(1+z)
     chi = ccl.comoving_radial_distance(cosmo, a)
 
     w1 = profiles[0].tracer.get_kernel(chi).squeeze()
     w2 = profiles[1].tracer.get_kernel(chi).squeeze()
     w3 = profiles[2].tracer.get_kernel(chi).squeeze()
     w4 = profiles[3].tracer.get_kernel(chi).squeeze()
-    H_inv = (2997.92458*(1/a+1)/(ccl.h_over_h0(cosmo, a)*cosmo["h"]))  # c*z/H(z)
+    H_inv = (2997.92458/(ccl.h_over_h0(cosmo, a)*cosmo["h"]))  # c*z/H(z)
     N = w1*w2*w3*w4*H_inv/(4*np.pi*fsky*chi**6)
 
     k = (l+1/2)/chi[:, np.newaxis]
     t1h = hm_1h_trispectrum(cosmo, k, profiles, **kwargs)
-    tl = simps(N[:, None, None] * t1h, np.log(1/a+1), axis=0)
+    tl = simps(N[:, None, None] * t1h, z, axis=0)
     return tl
