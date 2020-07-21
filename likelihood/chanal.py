@@ -12,6 +12,7 @@ from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import hm_bias
 from model.hmcorr import HaloModCorrection
+from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 from scipy.stats import norm
 _PP = norm.sf(-1)-norm.sf(1)
 
@@ -153,6 +154,7 @@ class chan(object):
     def __init__(self, fname_params):
         self.p = ParamRun(fname_params)
         self.cosmo = self.p.get_cosmo()
+        self.cosmo_vary = COSMO_VARY(self.p)
         self.kwargs = self.p.get_cosmo_pars()
         self.hm_correction = HaloModCorrection(self.cosmo,
                                                **self.kwargs
@@ -172,7 +174,9 @@ class chan(object):
 
 
     def _th(self, pars):
-        return get_theory(self.p, self.d,
+        if self.cosmo_vary:
+            cosmo = COSMO_ARGS(pars)
+        return get_theory(self.p, self.d, cosmo,
                           hm_correction=self.hm_correction,
                           **pars)
 

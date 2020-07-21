@@ -8,6 +8,7 @@ from model.theory import get_theory
 import matplotlib.pyplot as plt
 from model.hmcorr import HaloModCorrection
 from model.power_spectrum import hm_bias
+from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 
 try:
     fname_params = sys.argv[1]
@@ -19,6 +20,7 @@ run_name = p.get('mcmc')['run_name']
 
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
+cosmo_vary = COSMO_VARY(p)
 kwargs = p.get_cosmo_pars()
 hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
                 if p.get("mcmc").get("hm_correct") else None
@@ -40,18 +42,21 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     def th(pars):
-        return get_theory(p, d, return_separated=False,
+        if cosmo_vary: cosmo = COSMO_ARGS(pars)
+        return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
                           **pars)
 
     def th1h(pars):
-        return get_theory(p, d, return_separated=False,
+        if cosmo_vary: cosmo = COSMO_ARGS(pars)
+        return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
                           include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(pars):
-        return get_theory(p, d, return_separated=False,
+        if cosmo_vary: cosmo = COSMO_ARGS(pars)
+        return get_theory(p, d, cosmo, return_separated=False,
                           hm_correction=hm_correction,
                           include_2h=True, include_1h=False,
                           **pars)

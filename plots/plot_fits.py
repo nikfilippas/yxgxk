@@ -14,6 +14,7 @@ from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import HalomodCorrection
 from model.utils import selection_planck_erf, selection_planck_tophat
+from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 import matplotlib.pyplot as plt
 from matplotlib.gridspec import GridSpec, GridSpecFromSubplotSpec
 from matplotlib import rc
@@ -26,16 +27,22 @@ class thr(object):
         self.d = d
 
     def th(self, pars):
-        return get_theory(p, self.d, hm_correction=hm_correction,
+        if cosmo_vary: cosmo = COSMO_ARGS(pars)
+        return get_theory(p, self.d, cosmo,
+                          hm_correction=hm_correction,
                           selection=sel, **pars)
 
     def th1h(self, pars):
-        return get_theory(p, self.d, hm_correction=hm_correction,
+        if cosmo_vary: cosmo = COSMO_ARGS(pars)
+        return get_theory(p, self.d, cosmo,
+                          hm_correction=hm_correction,
                           selection=sel, include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(self, pars):
-        return get_theory(p, self.d, hm_correction=hm_correction,
+        if cosmo_vary: cosmo = COSMO_ARGS(pars)
+        return get_theory(p, self.d, cosmo,
+                          hm_correction=hm_correction,
                           selection=sel, include_2h=True, include_1h=False,
                           **pars)
 
@@ -43,6 +50,7 @@ class thr(object):
 fname_params = "params_wnarrow.yml"
 p = ParamRun(fname_params)
 cosmo = p.get_cosmo()
+cosmo_vary = COSMO_VARY(p)
 
 # Include halo model correction if needed
 if p.get('mcmc').get('hm_correct'):
