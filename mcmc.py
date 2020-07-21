@@ -20,8 +20,9 @@ if args.nsteps is not None:
     print("Updated MCMC to %d steps." % args.nsteps)
 
 p = ParamRun(fname_params)
+cosmo = p.get_cosmo()
 kwargs = p.get_cosmo_pars()
-hm_correction = HaloModCorrection(**kwargs).hm_correction \
+hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
                 if p.get("mcmc").get("hm_correct") else None
 
 # Jackknives
