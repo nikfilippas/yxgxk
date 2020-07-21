@@ -1,9 +1,9 @@
 import numpy as np
 from .power_spectrum import hm_ang_power_spectrum
-from .cosmo_utils import COSMO_ARGS
+from .cosmo_utils import COSMO_CHECK
 
 
-def get_theory(p, dm, return_separated=False,
+def get_theory(p, dm, cosmo, return_separated=False,
                include_1h=True, include_2h=True,
                hm_correction=None, **kwargs):
     """Computes the theory prediction used in the MCMC.
@@ -17,7 +17,7 @@ def get_theory(p, dm, return_separated=False,
             factor.
         **kwargs: Parametrisation of the profiles and cosmology.
     """
-    cosmo = COSMO_ARGS(kwargs)
+    COSMO_CHECK(cosmo, **kwargs)
     kwargs["mass_function"] = p.get_cosmo_pars()["mass_function"]
     kwargs["halo_bias"] = p.get_cosmo_pars()["halo_bias"]
 
