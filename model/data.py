@@ -146,9 +146,8 @@ class DataManager(object):
         v (dict): dictionary containing the list of two-point functions you
             want to analyze.
         all_data (bool): whether to use all ells or form a mask
-        **kwargs: Parametrisation of the profiles and cosmology.
     """
-    def __init__(self, p, v, all_data=False, jk_region=None, **kwargs):
+    def __init__(self, p, v, all_data=False, jk_region=None):
         nside = p.get_nside()
         kmax = np.inf if all_data else p.get('mcmc')['kmax']
         # Create tracers for all maps in the param file.
