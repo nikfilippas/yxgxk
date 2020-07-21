@@ -1,6 +1,7 @@
 import numpy as np
 import pyccl as ccl
 from scipy.integrate import simps
+from .power_spectrum import get_2pt
 from .cosmo_utils import COSMO_CHECK
 
 
@@ -11,41 +12,21 @@ def hm_1h_trispectrum(cosmo, k, profiles, **kwargs):
     COSMO_CHECK(cosmo, **kwargs)
 
     p1, p2, p3, p4 = profiles
-    p1.update_parameters(cosmo, **kwargs)
-    p2.update_parameters(cosmo, **kwargs)
-    p3.update_parameters(cosmo, **kwargs)
-    p4.update_parameters(cosmo, **kwargs)
+    # these lines are redundant because it should have
+    # already been called in `hm_ang_1h_covariance`
+    # p1.update_parameters(cosmo, **kwargs)
+    # p2.update_parameters(cosmo, **kwargs)
+    # p3.update_parameters(cosmo, **kwargs)
+    # p4.update_parameters(cosmo, **kwargs)
     # Set up Halo Model Calculator
     hmd = ccl.halos.MassDef(500, 'critical')
     nM = kwargs["mass_function"](cosmo, mass_def=hmd)
     bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
     hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
 
-    # covariance for p1, p2
-    if p1.type == p2.type == 'g':
-        p2pt_12 = ccl.halos.Profile2ptHOD()
-    else:
-        r_corr = kwargs.get('r_corr_%s%s' % (p1.type, p2.type))
-        if r_corr is None:
-            r_corr = kwargs.get('r_corr_%s%s' % (p2.type, p1.type))
-            if r_corr is None:
-                r_corr = 0
-                print('2pt covariance for %sx%s defaulting to 0' % (p1.type,
-                                                                    p2.type))
-        p2pt_12 = ccl.halos.Profile2ptR(r_corr=r_corr)
-
-    # covariance for p3, p4
-    if p3.type == p4.type == 'g':
-        p2pt_34 = ccl.halos.Profile2ptHOD()
-    else:
-        r_corr = kwargs.get('r_corr_%s%s' % (p3.type, p4.type))
-        if r_corr is None:
-            r_corr = kwargs.get('r_corr_%s%s' % (p3.type, p4.type))
-            if r_corr is None:
-                r_corr = 0
-                print('2pt covariance for %sx%s defaulting to 0' % (p1.type,
-                                                                    p2.type))
-        p2pt_34 = ccl.halos.Profile2ptR(r_corr=r_corr)
+    # set up covariance
+    p2pt_12 = get_2pt(p1, p2, **kwargs)
+    p2pt_34 = get_2pt(p3, p4, **kwargs)
 
     a_arr = np.linspace(0.2, 1, 128)
     I04 = np.array([hmc.I_0_4(cosmo, k, a,
