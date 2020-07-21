@@ -23,8 +23,7 @@ def get_theory(p, dm, return_separated=False,
 
     cls_out = []
     for tr, ls, bms in zip(dm.tracers, dm.ells, dm.beams):
-        profiles = (tr[0].profile, tr[1].profile)
-        cl = hm_ang_power_spectrum(cosmo, ls, profiles,
+        cl = hm_ang_power_spectrum(cosmo, ls, tr,
                                    hm_correction=hm_correction,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
