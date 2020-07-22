@@ -95,6 +95,8 @@ def merge_models(models1, models2):
             models[par] = (models1[par]+models2[par])/2
         except TypeError:  # not integer
             continue
+        except KeyError:  # different profile types
+            continue
     return models
 
 
