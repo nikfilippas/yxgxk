@@ -379,7 +379,7 @@ params:
       value: 0.
       prior:
           type: "TopHat"
-          values: [-1., 1.]
+          values: [-0.5., 0.5]
     - name: "width"
       label: "w_{N(z)}"
       vary: True
