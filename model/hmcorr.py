@@ -7,6 +7,7 @@ import pyccl as ccl
 from scipy.interpolate import interp1d
 from scipy.interpolate import interp2d
 from scipy.optimize import curve_fit
+import warnings
 
 
 class HM_halofit(object):
@@ -90,9 +91,12 @@ class HaloModCorrection(object):
         gauss = lambda k, A, k0, s: 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
 
         POPT = [[] for i in range(a_arr.size)]
-        for i, a in enumerate(a_arr):
-            popt, pcov = curve_fit(gauss, k_arr, hf(k_arr, a))
-            POPT[i] = popt
+        # catch covariance errors due to the fill_value step
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            for i, a in enumerate(a_arr):
+                popt, _ = curve_fit(gauss, k_arr, hf(k_arr, a))
+                POPT[i] = popt
 
         BF = np.vstack(POPT)
 
