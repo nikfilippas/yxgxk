@@ -67,6 +67,7 @@ maps:
           beta_max:  1.0
           fc:  1.0
           r_corr_gy:  -0.10361521
+          r_corr_gk:  0.
           sigmaLogM:  0.15
           width: 1.19939348
           Omega_c: 0.26066676
@@ -95,6 +96,7 @@ maps:
           beta_max:  1.0
           fc:  1.0
           r_corr_gy:  -0.65621202
+          r_corr_gk:  0.
           sigmaLogM:  0.15
           width: 0.81297445
           Omega_c: 0.26066676
@@ -124,6 +126,7 @@ maps:
           beta_max:  1.0
           fc:  1.0
           r_corr_gy:  -0.61417099
+          r_corr_gk:  0.
           sigmaLogM:  0.15
           width: 0.8080167
           Omega_c: 0.26066676
@@ -153,6 +156,7 @@ maps:
           beta_max:  1.0
           fc:  1.0
           r_corr_gy:  -0.62590662
+          r_corr_gk:  0.
           sigmaLogM:  0.15
           width: 0.96975127
           Omega_c: 0.26066676
@@ -182,6 +186,7 @@ maps:
           beta_max:  1.0
           fc:  1.0
           r_corr_gy:  -0.5776713
+          r_corr_gk:  0.
           sigmaLogM:  0.15
           width: 1.15909897
           Omega_c: 0.26066676
@@ -211,6 +216,7 @@ maps:
           beta_max:  1.0
           fc:  1.0
           r_corr_gy:  -0.68876424
+          r_corr_gk:  0.
           sigmaLogM:  0.15
           width: 1.18987421
           Omega_c: 0.26066676
@@ -360,6 +366,13 @@ params:
           values: [0., 1.]
     - name: "r_corr_gy"
       label: "\\rho_{gy}"
+      vary: True
+      value: 0.
+      prior:
+          type: "TopHat"
+          values: [-1., 1.]
+    - name: "r_corr_gk"
+      label: "\\rho_{g\\kappa}"
       vary: True
       value: 0.
       prior:
