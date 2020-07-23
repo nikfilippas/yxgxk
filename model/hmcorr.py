@@ -81,7 +81,7 @@ class HaloModCorrection(object):
     """
     def __init__(self, cosmo,
                  k_range=[1E-1, 5], nlk=20,
-                 z_range=[0., 1.], nz=16,
+                 z_range=[0., 4.], nz=64,
                  **kwargs):
         hf = HM_halofit(cosmo, **kwargs).rk_interp
         k_arr = np.geomspace(k_range[0], k_range[1], nlk)
@@ -96,7 +96,7 @@ class HaloModCorrection(object):
 
         BF = np.vstack(POPT)
 
-        self.af = interp1d(a_arr, BF[:, 0], bounds_error=False, fill_value=1)
+        self.af = interp1d(a_arr, BF[:, 0], bounds_error=False, fill_value="extrapolate")
         self.k0f = interp1d(a_arr, BF[:, 1], bounds_error=False, fill_value=1)
         self.sf = interp1d(a_arr, BF[:, 2], bounds_error=False, fill_value=1e64)
 
@@ -114,7 +114,9 @@ class HaloModCorrection(object):
         Returns:
             R (float ot array): halo model correction for given k
         """
-        A = kwargs["a_HMcorr"]
+        A = kwargs.get("a_HMcorr")
+        # overall best fit for non g- cross-correlations
+        if A is None: A = 0.315
 
         k0 = self.k0f(a)
         s = self.sf(a)
