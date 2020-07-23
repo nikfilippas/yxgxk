@@ -375,7 +375,7 @@ params:
           values: [-1., 1.]
     - name: "r_corr_gk"
       label: "\\rho_{g\\kappa}"
-      vary: False
+      vary: True
       value: 0.
       prior:
           type: "TopHat"
