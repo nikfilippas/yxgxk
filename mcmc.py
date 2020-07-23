@@ -40,9 +40,8 @@ for v in p.get('data_vectors'):
     # Theory predictor wrapper
     def th(kwargs):
         d = DataManager(p, v, jk_region=jk_region)
-        global cosmo
-        cosmo = COSMO_ARGS(kwargs) if cosmo_vary else cosmo
-        return get_theory(p, d, cosmo,
+        cosmo_fid = cosmo if not cosmo_vary else COSMO_ARGS(kwargs)
+        return get_theory(p, d, cosmo_fid,
                           hm_correction=hm_correction,
                           **kwargs)
 
