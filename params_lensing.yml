@@ -5,8 +5,8 @@ global:
     # Number of alm iterations in ``pymaster.Field``
     n_iter: 3
     # Output directory
-    # output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_default'
-    output_dir: 'output_default'
+    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_default'
+    # output_dir: 'output_default'
 
 
 jk:
