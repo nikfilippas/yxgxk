@@ -87,6 +87,7 @@ class Likelihood(object):
             if pr is None:  # No prior
                 continue
             elif pr['type'] == 'Gaussian':
+                print(pr["values"])
                 lnp += -0.5 * ((p - pr['values'][0]) / pr['values'][1])**2
             elif pr['type'] == 'TopHat':
                 if not(pr['values'][0] <= p <= pr['values'][1]):
