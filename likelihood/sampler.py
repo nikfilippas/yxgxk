@@ -225,14 +225,19 @@ class Sampler(object):
 
         if (not found_file) or (not carry_on):
             pos_ini = (np.array(self.p0)[None, :] +
-                   0.001 * np.random.randn(self.nwalkers, self.ndim))
+                       0.001 * np.random.randn(self.nwalkers, self.ndim))
             nsteps_use = self.nsteps
         else:
             print("Restarting from previous run")
             old_chain = np.loadtxt(fname_chain+'.txt')
-            pos_ini = old_chain[-self.nwalkers:, :]
-            nsteps_use = max(self.nsteps-len(old_chain) // self.nwalkers, 0)
-            print(self.nsteps - len(old_chain) // self.nwalkers)
+            if old_chain.size != 0:
+                pos_ini = old_chain[-self.nwalkers:, :]
+                nsteps_use = max(self.nsteps-len(old_chain) // self.nwalkers, 0)
+                # print(self.nsteps - len(old_chain) // self.nwalkers)
+            else:
+                pos_ini = (np.array(self.p0)[None, :] +
+                           0.001 * np.random.randn(self.nwalkers, self.ndim))
+                nsteps_use = self.nsteps
 
         chain_file = SampleFileUtil(self.prefix_out+"chain", carry_on=carry_on)
         sampler = emcee.EnsembleSampler(self.nwalkers,
