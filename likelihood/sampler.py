@@ -229,7 +229,9 @@ class Sampler(object):
             nsteps_use = self.nsteps
         else:
             print("Restarting from previous run")
-            old_chain = np.loadtxt(fname_chain+'.txt')
+            with warnings.catch_warnings:
+                warnings.simplefilter("ignore")
+                old_chain = np.loadtxt(fname_chain+'.txt')
             if old_chain.size != 0:
                 pos_ini = old_chain[-self.nwalkers:, :]
                 nsteps_use = max(self.nsteps-len(old_chain) // self.nwalkers, 0)
