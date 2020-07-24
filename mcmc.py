@@ -69,7 +69,6 @@ for v in p.get('data_vectors'):
     print(" n_data = %d" % (len(d.data_vector)))
 
     # Update yaml file with best-fit parameters
-    print(sam.parnames, sam.p0)
     update_params(fname_params, v["name"], sam.parnames, sam.p0)
     print("Updated yaml file with best-fit parameters.")
 
