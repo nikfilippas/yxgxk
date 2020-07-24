@@ -229,7 +229,7 @@ class Sampler(object):
             nsteps_use = self.nsteps
         else:
             print("Restarting from previous run")
-            with warnings.catch_warnings:
+            with warnings.catch_warnings(record=True):
                 warnings.simplefilter("ignore")
                 old_chain = np.loadtxt(fname_chain+'.txt')
             if old_chain.size != 0:
