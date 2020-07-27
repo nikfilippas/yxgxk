@@ -30,6 +30,17 @@ hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
 # Jackknives
 jk_region = args.jk_id
 
+
+def extract_map_p0(p, v, parnames):
+    """Extract the proposal p0 from a specific map."""
+    for m in p.get("maps"):
+        if m["name"] == v["name"]:
+            break
+
+    p0 = [m["model"][k] for k in parnames]
+    return p0
+
+
 par = []
 for v in p.get('data_vectors'):
     print(v['name'])
@@ -50,7 +61,8 @@ for v in p.get('data_vectors'):
                      template=d.templates, debug=p.get('mcmc')['debug'])
 
     # Set up sampler
-    sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
+    p0 = extract_map_p0(p, v, parnames)  # p0 for particular map
+    sam = Sampler(lik.lnprob, p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
                   p.get('mcmc'))
 
@@ -76,7 +88,7 @@ for v in p.get('data_vectors'):
         # Monte-carlo
         print(" Sampling:")
         sam.sample(carry_on=p.get('mcmc')['continue_mcmc'],
-                   verbosity=1, use_mpi=True)
+                   verbosity=1, use_mpi=False)
 
 if len(par) > 0:
     is_jk = str(jk_region) if bool(jk_region) else ""
