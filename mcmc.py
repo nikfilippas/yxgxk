@@ -61,7 +61,7 @@ for v in p.get('data_vectors'):
                      template=d.templates, debug=p.get('mcmc')['debug'])
 
     # Set up sampler
-    p0 = extract_map_p0(p, v, parnames)  # p0 for particular map
+    p0 = extract_map_p0(p, v, lik.p_free_names)  # p0 for particular map
     sam = Sampler(lik.lnprob, p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
                   p.get('mcmc'))
