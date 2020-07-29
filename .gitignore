@@ -3,7 +3,7 @@ __pycache__/
 data/
 legacy/
 other/
-output_backup/
+output_*/
 .spyproject/
 
 # File extensions
