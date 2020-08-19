@@ -34,21 +34,21 @@ class ParamRun(object):
             raise ValueError("Provide halo bias model.")
 
 
-    def get_cosmo_pars(self):
+    def get_cosmo_pars(self, hmfunc=True, hmbias=True):
         """Extract cosmological parameters from yaml file."""
         # names of all possible cosmological parameters
         pars = {par["name"]: par["value"] for par in self.p.get("params") \
                                           if par["name"] in COSMO_KEYS}
-        pars["mass_function"] = mass_function_from_name(self.get_massfunc())
-        pars["halo_bias"] = halo_bias_from_name(self.get_halobias())
+        if hmfunc:
+            pars["mass_function"] = mass_function_from_name(self.get_massfunc())
+        if hmbias:
+            pars["halo_bias"] = halo_bias_from_name(self.get_halobias())
         return pars
 
 
     def get_cosmo(self):
         """Get default cosmology."""
-        pars = self.get_cosmo_pars()
-        pars.pop("halo_bias")
-        pars.pop("mass_function")  # mass function not needed
+        pars = self.get_cosmo_pars(hmfunc=False, hmbias=False)
         return ccl.Cosmology(**pars)
 
 
