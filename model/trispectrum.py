@@ -5,11 +5,12 @@ from .power_spectrum import get_2pt
 from .cosmo_utils import COSMO_CHECK
 
 
-def hm_1h_trispectrum(cosmo, k, profiles, **kwargs):
+def hm_1h_trispectrum(cosmo, k, a, profiles, **kwargs):
     """Computes the halo model prediction for the 1-halo 3D
     trispectrum of four profile quantities.
     """
     COSMO_CHECK(cosmo, **kwargs)
+    a = np.atleast1d(a)
 
     p1, p2, p3, p4 = profiles
     # Set up Halo Model Calculator
