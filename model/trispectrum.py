@@ -23,10 +23,18 @@ def hm_1h_trispectrum(cosmo, k, profiles, **kwargs):
     p2pt_34 = get_2pt(p3, p4, **kwargs)
 
     a_arr = np.linspace(0.2, 1, 128)
-    I04 = np.array([hmc.I_0_4(cosmo, k, a,
-                              p1.profile, p2pt_12, p2.profile,
-                              p3.profile, p2pt_34, p4.profile)
-                              for a in a_arr])
+    I04 = []
+    for a in a_arr:
+        print(a)
+        cov = hmc.I_0_4(cosmo, k, a,
+                        p1.profile, p2pt_12, p2.profile,
+                        p3.profile, p2pt_34, p4.profile)
+        for p in profiles:
+            if p.type != 'y':
+                cov *= hmc.profile_norm(cosmo, a, p.profile)
+        I04.append(cov)
+    I04 = np.asarray(I04)
+
     return I04
 
 
