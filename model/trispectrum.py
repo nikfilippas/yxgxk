@@ -10,7 +10,7 @@ def hm_1h_trispectrum(cosmo, k, a, profiles, **kwargs):
     trispectrum of four profile quantities.
     """
     COSMO_CHECK(cosmo, **kwargs)
-    a = np.atleast1d(a)
+    a_arr = np.atleast_1d(a)
 
     p1, p2, p3, p4 = profiles
     # Set up Halo Model Calculator
@@ -23,7 +23,6 @@ def hm_1h_trispectrum(cosmo, k, a, profiles, **kwargs):
     p2pt_12 = get_2pt(p1, p2, **kwargs)
     p2pt_34 = get_2pt(p3, p4, **kwargs)
 
-    a_arr = np.linspace(0.2, 1, 128)
     I04 = []
     for a in a_arr:
         print(a)
