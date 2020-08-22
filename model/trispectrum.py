@@ -25,7 +25,6 @@ def hm_1h_trispectrum(cosmo, k, a, profiles, **kwargs):
 
     I04 = []
     for a in a_arr:
-        print(a)
         cov = hmc.I_0_4(cosmo, k, a,
                         p1.profile, p2pt_12, p2.profile,
                         p3.profile, p2pt_34, p4.profile)
