@@ -15,6 +15,7 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import HalomodCorrection
+from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 from scipy.interpolate import interp1d
 from matplotlib import rc
@@ -31,9 +32,12 @@ ls=dgg_wdpj['ls']
 
 fname_params = "params_wnarrow.yml"
 p = ParamRun(fname_params)
+kwargs = p.get_cosmo_pars()
 cosmo = p.get_cosmo()
+hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)
 hm_correction = HalomodCorrection(cosmo)
+
 
 v=None
 for s,vv in enumerate(p.get("data_vectors")):
@@ -43,9 +47,13 @@ for s,vv in enumerate(p.get("data_vectors")):
 dat = DataManager(p, v, cosmo, all_data=False)
 gat = DataManager(p, v, cosmo, all_data=True)
 def th(pars,d):
-    if cosmo_vary:
-        cosmo = COSMO_ARGS(pars)
-    return get_theory(p, d, cosmo,
+    if not cosmo_vary:
+        cosmo_fid = cosmo
+        hmc_fid = hmc
+    else:
+        cosmo_fid = COSMO_ARGS(kwargs)
+        hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+    return get_theory(p, d, cosmo_fid, hmc_fid,
                       hm_correction=hm_correction,
                       selection=None,**pars)
 likd = Likelihood(p.get('params'), dat.data_vector, dat.covar, th,

@@ -8,6 +8,7 @@ from model.theory import get_theory
 import matplotlib.pyplot as plt
 from model.hmcorr import HaloModCorrection
 from model.power_spectrum import hm_bias
+from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 
 try:
@@ -16,10 +17,12 @@ except IndexError:
     raise ValueError("Must provide param file name as command-line argument")
 
 p = ParamRun(fname_params)
+kwargs = p.get_cosmo_pars()
 run_name = p.get('mcmc')['run_name']
 
 # Cosmology (Planck 2018)
 cosmo = p.get_cosmo()
+hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)
 kwargs = p.get_cosmo_pars()
 hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
@@ -42,21 +45,39 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     def th(pars):
-        if cosmo_vary: cosmo = COSMO_ARGS(pars)
-        return get_theory(p, d, cosmo, return_separated=False,
+        if not cosmo_vary:
+            cosmo_fid = cosmo
+            hmc_fid = hmc
+        else:
+            cosmo_fid = COSMO_ARGS(kwargs)
+            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+        return get_theory(p, d, cosmo_fid, hmc_fid,
+                          return_separated=False,
                           hm_correction=hm_correction,
                           **pars)
 
     def th1h(pars):
-        if cosmo_vary: cosmo = COSMO_ARGS(pars)
-        return get_theory(p, d, cosmo, return_separated=False,
+        if not cosmo_vary:
+            cosmo_fid = cosmo
+            hmc_fid = hmc
+        else:
+            cosmo_fid = COSMO_ARGS(kwargs)
+            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+        return get_theory(p, d, cosmo_fid, hmc_fid,
+                          return_separated=False,
                           hm_correction=hm_correction,
                           include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(pars):
-        if cosmo_vary: cosmo = COSMO_ARGS(pars)
-        return get_theory(p, d, cosmo, return_separated=False,
+        if not cosmo_vary:
+            cosmo_fid = cosmo
+            hmc_fid = hmc
+        else:
+            cosmo_fid = COSMO_ARGS(kwargs)
+            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+        return get_theory(p, d, cosmo_fid, hmc_fid,
+                          return_separated=False,
                           hm_correction=hm_correction,
                           include_2h=True, include_1h=False,
                           **pars)

@@ -7,6 +7,28 @@ import pyccl as ccl
 from .cosmo_utils import COSMO_CHECK
 
 
+def get_hmcalc(cosmo, mdef_delta=500, mdef_type='critical', **kwargs):
+    """Generates the associated halo model calculator.
+
+    Parameters
+    ----------
+    cosmo (`~pyccl.core.Cosmology) : cosmology object
+    mdef_delta (int) : reference halo mass overdensity
+    mdef_type (str) : reference halo mass overdensity type
+    **kwargs : dictionary containing 'mass_function' and 'halo_bias' functions
+
+    Returns
+    -------
+    `~pyccl.halos.halo_model.HMCalculator : halo model calculator
+    """
+    hmd = ccl.halos.MassDef(mdef_delta, mdef_type)
+    nM = kwargs["mass_function"](cosmo, mass_def=hmd)
+    bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
+    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
+    return hmc
+
+
+
 # Halo sizes
 def concentration_duffy(M, a, is_D500=False, squeeze=True):
     """

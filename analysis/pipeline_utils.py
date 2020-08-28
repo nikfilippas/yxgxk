@@ -9,6 +9,7 @@ from scipy.interpolate import interp1d
 from tqdm import tqdm
 import healpy as hp
 import pymaster as nmt
+import pyccl as ccl
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
@@ -16,6 +17,7 @@ from analysis.jackknife import JackKnife
 from model.hmcorr import HaloModCorrection
 from model.trispectrum import hm_ang_1h_covariance
 from model.power_spectrum import hm_ang_power_spectrum
+from model.utils import get_hmcalc
 from model.utils import beam_hpix, beam_gaussian
 from model.cosmo_utils import COSMO_ARGS, COSMO_DEFAULT
 from model.data import ProfTracer
@@ -226,7 +228,8 @@ def model_xcorr(p, fields, xcorr):
                     kwargs = merge_models(kwargs1, kwargs2)
                     cosmo = COSMO_ARGS(kwargs)
                     l = mcorr[name1][name2].leff
-                    cl = hm_ang_power_spectrum(cosmo, l, (prof1, prof2),
+                    hmc = get_hmcalc(cosmo, **kwargs)
+                    cl = hm_ang_power_spectrum(cosmo, hmc, l, (prof1, prof2),
                                                hm_correction=hm_correction,
                                                **kwargs)
                     if type1 == type2 == 'g':

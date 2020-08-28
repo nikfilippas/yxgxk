@@ -13,6 +13,7 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import HalomodCorrection
+from model.utils import get_hmcalc
 from model.utils import selection_planck_erf, selection_planck_tophat
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 import matplotlib.pyplot as plt
@@ -27,21 +28,36 @@ class thr(object):
         self.d = d
 
     def th(self, pars):
-        if cosmo_vary: cosmo = COSMO_ARGS(pars)
-        return get_theory(p, self.d, cosmo,
+        if not cosmo_vary:
+            cosmo_fid = cosmo
+            hmc_fid = hmc
+        else:
+            cosmo_fid = COSMO_ARGS(kwargs)
+            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+        return get_theory(p, self.d, cosmo_fid, hmc_fid,
                           hm_correction=hm_correction,
                           selection=sel, **pars)
 
     def th1h(self, pars):
-        if cosmo_vary: cosmo = COSMO_ARGS(pars)
-        return get_theory(p, self.d, cosmo,
+        if not cosmo_vary:
+            cosmo_fid = cosmo
+            hmc_fid = hmc
+        else:
+            cosmo_fid = COSMO_ARGS(kwargs)
+            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+        return get_theory(p, self.d, cosmo_fid, hmc_fid,
                           hm_correction=hm_correction,
                           selection=sel, include_2h=False, include_1h=True,
                           **pars)
 
     def th2h(self, pars):
-        if cosmo_vary: cosmo = COSMO_ARGS(pars)
-        return get_theory(p, self.d, cosmo,
+        if not cosmo_vary:
+            cosmo_fid = cosmo
+            hmc_fid = hmc
+        else:
+            cosmo_fid = COSMO_ARGS(kwargs)
+            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+        return get_theory(p, self.d, cosmo_fid, hmc_fid,
                           hm_correction=hm_correction,
                           selection=sel, include_2h=True, include_1h=False,
                           **pars)
@@ -49,7 +65,9 @@ class thr(object):
 
 fname_params = "params_wnarrow.yml"
 p = ParamRun(fname_params)
+kwargs = p.get_cosmo_pars()
 cosmo = p.get_cosmo()
+hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)
 
 # Include halo model correction if needed

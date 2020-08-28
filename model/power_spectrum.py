@@ -3,12 +3,13 @@ import pyccl as ccl
 from model.cosmo_utils import COSMO_CHECK
 
 
-def hm_bias(cosmo, a, profile, **kwargs):
+def hm_bias(cosmo, hmc, a, profile, **kwargs):
     """Computes the halo model prediction for the bias of a given
     tracer.
 
     Args:
         cosmo (~pyccl.core.Cosmology): a Cosmology object.
+        hmc (`~pyccl.halos.halo_model.HMCalculator): halo model calculator
         a (array): array of scale factor values.
         profile (`model.data.ProfTracer`): a profile-tracer object.
         **kwargs: Parametrisation of the profiles and cosmology.
@@ -17,12 +18,7 @@ def hm_bias(cosmo, a, profile, **kwargs):
         `numpy.array`: The halo model bias for the input profile.
     """
     COSMO_CHECK(cosmo, **kwargs)
-    hmd = ccl.halos.MassDef(500, 'critical')
-    nM = kwargs["mass_function"](cosmo, mass_def=hmd)
-    bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
-    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
     profile.update_parameters(cosmo, **kwargs)
-
     bias = ccl.halos.halomod_bias_1pt(cosmo, hmc, 0.0001, a,
                                       profile.profile,
                                       normprof=(profile.type!='y'))
@@ -44,13 +40,14 @@ def get_2pt(p1, p2, **kwargs):
         return ccl.halos.Profile2ptR(r_corr=r_corr)
 
 
-def hm_ang_power_spectrum(cosmo, l, profiles,
+def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                           include_1h=True, include_2h=True,
                           hm_correction=None, **kwargs):
     """Angular power spectrum using CCL.
 
     Args:
-        cosmo (~pyccl.core.Cosmology): a Cosmology object.
+        cosmo (~pyccl.core.Cosmology): a Cosmology object
+        hmc (`~pyccl.halos.halo_model.HMCalculator): halo model calculator
         l (`numpy.array`): effective multipoles to sample
         profiles (tuple of `model.data.ProfTracer`): profile and tracer pair
         include_1h (`bool`): whether to include the 1-halo term
@@ -65,11 +62,6 @@ def hm_ang_power_spectrum(cosmo, l, profiles,
     p1, p2 = profiles
     p1.update_parameters(cosmo, **kwargs)
     p2.update_parameters(cosmo, **kwargs)
-    # Set up Halo Model calculator
-    hmd = ccl.halos.MassDef(500, 'critical')
-    nM = kwargs["mass_function"](cosmo, mass_def=hmd)
-    bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
-    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
 
     # Set up covariance
     p2pt = get_2pt(p1, p2, **kwargs)

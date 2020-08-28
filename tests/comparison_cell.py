@@ -60,6 +60,7 @@ L = np.geomspace(6, 3000, 50)
 from analysis.params import ParamRun
 from model.power_spectrum import hm_ang_power_spectrum
 from model.data import ProfTracer
+from model.utils import get_hmcalc
 import analysis.pipeline_utils as pu
 
 g = []
@@ -74,19 +75,19 @@ for m in p.get("maps"):
 
 z = np.linspace(0.0005, 6, 1000)
 
-
 TT = [[[] for i in range(6)] for j in range(3)]
 for i in range(6):
     cosmo = COSMO_ARGS(cosmo_pars)
-    TT[0][i] = hm_ang_power_spectrum(cosmo, L, (g[i], g[i]),
+    hmc = get_hmcalc(cosmo, **{**kwargs[i], **cosmo_pars})
+    TT[0][i] = hm_ang_power_spectrum(cosmo, hmc, L, (g[i], g[i]),
                                      hm_correction=hm_correction,
                                      **{**kwargs[i], **cosmo_pars})
     TT[0][i] *= pu.Beam(("g", "g"), L, 2048)
-    TT[1][i] = hm_ang_power_spectrum(cosmo, L, (y, g[i]),
+    TT[1][i] = hm_ang_power_spectrum(cosmo, hmc, L, (y, g[i]),
                                      hm_correction=hm_correction,
                                      **{**kwargs[i], **cosmo_pars})
     TT[1][i] *= pu.Beam(("g", "y"), L, 2048)
-    TT[2][i] = hm_ang_power_spectrum(cosmo, L, (k, g[i]),
+    TT[2][i] = hm_ang_power_spectrum(cosmo, hmc, L, (k, g[i]),
                                      hm_correction=hm_correction,
                                      **{**kwargs[i], **cosmo_pars})
     TT[2][i] *= pu.Beam(("g", "k"), L, 2048)
