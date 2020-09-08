@@ -5,7 +5,7 @@ global:
     # Number of alm iterations in ``pymaster.Field``
     n_iter: 3
     # Output directory
-    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_default'
+    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_lensing'
     # output_dir: 'output_default'
 
 
@@ -270,7 +270,7 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lensing'
+    run_name: 'lensing_sigma8_100x1000'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Number of samples in redshift for each bin
@@ -282,8 +282,8 @@ mcmc:
     # Print debug information?
     debug: False
     # Emcee parameters
-    n_walkers: 200
-    n_steps: 20000
+    n_walkers: 100
+    n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Save parameters (separated by whitespace)
@@ -410,7 +410,7 @@ params:
           values: [0.55, 0.80]
     - name: "sigma8"
       label: "\\sigma_8"
-      vary: False
+      vary: True
       value: 0.8102
       prior:
           type: "TopHat"
