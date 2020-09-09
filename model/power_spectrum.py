@@ -29,14 +29,16 @@ def get_2pt(p1, p2, **kwargs):
     """Returns the 2pt function of the input profiles."""
     if p1.type == p2.type == 'g':
         return ccl.halos.Profile2ptHOD()
+    elif p1.type == p2.type:
+        return ccl.halos.Profile2ptR(r_corr=0)
     else:
         r_corr = kwargs.get('r_corr_%s%s' % (p1.type, p2.type))
         if r_corr is None:
             r_corr = kwargs.get('r_corr_%s%s' % (p2.type, p1.type))
             if r_corr is None:
                 r_corr = 0
-                print('2pt covariance for %sx%s defaulting to 0' % (p1.type,
-                                                                    p2.type))
+                print(' -- 2pt covariance for %sx%s defaulting to 0' %
+                     (p1.type, p2.type))
         return ccl.halos.Profile2ptR(r_corr=r_corr)
 
 

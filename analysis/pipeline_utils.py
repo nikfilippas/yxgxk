@@ -284,7 +284,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
                 cosmo = COSMO_ARGS(kwargs)
             except KeyError:
                 kwargs = {"b_hydro": 0.25}  # gNFW profile triggers exception
-                cosmo = COSMO_DEFAULT
+                cosmo = COSMO_DEFAULT()
             prof.update_parameters(cosmo, **kwargs)
             profiles[i] = prof
         # Get single model parameter dictionary
