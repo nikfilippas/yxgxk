@@ -52,7 +52,6 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     def th(kwargs):
-        d = DataManager(p, v, jk_region=jk_region)
         if not cosmo_vary:
             cosmo_fid = cosmo
             hmc_fid = hmc
