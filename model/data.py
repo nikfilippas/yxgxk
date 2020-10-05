@@ -35,6 +35,7 @@ class ProfTracer(object):
                 self.nzf = interp1d(self.z, self.nz, kind='cubic',
                                     bounds_error=False, fill_value=0.)
                 self.z_avg = np.average(self.z, weights=self.nz)
+                self.zrange = self.z[self.nz >= 0.05].take([0, -1])
                 # determine max ell
                 zmean = np.average(self.z, weights=self.nz)
                 cosmo = COSMO_ARGS(m['model'])
@@ -43,6 +44,7 @@ class ProfTracer(object):
 
                 self.bz = np.ones_like(self.z)
                 self.profile = ccl.halos.HaloProfileHOD(cM)
+
             elif m['type'] == 'k':
                 self.profile = ccl.halos.HaloProfileNFW(cM)
         self.tracer = None
