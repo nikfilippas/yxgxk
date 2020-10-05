@@ -44,7 +44,8 @@ def get_2pt(p1, p2, **kwargs):
 
 def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                           include_1h=True, include_2h=True,
-                          hm_correction=None, **kwargs):
+                          hm_correction=None,
+                          kpts=128, zpts=8, **kwargs):
     """Angular power spectrum using CCL.
 
     Args:
@@ -68,8 +69,16 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     # Set up covariance
     p2pt = get_2pt(p1, p2, **kwargs)
 
-    k_arr = np.geomspace(1e-4, 1e2, 256)
-    a_arr = np.linspace(0.2, 1, 64)
+    k_arr = np.geomspace(1e-3, 1e2, kpts)
+
+    if profiles[0].type == "g":
+        zmin, zmax = profiles[0].zrange
+    elif profiles[1].type == "g":
+        zmin, zmax = profiles[1].zrange
+    else:
+        zmax = 1.0
+
+    a_arr = np.linspace(1/(1+zmax), 1, zpts)
 
     if hm_correction is not None:
         hm_correction_mod = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
