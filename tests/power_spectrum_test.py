@@ -11,12 +11,12 @@ from model.data import ProfTracer
 from model.utils import get_hmcalc
 from model.power_spectrum import hm_ang_power_spectrum
 
-
-fname = "params_wisc1.yml"
+gname = "wisc1"
+fname = "params_%s.yml" % gname
 p = ParamRun(fname)
 
 for mg in p.get("maps"):
-    if mg["name"] == "wisc1":
+    if mg["name"] == gname:
         g = ProfTracer(mg)
         break
 
@@ -39,7 +39,10 @@ kwargs["halo_bias"] = ccl.halos.hbias.halo_bias_from_name("tinker10")
 
 cosmo = p.get_cosmo()
 hmc = get_hmcalc(cosmo, **kwargs)
-l = np.arange(6, 2500)
+# scale cuts
+kmax = 1
+lmax = kmax*ccl.comoving_radial_distance(cosmo, 1/(1+g.z_avg)) - 0.5
+l = np.arange(6, np.floor(lmax))
 
 clgg_256x64 = hm_ang_power_spectrum(cosmo, hmc, l, (g,g), kpts=256, zpts=64, **kwargs)
 clgg_128x8 = hm_ang_power_spectrum(cosmo, hmc, l, (g,g), kpts=128, zpts=8, **kwargs)
