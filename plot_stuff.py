@@ -6,7 +6,7 @@ from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
 import matplotlib.pyplot as plt
-from model.hmcorr import HaloModCorrection
+from model.hmcorr import HM_Gauss
 from model.power_spectrum import hm_bias
 from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
@@ -25,7 +25,7 @@ cosmo = p.get_cosmo()
 hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)
 kwargs = p.get_cosmo_pars()
-hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
+hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction \
                 if p.get("mcmc").get("hm_correct") else None
 
 

@@ -9,7 +9,7 @@ import numpy as np
 import pyccl as ccl
 from pyccl.halos.hmfunc import mass_function_from_name
 from pyccl.halos.hbias import halo_bias_from_name
-from model.hmcorr import HaloModCorrection
+from model.hmcorr import HM_Gauss
 from model.hmcorr import HM_halofit
 
 
@@ -24,7 +24,7 @@ cosmo = ccl.Cosmology(Omega_c=0.26066676,
 kwargs = {"mass_function": mass_function_from_name("tinker08"),
           "halo_bias": halo_bias_from_name("tinker10")}
 
-HM = HaloModCorrection(cosmo, **kwargs)
+HM = HM_Gauss(cosmo, **kwargs)
 a_HMcorr = HM.af(a_arr)
 for i, a in enumerate(a_arr):
     hm_old = HM_halofit(cosmo, **kwargs).rk_interp(k_arr, a)

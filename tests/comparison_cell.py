@@ -2,14 +2,14 @@
 
 import numpy as np
 from analysis.params import ParamRun
-from model.hmcorr import HaloModCorrection
+from model.hmcorr import HM_Gauss
 from model.cosmo_utils import COSMO_ARGS
 
 
 p = ParamRun("params_lensing.yml")
 cosmo_pars = p.get_cosmo_pars()
 cosmo = p.get_cosmo()
-hm_correction = HaloModCorrection(cosmo, **cosmo_pars).hm_correction
+hm_correction = HM_Gauss(cosmo, **cosmo_pars).hm_correction
 
 zbins = ["2mpz"]+["wisc%d" % i for i in range(1, 6)]
 kwargs = [[] for i in range(6)]

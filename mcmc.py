@@ -6,7 +6,7 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
-from model.hmcorr import HaloModCorrection
+from model.hmcorr import HM_Gauss
 from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 
@@ -26,7 +26,7 @@ kwargs = p.get_cosmo_pars()
 cosmo = p.get_cosmo()
 hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)  # vary cosmology in this analysis?
-hm_correction = HaloModCorrection(cosmo, **kwargs).hm_correction \
+hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction \
                 if p.get("mcmc").get("hm_correct") else None
 
 # Jackknives
@@ -52,6 +52,7 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     def th(kwargs):
+        print("running")
         if not cosmo_vary:
             cosmo_fid = cosmo
             hmc_fid = hmc

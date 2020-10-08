@@ -9,12 +9,11 @@ from scipy.interpolate import interp1d
 from tqdm import tqdm
 import healpy as hp
 import pymaster as nmt
-import pyccl as ccl
 from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
-from model.hmcorr import HaloModCorrection
+from model.hmcorr import HM_Gauss
 from model.trispectrum import hm_ang_1h_covariance
 from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import get_hmcalc
@@ -194,7 +193,7 @@ def get_xcorr(p, fields, jk_region=None, save_windows=True):
 
 def model_xcorr(p, fields, xcorr):
     """Models the angular power spectrum."""
-    hm_correction = HaloModCorrection(p.get_cosmo(),
+    hm_correction = HM_Gauss(p.get_cosmo(),
                                       **p.get_cosmo_pars()).hm_correction \
                     if p.get("mcmc").get("hm_correct") else None
 
