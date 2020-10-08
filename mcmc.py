@@ -1,5 +1,7 @@
 from argparse import ArgumentParser
 import numpy as np
+from pyccl.halos.hmfunc import mass_function_from_name
+from pyccl.halos.hbias import halo_bias_from_name
 from analysis.params import ParamRun
 from likelihood.yaml_handler import update_params, update_nsteps
 from likelihood.like import Likelihood
@@ -52,11 +54,12 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     def th(kwargs):
-        print("running")
         if not cosmo_vary:
             cosmo_fid = cosmo
             hmc_fid = hmc
         else:
+            kwargs["mass_function"] = mass_function_from_name(p.get_massfunc())
+            kwargs["halo_bias"] = halo_bias_from_name(p.get_halobias())
             cosmo_fid = COSMO_ARGS(kwargs)
             hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
         return get_theory(p, d, cosmo_fid, hmc_fid,
