@@ -43,134 +43,6 @@ masks:
 
 # Maps
 maps:
-    # Each item here corresponds to one sky map
-    - name: "2mpz"
-      # 'g' for galaxies, 'y' for tSZ, 'k' for CMB lensing, "d" for dust
-      type: "g"
-      # Do galaxies with satellites necessarily contain a central?
-      ns_independent: false
-      # Path to map
-      map: "data/maps/2mpz_05_01_512.fits"
-      # Name of mask (should correspond to one of the keys in the previous section)
-      mask: "mask_lowz"
-      # dndz file
-      dndz: "data/dndz/2MPZ_bin1.txt"
-      # Is there a beam associated with this map?
-      beam: False
-      # Proposed model parameters describing this map
-      model:
-          # Cosmology, HOD, and tSZ parameters
-          lM0:  11.66317664
-          lM1:  12.99472018
-          lMmin:  11.66317664
-          alpha:  1.0
-          b_hydro:  0.33652023
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.10361521
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 1.19939348
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.1958513
-      # List of systematics
-      systematics:
-        - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "wisc1"
-      type: "g"
-      ns_independent: false
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin1.txt"
-      beam: False
-      model:
-          lM0:  10.59153793
-          lM1:  11.89126683
-          lMmin:  10.59153793
-          alpha:  1.0
-          b_hydro:  0.11877272
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.65621202
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 0.81297445
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.21515478
-      systematics:
-        - 'scos_plates'
-        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
-        - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "wisc2"
-      type: "g"
-      ns_independent: false
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin2.txt"
-      beam: False
-      model:
-          lM0:  10.48718201
-          lM1:  11.73255203
-          lMmin:  10.48718201
-          alpha:  1.0
-          b_hydro:  0.16081615
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.61417099
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 0.8080167
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.23087286
-      systematics:
-        - 'scos_plates'
-        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
-        - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "wisc3"
-      type: "g"
-      ns_independent: false
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin3.txt"
-      beam: False
-      model:
-          lM0:  11.32914985
-          lM1:  12.51536196
-          lMmin:  11.32914985
-          alpha:  1.0
-          b_hydro:  0.19452851
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.62590662
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 0.96975127
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.24627099
-      systematics:
-        - 'scos_plates'
-        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
-        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "wisc4"
       type: "g"
       ns_independent: false
@@ -179,57 +51,27 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          lM0:  11.99335452
-          lM1:  13.18622206
-          lMmin: 11.99335452
-          alpha:  1.0
-          b_hydro:  0.26434493
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.5776713
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 1.15909897
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.25827266
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.25827266
+        alpha: 1.0
+        b_hydro: 0.26434493
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 11.99335452
+        lM1: 13.18622206
+        lMmin: 11.99335452
+        n_s: 0.9665
+        r_corr_gk: 0.0
+        r_corr_gy: -0.5776713
+        sigma8: 0.8102
+        sigmaLogM: 0.15
+        width: 1.15909897
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
-        - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "wisc5"
-      type: "g"
-      ns_independent: false
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin5.txt"
-      beam: False
-      model:
-          lM0:  12.55077359
-          lM1:  13.43386643
-          lMmin:  12.55077359
-          alpha:  1.0
-          b_hydro:  0.25261573
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.68876424
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 1.18987421
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.27359295
-      systematics:
-        - 'scos_plates'
-        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
         - 'data/maps/lambda_sfd_ebv.fits'
     - name: "y_milca"
       type: "y"
@@ -270,19 +112,13 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lensing_sigma8_100x1000'
+    run_name: 'lensing'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
-    # Number of samples in redshift for each bin
-    nz_points_g: 32
-    # Use logarithmic sampling in redshift?
-    z_log_sampling: True
-    # Correct the halo model in the transition regime?
-    hm_correct: True
     # Print debug information?
     debug: False
     # Emcee parameters
-    n_walkers: 100
+    n_walkers: 96
     n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
@@ -436,52 +272,6 @@ params:
 # List all the different combinations of
 # power spectra you want to analyze
 data_vectors:
-    # - type: 'Cl'
-    #   # Give each element a different name
-    #   name: '2mpz'
-    #   # Type of covariance matrix to be used.
-    #   covar_type: 'data'
-    #   # List here the different power spectrum
-    #   # combinations you want to use
-    #   twopoints:
-    #       # Names of the two tracers (maps) going into this C_ell
-    #       - tracers: ['2mpz','2mpz']
-    #         # Minimum multipole to use in the analysis
-    #         lmin: 0
-    #       - tracers: ['2mpz','y_milca']
-    #         lmin: 0
-    #       - tracers: ['2mpz', 'lens']
-    #         lmin: 0
-    # - type: 'Cl'
-    #   name: 'wisc1'
-    #   covar_type: 'data'
-    #   twopoints:
-    #       - tracers: ['wisc1','wisc1']
-    #         lmin: 10
-    #       - tracers: ['wisc1','y_milca']
-    #         lmin: 0
-    #       - tracers: ['wisc1', 'lens']
-    #         lmin: 0
-    # - type: 'Cl'
-    #   name: 'wisc2'
-    #   covar_type: 'data'
-    #   twopoints:
-    #       - tracers: ['wisc2','wisc2']
-    #         lmin: 10
-    #       - tracers: ['wisc2','y_milca']
-    #         lmin: 0
-    #       - tracers: ['wisc2', 'lens']
-    #         lmin: 0
-    # - type: 'Cl'
-    #   name: 'wisc3'
-    #   covar_type: 'data'
-    #   twopoints:
-    #       - tracers: ['wisc3','wisc3']
-    #         lmin: 10
-    #       - tracers: ['wisc3','y_milca']
-    #         lmin: 0
-    #       - tracers: ['wisc3', 'lens']
-    #         lmin: 0
     - type: 'Cl'
       name: 'wisc4'
       covar_type: 'data'
@@ -492,13 +282,3 @@ data_vectors:
             lmin: 0
           - tracers: ['wisc4', 'lens']
             lmin: 0
-    # - type: 'Cl'
-    #   name: 'wisc5'
-    #   covar_type: 'data'
-    #   twopoints:
-    #       - tracers: ['wisc5','wisc5']
-    #         lmin: 10
-    #       - tracers: ['wisc5','y_milca']
-    #         lmin: 0
-    #       - tracers: ['wisc5', 'lens']
-    #         lmin: 0
