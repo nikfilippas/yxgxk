@@ -28,8 +28,7 @@ kwargs = p.get_cosmo_pars()
 cosmo = p.get_cosmo()
 hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)  # vary cosmology in this analysis?
-hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction \
-                if p.get("mcmc").get("hm_correct") else None
+hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction
 
 # Jackknives
 jk_region = args.jk_id
