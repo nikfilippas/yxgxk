@@ -274,7 +274,7 @@ params:
 data_vectors:
     - type: 'Cl'
       name: 'wisc5'
-      covar_type: 'data'
+      covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc5','wisc5']
             lmin: 10

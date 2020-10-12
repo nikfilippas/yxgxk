@@ -284,7 +284,7 @@ data_vectors:
       # Give each element a different name
       name: '2mpz'
       # Type of covariance matrix to be used.
-      covar_type: 'data'
+      covar_type: 'comb_m'
       # List here the different power spectrum
       # combinations you want to use
       twopoints:

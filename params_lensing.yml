@@ -434,7 +434,7 @@ data_vectors:
       # Give each element a different name
       name: '2mpz'
       # Type of covariance matrix to be used.
-      covar_type: 'data'
+      covar_type: 'comb_m'
       # List here the different power spectrum
       # combinations you want to use
       twopoints:
@@ -448,7 +448,7 @@ data_vectors:
             lmin: 0
     - type: 'Cl'
       name: 'wisc1'
-      covar_type: 'data'
+      covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc1','wisc1']
             lmin: 10
@@ -458,7 +458,7 @@ data_vectors:
             lmin: 0
     - type: 'Cl'
       name: 'wisc2'
-      covar_type: 'data'
+      covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc2','wisc2']
             lmin: 10
@@ -468,7 +468,7 @@ data_vectors:
             lmin: 0
     - type: 'Cl'
       name: 'wisc3'
-      covar_type: 'data'
+      covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc3','wisc3']
             lmin: 10
@@ -478,7 +478,7 @@ data_vectors:
             lmin: 0
     - type: 'Cl'
       name: 'wisc4'
-      covar_type: 'data'
+      covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc4','wisc4']
             lmin: 10
@@ -488,7 +488,7 @@ data_vectors:
             lmin: 0
     - type: 'Cl'
       name: 'wisc5'
-      covar_type: 'data'
+      covar_type: 'comb_m'
       twopoints:
           - tracers: ['wisc5','wisc5']
             lmin: 10
