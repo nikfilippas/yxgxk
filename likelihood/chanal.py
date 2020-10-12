@@ -156,10 +156,7 @@ class chan(object):
         self.cosmo = self.p.get_cosmo()
         self.cosmo_vary = COSMO_VARY(self.p)
         self.kwargs = self.p.get_cosmo_pars()
-        self.hm_correction = HM_Gauss(self.cosmo,
-                                               **self.kwargs
-                                               ).hm_correction \
-                             if self.p.get("mcmc").get("hm_correct") else None
+        self.hm_correction = HM_Gauss(self.cosmo, **self.kwargs).hm_correction
 
 
     def _get_dndz(self, fname, width):
