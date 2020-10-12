@@ -17,6 +17,7 @@ os.system('mkdir -p ' + p.get_outdir())  # mkdir if needed
 
 if args.joint_cov:
     assert args.jk_id is None, "No joint covs after completing a single JK!"
+    print("Computing joint covariances...")
     pu.get_joint_cov(p)
     import sys
     sys.exit(0)
