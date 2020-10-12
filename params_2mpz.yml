@@ -81,10 +81,6 @@ maps:
       # List of systematics
       systematics:
         - 'data/maps/lambda_sfd_ebv.fits'
-      systematics:
-        - 'scos_plates'
-        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
-        - 'data/maps/lambda_sfd_ebv.fits'
     - name: "y_milca"
       type: "y"
       map: "data/maps/milca_ymaps.fits"

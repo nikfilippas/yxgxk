@@ -59,25 +59,25 @@ maps:
       beam: False
       # Proposed model parameters describing this map
       model:
-          # Cosmology, HOD, and tSZ parameters
-          lM0:  11.66317664
-          lM1:  12.99472018
-          lMmin:  11.66317664
-          alpha:  1.0
-          b_hydro:  0.33652023
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.10361521
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 1.19939348
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.1958513
+        # Cosmology, HOD, and tSZ parameters
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.4996537824025633
+        alpha: 1.0
+        b_hydro: 0.32935235687694947
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 11.653556490729253
+        lM1: 13.035622987247043
+        lMmin: 11.653556490729253
+        n_s: 0.9665
+        r_corr_gk: 0.4999999999996133
+        r_corr_gy: -0.2152449426868446
+        sigma8: 0.8371251038286969
+        sigmaLogM: 0.15
+        width: 1.199999999993615
       # List of systematics
       systematics:
         - 'data/maps/lambda_sfd_ebv.fits'
@@ -89,24 +89,24 @@ maps:
       dndz: "data/dndz/WISC_bin1.txt"
       beam: False
       model:
-          lM0:  10.59153793
-          lM1:  11.89126683
-          lMmin:  10.59153793
-          alpha:  1.0
-          b_hydro:  0.11877272
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.65621202
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 0.81297445
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.21515478
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.21515478
+        alpha: 1.0
+        b_hydro: 0.11877272
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 10.59153793
+        lM1: 11.89126683
+        lMmin: 10.59153793
+        n_s: 0.9665
+        r_corr_gk: 0.0
+        r_corr_gy: -0.65621202
+        sigma8: 0.8102
+        sigmaLogM: 0.15
+        width: 0.81297445
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
@@ -119,24 +119,24 @@ maps:
       dndz: "data/dndz/WISC_bin2.txt"
       beam: False
       model:
-          lM0:  10.48718201
-          lM1:  11.73255203
-          lMmin:  10.48718201
-          alpha:  1.0
-          b_hydro:  0.16081615
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.61417099
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 0.8080167
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.23087286
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.21515478
+        alpha: 1.0
+        b_hydro: 0.11877272
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 10.59153793
+        lM1: 11.89126683
+        lMmin: 10.59153793
+        n_s: 0.9665
+        r_corr_gk: 0.0
+        r_corr_gy: -0.65621202
+        sigma8: 0.8102
+        sigmaLogM: 0.15
+        width: 0.81297445
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
@@ -149,24 +149,24 @@ maps:
       dndz: "data/dndz/WISC_bin3.txt"
       beam: False
       model:
-          lM0:  11.32914985
-          lM1:  12.51536196
-          lMmin:  11.32914985
-          alpha:  1.0
-          b_hydro:  0.19452851
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.62590662
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 0.96975127
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.24627099
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.24627099
+        alpha: 1.0
+        b_hydro: 0.19452851
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 11.32914985
+        lM1: 12.51536196
+        lMmin: 11.32914985
+        n_s: 0.9665
+        r_corr_gk: 0.0
+        r_corr_gy: -0.62590662
+        sigma8: 0.8102
+        sigmaLogM: 0.15
+        width: 0.96975127
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
@@ -179,24 +179,24 @@ maps:
       dndz: "data/dndz/WISC_bin4.txt"
       beam: False
       model:
-          lM0:  11.99335452
-          lM1:  13.18622206
-          lMmin: 11.99335452
-          alpha:  1.0
-          b_hydro:  0.26434493
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.5776713
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 1.15909897
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.25827266
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.25827266
+        alpha: 1.0
+        b_hydro: 0.26434493
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 11.99335452
+        lM1: 13.18622206
+        lMmin: 11.99335452
+        n_s: 0.9665
+        r_corr_gk: 0.0
+        r_corr_gy: -0.5776713
+        sigma8: 0.8102
+        sigmaLogM: 0.15
+        width: 1.15909897
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
@@ -209,24 +209,24 @@ maps:
       dndz: "data/dndz/WISC_bin5.txt"
       beam: False
       model:
-          lM0:  12.55077359
-          lM1:  13.43386643
-          lMmin:  12.55077359
-          alpha:  1.0
-          b_hydro:  0.25261573
-          beta_gal:  1.0
-          beta_max:  1.0
-          fc:  1.0
-          r_corr_gy:  -0.68876424
-          r_corr_gk:  0.
-          sigmaLogM:  0.15
-          width: 1.18987421
-          Omega_c: 0.26066676
-          Omega_b: 0.048974682
-          h: 0.6766
-          sigma8: 0.8102
-          n_s: 0.9665
-          a_HMcorr: 0.27359295
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.27359295
+        alpha: 1.0
+        b_hydro: 0.25261573
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 12.55077359
+        lM1: 13.43386643
+        lMmin: 12.55077359
+        n_s: 0.9665
+        r_corr_gk: 0.0
+        r_corr_gy: -0.68876424
+        sigma8: 0.8102
+        sigmaLogM: 0.15
+        width: 1.18987421
       systematics:
         - 'scos_plates'
         - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
@@ -273,17 +273,11 @@ mcmc:
     run_name: 'lensing'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
-    # Number of samples in redshift for each bin
-    nz_points_g: 32
-    # Use logarithmic sampling in redshift?
-    z_log_sampling: True
-    # Correct the halo model in the transition regime?
-    hm_correct: True
     # Print debug information?
     debug: False
     # Emcee parameters
-    n_walkers: 200
-    n_steps: 20000
+    n_walkers: 100
+    n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Save parameters (separated by whitespace)
@@ -410,7 +404,7 @@ params:
           values: [0.55, 0.80]
     - name: "sigma8"
       label: "\\sigma_8"
-      vary: False
+      vary: True
       value: 0.8102
       prior:
           type: "TopHat"
@@ -429,7 +423,7 @@ params:
       value: 0.36
       prior:
           type: "TopHat"
-          values: [0.2, 0.6]
+          values: [0.1, 0.5]
 
 
 
