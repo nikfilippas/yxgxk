@@ -211,6 +211,7 @@ class DataManager(object):
             self.templates = None
 
         # Now form covariance matrix in a block-wise fashion
+        looped = []
         self.covar = np.zeros([ndata, ndata])
         nd1 = 0
         for tp1, m1 in zip(v['twopoints'], mask_total):
@@ -220,15 +221,19 @@ class DataManager(object):
             for tp2, m2 in zip(v['twopoints'], mask_total):
                 tr2 = [tracers[n] for n in tp2['tracers']]
                 nd2_here = np.sum(m2)  # Number of points for vector 2
+
+                this_loop = set((tr1[0].type+tr1[1].type, tr2[0].type+tr2[1].type))
                 # Read covariance block
-                fname_cov, trans = choose_cov_file(p, tr1, tr2,
-                                                   v['covar_type'])
+                fname_cov, T = choose_cov_file(p, tr1, tr2, v['covar_type'])
                 with np.load(fname_cov) as f:
-                    cov = f['cov']
-                    if trans:  # Transpose if needed
+                    cov = f["cov"]
+                    # transpose if needed
+                    if T or (this_loop not in looped):
+                        looped.append(this_loop)
                         cov = cov.T
                     cov = cov[m1][:, m2]  # Mask
                     # Assign to block
                     self.covar[nd1:nd1+nd1_here][:, nd2:nd2+nd2_here] = cov
+
                 nd2 += nd2_here
             nd1 += nd1_here
