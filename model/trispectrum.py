@@ -67,16 +67,16 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
 
     # integration and normalisation handling
     if not np.any([prof.type == 'g' for prof in profiles]):
-        zrange = [1e-6, 6.0]
+        zmin, zmax = [1e-6, 6.0]
     else:
         zmin, zmax = [], []
         for prof in profiles:
             if prof.type == 'g':
                 zmin.append(prof.zrange[0])
                 zmax.append(prof.zrange[1])
-        zrange = [np.min(zmin), np.max(zmax)]
+        zmin, zmax = [np.min(zmin), np.max(zmax)]
 
-    z = np.geomspace(zrange[0], zrange[1], 64)
+    z = np.geomspace(zmin, zmax, 64)
     x, jac = np.log(z), z
     a = 1/(1+z)
     chi = ccl.comoving_radial_distance(cosmo, a)
