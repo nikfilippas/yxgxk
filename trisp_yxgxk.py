@@ -43,10 +43,10 @@ tri_yyyy = hm_1h_trispectrum(cosmo, hmc, k, a, (y,y,y,y),
 
 tri = np.load("tri.npz")
 
-assert np.allclose(tri_gggg, tri["tri_gggg"], rtol=0.012)
-assert np.allclose(tri_gggy, tri["tri_gggy"], rtol=0.011)
-assert np.allclose(tri_gygy, tri["tri_gygy"], rtol=0.008)
-assert np.allclose(tri_yyyy, tri["tri_yyyy"], rtol=0.002)
+assert np.allclose(tri_gggg, tri["tri_gggg"], rtol=0.01)
+assert np.allclose(tri_gggy, tri["tri_gggy"], rtol=0.01)
+assert np.allclose(tri_gygy, tri["tri_gygy"], rtol=0.01)
+assert np.allclose(tri_yyyy, tri["tri_yyyy"], rtol=0.01)
 
 
 '''
@@ -110,6 +110,7 @@ np.savez("../yxgxk/tri",
 import numpy as np
 from analysis.params import ParamRun
 from model.utils import get_hmcalc
+from model.trispectrum import hm_ang_1h_covariance
 
 fname = "params_lensing.yml"
 p = ParamRun(fname)
@@ -133,3 +134,16 @@ y.update_parameters(cosmo, **kwargs)
 
 fsky = 0.6
 l = np.arange(6, 2500, 10)
+
+
+cov_gggg = hm_ang_1h_covariance(fsky, l, cosmo, hmc, (g,g,g,g),
+                                p2pt_gg, p2pt_gg, **kwargs)
+cov_gggy = hm_ang_1h_covariance(fsky, l, cosmo, hmc, (g,g,g,y),
+                                p2pt_gg, p2pt_gy, **kwargs)
+cov_gygy = hm_ang_1h_covariance(fsky, l, cosmo, hmc, (g,y,g,y),
+                                p2pt_gy, p2pt_gy, **kwargs)
+
+np.savez("dcov.npz",
+         cov_gggg=cov_gggg,
+         cov_gggy=cov_gggy,
+         cov_gygy=cov_gygy)
