@@ -30,7 +30,7 @@ def get_2pt(p1, p2, **kwargs):
     if p1.type == p2.type == 'g':
         return ccl.halos.Profile2ptHOD()
     elif p1.type == p2.type:
-        return ccl.halos.Profile2ptR(r_corr=0)
+        return ccl.halos.Profile2pt()
     else:
         r_corr = kwargs.get('r_corr_%s%s' % (p1.type, p2.type))
         if r_corr is None:

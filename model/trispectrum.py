@@ -38,7 +38,7 @@ def hm_1h_trispectrum(cosmo, hmc, k, a, profiles,
 
 
 def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
-                         zrange=(1e-6, 6), zpoints=32, zlog=True,
+                         p2pt_12=None, p2pt_34=None,
                          **kwargs):
     """Computes the 1-h trispectrum contribution to the covariance of the
     angular cross power spectra involving two pairs of quantities.
@@ -66,13 +66,18 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
     p1, p2, p3, p4 = profiles
 
     # integration and normalisation handling
-    zmin, zmax = zrange
-    if zlog:
-        z = np.geomspace(zmin, zmax, zpoints)
-        x, jac = np.log(z), z
+    if not np.any([prof.type == 'g' for prof in profiles]):
+        zrange = [1e-6, 6.0]
     else:
-        z = np.linspace(zmin, zmax, zpoints)
-        x, jac = z, 1.
+        zmin, zmax = [], []
+        for prof in profiles:
+            if prof.type == 'g':
+                zmin.append(prof.zrange[0])
+                zmax.append(prof.zrange[1])
+        zrange = [np.min(zmin), np.max(zmax)]
+
+    z = np.geomspace(zrange[0], zrange[1], 64)
+    x, jac = np.log(z), z
     a = 1/(1+z)
     chi = ccl.comoving_radial_distance(cosmo, a)
 
@@ -84,11 +89,14 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
     N = w1*w2*w3*w4*H_inv/(4*np.pi*fsky*chi**6)
 
     # set up covariance
-    p2pt_12 = get_2pt(p1, p2, **kwargs)
-    p2pt_34 = get_2pt(p3, p4, **kwargs)
+    if p2pt_12 is None:
+        p2pt_12 = get_2pt(p1, p2, **kwargs)
+    if p2pt_34 is None:
+        p2pt_34 = get_2pt(p3, p4, **kwargs)
 
     t1h = np.zeros([len(a), len(l), len(l)])
     for ii, (aa, cchi) in enumerate(zip(a, chi)):
+        print(ii)
         k = (l+1/2)/cchi
         cov = hmc.I_0_4(cosmo, k, aa,
                         p1.profile, p2pt_12, p2.profile,
