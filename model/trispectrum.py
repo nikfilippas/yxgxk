@@ -96,7 +96,6 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
 
     t1h = np.zeros([len(a), len(l), len(l)])
     for ii, (aa, cchi) in enumerate(zip(a, chi)):
-        print(ii)
         k = (l+1/2)/cchi
         cov = hmc.I_0_4(cosmo, k, aa,
                         p1.profile, p2pt_12, p2.profile,
