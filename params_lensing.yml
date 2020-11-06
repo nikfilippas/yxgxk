@@ -75,7 +75,7 @@ maps:
         n_s: 0.9665
         r_corr_gk: 0.4999999999996133
         r_corr_gy: -0.2152449426868446
-        sigma8: 0.8371251038286969
+        sigma8: 0.8102
         sigmaLogM: 0.15
         width: 1.199999999993615
       # List of systematics
