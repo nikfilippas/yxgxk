@@ -109,7 +109,7 @@ class Likelihood(object):
         """
         params = self.build_kwargs(par)
         tv = self.get_theory(params)
-        if tv is None:  # Theory calculation failed
+        if tv is None:  # theory calculation failed
             return -np.inf
         dx = self.dv-tv
         return -0.5 * np.einsum('i,ij,j', dx, self.ic, dx)
