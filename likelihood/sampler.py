@@ -255,7 +255,7 @@ class Sampler(object):
                 print('Iteration done. Persisting.')
                 chain_file.persistSamplingValues(pos, prob)
 
-                if counter % 10:
+                if (counter % 10) == 0:
                     print(f"Finished sample {counter}")
             counter += 1
 
@@ -315,8 +315,20 @@ class Sampler(object):
         attribute. The log-posterior for each sample can be retrieved through
         the `probs` attribute.
         """
-        self.chain = np.loadtxt(self.prefix_out + "chain.txt")
-        self.probs = np.loadtxt(self.prefix_out + "chainprob.txt")
+        import pandas as pd
+        self.chain = pd.read_table(self.prefix_out+"chain.txt", header=None).to_numpy(float)
+        self.probs = pd.read_table(self.prefix_out+"chainprob.txt", header=None).to_numpy(float)
+        # check for nan's in case of failed walker step
+        nans = list(set(np.argwhere(np.isnan(self.chain))[:,0]))
+        if len(nans) != 0:
+            for nn in nans:
+                print("Malformed row %d found in chain. Deleting row from file." % nn)
+            self.chain = np.delete(self.chain, nans, axis=0)
+            self.probs = np.delete(self.probs, nans)
+            # check consistency
+            assert self.chain.size == self.probs.size*len(self.parnames), "Error in chain/prob files!"
+            np.savetxt(self.prefix_out+"chain.txt", self.chain, fmt="%.18f", delimiter="\t")
+            np.savetxt(self.prefix_out+"chainprobs.txt", self.probs, fmt="%.18f", delimiter="\t")
         #exit(1)
         #reader = emcee.backends.HDFBackend(fname_chain, read_only=True)
         #self.chain = reader.get_chain(flat=True)
