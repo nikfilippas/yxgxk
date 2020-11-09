@@ -12,6 +12,7 @@ from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import hm_bias
 from model.hmcorr import HM_Gauss
+from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 from scipy.stats import norm
 _PP = norm.sf(-1)-norm.sf(1)
@@ -156,6 +157,7 @@ class chan(object):
         self.cosmo = self.p.get_cosmo()
         self.cosmo_vary = COSMO_VARY(self.p)
         self.kwargs = self.p.get_cosmo_pars()
+        self.hmc = get_hmcalc(self.cosmo, **self.kwargs)
         self.hm_correction = HM_Gauss(self.cosmo, **self.kwargs).hm_correction
 
 
@@ -173,7 +175,11 @@ class chan(object):
     def _th(self, pars):
         if self.cosmo_vary:
             cosmo = COSMO_ARGS(pars)
-        return get_theory(self.p, self.d, cosmo,
+            hmc = get_hmcalc(cosmo, **self.p.get_cosmo_pars())
+        else:
+            cosmo = self.cosmo
+            hmc = self.hmc
+        return get_theory(self.p, self.d, cosmo, hmc,
                           hm_correction=self.hm_correction,
                           **pars)
 
@@ -183,7 +189,13 @@ class chan(object):
 
         def bias_one(p0, num):
             """Calculates the halo model bias for a set of parameters."""
-            bb = hm_bias(self.cosmo,
+            if self.cosmo_vary:
+                cosmo = COSMO_ARGS(pars)
+                hmc = get_hmcalc(cosmo, **self.p.get_cosmo_pars())
+            else:
+                cosmo = self.cosmo
+                hmc = self.hmc
+            bb = hm_bias(cosmo, hmc,
                          1/(1+zarr),
                          d.tracers[num][1],
                          **lik.build_kwargs(p0))
@@ -205,12 +217,10 @@ class chan(object):
                           self.p.get("mcmc")["run_name"] + "_" + s + "_chain"
 
         if type(pars) == str: pars = [pars]
-        import os; print(os.getcwd())
         preCHAINS = {}
         fid_pars = pars.copy()
         for par in pars:
             try:
-                print(fname(par))
                 preCHAINS[par] = np.load(fname(par)+".npy")
                 fid_pars.remove(par)
                 print("Found saved chains for %s." % par)
@@ -225,6 +235,7 @@ class chan(object):
                 b_skip = 100
 
         for s, v in enumerate(self.p.get("data_vectors")):
+            print(v["name"])
             d = DataManager(self.p, v, all_data=False)
             self.d = d
             lik = Likelihood(self.p.get('params'),
@@ -238,6 +249,7 @@ class chan(object):
             chains = lik.build_kwargs(sam.chain.T)
 
             sam.update_p0(sam.chain[np.argmax(sam.probs)])
+            # print(sam.p0)
             kwargs = lik.build_kwargs(sam.p0)
             w = kwargs["width"]
             zz, NN = self._get_dndz(d.tracers[0][0].dndz, w)
@@ -262,10 +274,10 @@ class chan(object):
             # Construct tomographic dictionary
             if s == 0:
                 keys = ["z"] + fid_pars
-                CHAINS = {k: chains[k] for k in keys}
+                CHAINS = {k: [chains[k]] for k in keys}
             else:
                 for k in keys:
-                    CHAINS[k] = np.vstack((CHAINS[k], chains[k]))
+                    CHAINS[k].append(chains[k])
 
         # save bias chains to save time if not already saved
         if "bg" in fid_pars: np.save(fname("bg"), CHAINS["bg"])
