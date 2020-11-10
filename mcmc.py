@@ -97,7 +97,7 @@ for v in p.get('data_vectors'):
         # Monte-carlo
         print(" Sampling:")
         sam.sample(carry_on=p.get('mcmc')['continue_mcmc'],
-                   verbosity=1, use_mpi=False)
+                   verbosity=1, use_mpi=True)
 
 if len(par) > 0:
     is_jk = str(jk_region) if bool(jk_region) else ""
