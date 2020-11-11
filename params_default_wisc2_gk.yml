@@ -6,19 +6,15 @@ bandpowers:
   type: linlog
 data_vectors:
 - covar_type: comb_m
-  name: wisc1
+  name: wisc2
   twopoints:
   - lmin: 10
     tracers:
-    - wisc1
-    - wisc1
+    - wisc2
+    - wisc2
   - lmin: 0
     tracers:
-    - wisc1
-    - y_milca
-  - lmin: 0
-    tracers:
-    - wisc1
+    - wisc2
     - lens
   type: Cl
 global:
@@ -31,33 +27,33 @@ jk:
   store_mcm: true
 maps:
 - beam: false
-  dndz: data/dndz/WISC_bin1.txt
-  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
+  dndz: data/dndz/WISC_bin2.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
   mask: mask_lowz
   model:
     Omega_b: 0.048974682
     Omega_c: 0.26066676
-    a_HMcorr: 0.44851399116254714
+    a_HMcorr: 0.42686663018297105
     alpha: 1.0
-    b_hydro: 0.13445529991375527
+    b_hydro: 0.18552737393581645
     beta_gal: 1.0
     beta_max: 1.0
     fc: 1.0
     h: 0.6766
-    lM0: 10.566915700652395
-    lM1: 11.856040531728171
-    lMmin: 10.566915700652395
+    lM0: 10.549497122684178
+    lM1: 11.795720402603116
+    lMmin: 10.549497122684178
     n_s: 0.9665
-    r_corr_gk: 0.15391042875162592
-    r_corr_gy: -0.6191623216370346
-    sigma8: 0.8001868841125964
+    r_corr_gk: -0.2222356811393764
+    r_corr_gy: -0.6016504507191125
+    sigma8: 0.8133837825416024
     sigmaLogM: 0.15
-    width: 0.845672610496452
-  name: wisc1
+    width: 0.8513303728359833
+  name: wisc2
   ns_independent: false
   systematics:
   - scos_plates
-  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
   - data/maps/lambda_sfd_ebv.fits
   type: g
 - beam: 10.0
@@ -99,7 +95,7 @@ mcmc:
   mfunc: tinker08
   n_steps: 1000
   n_walkers: 96
-  run_name: lensing_gyk
+  run_name: lensing_gk
   save_par: false
 params:
 - alias: lMmin

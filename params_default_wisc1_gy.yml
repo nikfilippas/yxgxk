@@ -16,10 +16,6 @@ data_vectors:
     tracers:
     - wisc1
     - y_milca
-  - lmin: 0
-    tracers:
-    - wisc1
-    - lens
   type: Cl
 global:
   n_iter: 3
@@ -99,7 +95,7 @@ mcmc:
   mfunc: tinker08
   n_steps: 1000
   n_walkers: 96
-  run_name: lensing_gyk
+  run_name: lensing_gy
   save_par: false
 params:
 - alias: lMmin

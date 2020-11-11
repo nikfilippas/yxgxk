@@ -270,13 +270,13 @@ maps:
 # MCMC
 mcmc:
     # Name for this run
-    run_name: 'lensing'
+    run_name: 'lensing_gk'
     # Maximum wavenumber in units of 1/Mpc
     kmax: 1.
     # Print debug information?
     debug: False
     # Emcee parameters
-    n_walkers: 100
+    n_walkers: 96
     n_steps: 1000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
@@ -442,8 +442,6 @@ data_vectors:
           - tracers: ['2mpz','2mpz']
             # Minimum multipole to use in the analysis
             lmin: 0
-          - tracers: ['2mpz','y_milca']
-            lmin: 0
           - tracers: ['2mpz', 'lens']
             lmin: 0
     - type: 'Cl'
@@ -452,8 +450,6 @@ data_vectors:
       twopoints:
           - tracers: ['wisc1','wisc1']
             lmin: 10
-          - tracers: ['wisc1','y_milca']
-            lmin: 0
           - tracers: ['wisc1', 'lens']
             lmin: 0
     - type: 'Cl'
@@ -462,8 +458,6 @@ data_vectors:
       twopoints:
           - tracers: ['wisc2','wisc2']
             lmin: 10
-          - tracers: ['wisc2','y_milca']
-            lmin: 0
           - tracers: ['wisc2', 'lens']
             lmin: 0
     - type: 'Cl'
@@ -472,8 +466,6 @@ data_vectors:
       twopoints:
           - tracers: ['wisc3','wisc3']
             lmin: 10
-          - tracers: ['wisc3','y_milca']
-            lmin: 0
           - tracers: ['wisc3', 'lens']
             lmin: 0
     - type: 'Cl'
@@ -482,8 +474,6 @@ data_vectors:
       twopoints:
           - tracers: ['wisc4','wisc4']
             lmin: 10
-          - tracers: ['wisc4','y_milca']
-            lmin: 0
           - tracers: ['wisc4', 'lens']
             lmin: 0
     - type: 'Cl'
@@ -492,7 +482,5 @@ data_vectors:
       twopoints:
           - tracers: ['wisc5','wisc5']
             lmin: 10
-          - tracers: ['wisc5','y_milca']
-            lmin: 0
           - tracers: ['wisc5', 'lens']
             lmin: 0
