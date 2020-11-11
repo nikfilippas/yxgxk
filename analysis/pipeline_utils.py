@@ -281,11 +281,10 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
             prof = ProfTracer(m)
             if F.is_ndens:
                 kwargs = m["model"]
-                cosmo = COSMO_ARGS(kwargs)
+                cosmo = COSMO_ARGS(kwargs)  # TODO: final cosmo is used
                 prof.update_parameters(cosmo, **kwargs)
             else:
-                kwargs = {"b_hydro": 0.25}  # b_hydro best-fit for gNFW
-                prof.update_parameters(COSMO_DEFAULT(), **kwargs)
+                prof.update_parameters(COSMO_DEFAULT(), **{"b_hydro": 0.25})
             profiles[i] = prof
         # Get single model parameter dictionary
         models_a = p.get_models()[f11.name]
