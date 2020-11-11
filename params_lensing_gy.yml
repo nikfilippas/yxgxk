@@ -1,0 +1,486 @@
+# Global parameters
+global:
+    # Healpix resolution
+    nside: 2048
+    # Number of alm iterations in ``pymaster.Field``
+    n_iter: 3
+    # Output directory
+    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_lensing'
+    # output_dir: 'output_default'
+
+
+jk:
+    # Do you want to do jackknives?
+    do: True
+    # Healpix resolution defining the jackknife regions
+    nside: 8
+    # Should we store the mode-coupling matrix?
+    store_mcm: True
+
+# Information about ell bandpowers
+bandpowers:
+    # Bandpower mode
+    type: "linlog"
+    # Constant width
+    nlb: 20
+    # Threshold between linear and logarithmic
+    lsplit: 52
+    # Width of linar part
+    nlb_lin: 10
+    # Number of logarithmic bins
+    nb_log: 28
+
+# Masks
+# Add an entry for each mask used in the analysis
+masks:
+    # Give each mask a unique name (key)
+    mask_lowz: "data/maps/mask_v3.fits"
+    mask_tsz: "data/maps/mask_planck60.fits"
+    mask_545: "data/maps/mask_planck20.fits"
+    mask_lens_2015: "data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits"
+    # mask_lens_2018: "data/maps/COM_Lensing_4096_R3.00_mask.fits"
+    # mask_lens_SZ_2018: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits"
+
+# Maps
+maps:
+    # Each item here corresponds to one sky map
+    - name: "2mpz"
+      # 'g' for galaxies, 'y' for tSZ, 'k' for CMB lensing, "d" for dust
+      type: "g"
+      # Do galaxies with satellites necessarily contain a central?
+      ns_independent: false
+      # Path to map
+      map: "data/maps/2mpz_05_01_512.fits"
+      # Name of mask (should correspond to one of the keys in the previous section)
+      mask: "mask_lowz"
+      # dndz file
+      dndz: "data/dndz/2MPZ_bin1.txt"
+      # Is there a beam associated with this map?
+      beam: False
+      # Proposed model parameters describing this map
+      model:
+        # Cosmology, HOD, and tSZ parameters
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.46681452468487816
+        alpha: 1.0
+        b_hydro: 0.35351446943239806
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 10.08854876944231
+        lM1: 11.4484528820669
+        lMmin: 10.08854876944231
+        n_s: 0.9665
+        r_corr_gk: 0.4999999999996133
+        r_corr_gy: -0.5118953735696263
+        sigma8: 0.899999999992538
+        sigmaLogM: 0.15
+        width: 1.199999999993615
+      # List of systematics
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "wisc1"
+      type: "g"
+      ns_independent: false
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin1.txt"
+      beam: False
+      model:
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.44851399116254714
+        alpha: 1.0
+        b_hydro: 0.13445529991375527
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 10.566915700652395
+        lM1: 11.856040531728171
+        lMmin: 10.566915700652395
+        n_s: 0.9665
+        r_corr_gk: 0.15391042875162592
+        r_corr_gy: -0.6191623216370346
+        sigma8: 0.8001868841125964
+        sigmaLogM: 0.15
+        width: 0.845672610496452
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "wisc2"
+      type: "g"
+      ns_independent: false
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin2.txt"
+      beam: False
+      model:
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.42686663018297105
+        alpha: 1.0
+        b_hydro: 0.18552737393581645
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 10.549497122684178
+        lM1: 11.795720402603116
+        lMmin: 10.549497122684178
+        n_s: 0.9665
+        r_corr_gk: -0.2222356811393764
+        r_corr_gy: -0.6016504507191125
+        sigma8: 0.8133837825416024
+        sigmaLogM: 0.15
+        width: 0.8513303728359833
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "wisc3"
+      type: "g"
+      ns_independent: false
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin3.txt"
+      beam: False
+      model:
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.43126795044476257
+        alpha: 1.0
+        b_hydro: 0.24765492895174646
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 11.287017218314103
+        lM1: 12.491788005458634
+        lMmin: 11.287017218314103
+        n_s: 0.9665
+        r_corr_gk: -0.30753563702766173
+        r_corr_gy: -0.6180336283535182
+        sigma8: 0.8260845806459194
+        sigmaLogM: 0.15
+        width: 1.006831837360225
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "wisc4"
+      type: "g"
+      ns_independent: false
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin4.txt"
+      beam: False
+      model:
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.48378024582236284
+        alpha: 1.0
+        b_hydro: 0.0005942970868129798
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 12.001774546717256
+        lM1: 13.142830698583857
+        lMmin: 12.001774546717256
+        n_s: 0.9665
+        r_corr_gk: 0.08424959880497371
+        r_corr_gy: -0.5397816730912276
+        sigma8: 0.7168300238797304
+        sigmaLogM: 0.15
+        width: 1.1621305626977225
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "wisc5"
+      type: "g"
+      ns_independent: false
+      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits"
+      mask: "mask_lowz"
+      dndz: "data/dndz/WISC_bin5.txt"
+      beam: False
+      model:
+        Omega_b: 0.048974682
+        Omega_c: 0.26066676
+        a_HMcorr: 0.17029185349990675
+        alpha: 1.0
+        b_hydro: 0.016133914549806783
+        beta_gal: 1.0
+        beta_max: 1.0
+        fc: 1.0
+        h: 0.6766
+        lM0: 12.463207993327602
+        lM1: 13.155255385438792
+        lMmin: 12.463207993327602
+        n_s: 0.9665
+        r_corr_gk: 0.4999999991753602
+        r_corr_gy: -0.6482780271138109
+        sigma8: 0.7249192099206432
+        sigmaLogM: 0.15
+        width: 1.1999999999999365
+      systematics:
+        - 'scos_plates'
+        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits'
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "y_milca"
+      type: "y"
+      map: "data/maps/milca_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "y_nilc"
+      type: "y"
+      map: "data/maps/nilc_ymaps.fits"
+      mask: "mask_tsz"
+      beam: 10.
+      systematics:
+        - 'data/maps/lambda_sfd_ebv.fits'
+    - name: "dust_545"
+      type: "d"
+      map: "data/maps/HFI_SkyMap_545_2048_R2.02_full.fits"
+      mask: "mask_545"
+      beam: 10.
+    - name: "lens"
+      type: "k"
+      ns_independent: false
+      map: "data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits"
+      mask: "mask_lens_2015"
+      beam: False
+      systematics: None
+    # - name: "lens"
+    #   type: "k"
+    #   ns_independent: false
+    #   map: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_TT_map.fits"
+    #   mask: "mask_lens_SZ_2018"
+    #   beam: False
+    #   systematics: None
+
+
+
+# MCMC
+mcmc:
+    # Name for this run
+    run_name: 'lensing_gy'
+    # Maximum wavenumber in units of 1/Mpc
+    kmax: 1.
+    # Print debug information?
+    debug: False
+    # Emcee parameters
+    n_walkers: 96
+    n_steps: 1000
+    # Continue MCMC from previous iteration?
+    continue_mcmc: True
+    # Save parameters (separated by whitespace)
+    save_par: False
+    # Halo mass function
+    mfunc: "tinker08"
+    # Halo bias model
+    hbias: "tinker10"
+
+
+# Model parameters
+params:
+# Each item here corresponds to one of the parameters used in our model
+# Cosmological parameters must adopt the naming of CCL (see model.cosmo_utils)
+    - name: "lM0"
+      # Label for plotting
+      label: "M_0"
+      # Is this the same as another parameter? If so, put its name here.
+      alias: "lMmin"
+      # Is this a free parameter?
+      vary: False
+      # Fiducial value
+      value: 12.0
+      # Prior
+      prior:
+          # Allowed: "Gaussian" or "TopHat"
+          type: "TopHat"
+          # If "TopHat", put edges here.
+          # If "Gaussian", put [mean,sigma].
+          values: [10., 16.]
+    - name: "lM1"
+      label: "M_1"
+      vary: True
+      value: 13.0
+      prior:
+          type: "TopHat"
+          values: [10., 16.]
+    - name: "lMmin"
+      label: "M_{\\rm min}"
+      vary: True
+      value: 12.0
+      prior:
+          type: "TopHat"
+          values: [10., 16.]
+    - name: "fc"
+      label: "f_c"
+      vary: False
+      value: 1.0
+      prior:
+          type: "TopHat"
+          values: [0., 1.]
+    - name: "alpha"
+      label: "\\alpha"
+      vary: False
+      value: 1.0
+      prior:
+          type: "TopHat"
+          values: [0., 3.]
+    - name: "beta_max"
+      label: "\\beta_{\\rm max}"
+      alias: "beta_gal"
+    - name: "beta_gal"
+      label: "beta_g"
+      vary: False
+      value: 1.0
+      prior:
+          type: "TopHat"
+          values: [0.1, 10.]
+    - name: "sigmaLogM"
+      label: "\\sigma_{{\\rm ln}M}"
+      vary: False
+      value: 0.15
+      prior:
+          type: "TopHat"
+          values: [0.01, 1.]
+    - name: "b_hydro"
+      label: "b_H"
+      vary: True
+      value: 0.25
+      prior:
+          type: "TopHat"
+          values: [0., 1.]
+    - name: "r_corr_gy"
+      label: "\\rho_{gy}"
+      vary: True
+      value: 0.0
+      prior:
+          type: "TopHat"
+          values: [-1., 1.]
+    - name: "r_corr_gk"
+      label: "\\rho_{g\\kappa}"
+      vary: True
+      value: 0.0
+      prior:
+          type: "TopHat"
+          values: [-0.5, 0.5]
+    - name: "width"
+      label: "w_{N(z)}"
+      vary: True
+      value: 1.0
+      prior:
+          type: "TopHat"
+          values: [0.8, 1.2]
+    - name: "Omega_c"
+      label: "\\Omega_c"
+      vary: False
+      value: 0.26066676
+      prior:
+          type: "TopHat"
+          values: [0.1, 0.9]
+    - name: "Omega_b"
+      label: "\\Omega_b"
+      vary: False
+      value: 0.048974682
+      prior:
+          type: "TopHat"
+          values: [0.1, 0.9]
+    - name: "h"
+      label: "h"
+      vary: False
+      value: 0.6766
+      prior:
+          type: "TopHat"
+          values: [0.55, 0.80]
+    - name: "sigma8"
+      label: "\\sigma_8"
+      vary: True
+      value: 0.8102
+      prior:
+          type: "TopHat"
+          values: [0.50, 0.95]
+    - name: "n_s"
+      label: "n_s"
+      vary: False
+      value: 0.9665
+      prior:
+          type: "TopHat"
+          values: [0.8, 1.2]
+    # Halo Model correction - Gaussian approximation
+    - name: "a_HMcorr"
+      label: "\\a_\\textrm{HMcorr}"
+      vary: True
+      value: 0.36
+      prior:
+          type: "TopHat"
+          values: [0.1, 0.5]
+
+
+
+# List all the different combinations of
+# power spectra you want to analyze
+data_vectors:
+    - type: 'Cl'
+      # Give each element a different name
+      name: '2mpz'
+      # Type of covariance matrix to be used.
+      covar_type: 'comb_m'
+      # List here the different power spectrum
+      # combinations you want to use
+      twopoints:
+          # Names of the two tracers (maps) going into this C_ell
+          - tracers: ['2mpz','2mpz']
+            # Minimum multipole to use in the analysis
+            lmin: 0
+          - tracers: ['2mpz','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc1'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc1','wisc1']
+            lmin: 10
+          - tracers: ['wisc1','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc2'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc2','wisc2']
+            lmin: 10
+          - tracers: ['wisc2','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc3'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc3','wisc3']
+            lmin: 10
+          - tracers: ['wisc3','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc4'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc4','wisc4']
+            lmin: 10
+          - tracers: ['wisc4','y_milca']
+            lmin: 0
+    - type: 'Cl'
+      name: 'wisc5'
+      covar_type: 'comb_m'
+      twopoints:
+          - tracers: ['wisc5','wisc5']
+            lmin: 10
+          - tracers: ['wisc5','y_milca']
+            lmin: 0
