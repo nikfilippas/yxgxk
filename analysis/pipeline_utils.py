@@ -257,7 +257,8 @@ def get_covariance(p, f11, f12, f21, f22, suffix,
                                      mcm_1, mcm_2,
                                      cl11, cl12, cl21, cl22,
                                      cwsp=cmcm)
-        cov.to_file(fname_cov); print(fname_cov)
+        cov.to_file(fname_cov)
+        print(fname_cov)
 
 
 def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
