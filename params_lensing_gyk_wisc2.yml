@@ -1,284 +1,261 @@
-# Global parameters
-global:
-    # Healpix resolution
-    nside: 2048
-    # Number of alm iterations in ``pymaster.Field``
-    n_iter: 3
-    # Output directory
-    output_dir: '/mnt/extraspace/nikfilippas/yxgxk/output_lensing'
-    # output_dir: 'output_default'
-
-
-jk:
-    # Do you want to do jackknives?
-    do: True
-    # Healpix resolution defining the jackknife regions
-    nside: 8
-    # Should we store the mode-coupling matrix?
-    store_mcm: True
-
-# Information about ell bandpowers
 bandpowers:
-    # Bandpower mode
-    type: "linlog"
-    # Constant width
-    nlb: 20
-    # Threshold between linear and logarithmic
-    lsplit: 52
-    # Width of linar part
-    nlb_lin: 10
-    # Number of logarithmic bins
-    nb_log: 28
-
-# Masks
-# Add an entry for each mask used in the analysis
-masks:
-    # Give each mask a unique name (key)
-    mask_lowz: "data/maps/mask_v3.fits"
-    mask_tsz: "data/maps/mask_planck60.fits"
-    mask_545: "data/maps/mask_planck20.fits"
-    mask_lens_2015: "data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits"
-    # mask_lens_2018: "data/maps/COM_Lensing_4096_R3.00_mask.fits"
-    # mask_lens_SZ_2018: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits"
-
-# Maps
-maps:
-    - name: "wisc2"
-      type: "g"
-      ns_independent: false
-      map: "data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits"
-      mask: "mask_lowz"
-      dndz: "data/dndz/WISC_bin2.txt"
-      beam: False
-      model:
-        Omega_b: 0.048974682
-        Omega_c: 0.26066676
-        a_HMcorr: 0.42686663018297105
-        alpha: 1.0
-        b_hydro: 0.18552737393581645
-        beta_gal: 1.0
-        beta_max: 1.0
-        fc: 1.0
-        h: 0.6766
-        lM0: 10.549497122684178
-        lM1: 11.795720402603116
-        lMmin: 10.549497122684178
-        n_s: 0.9665
-        r_corr_gk: -0.2222356811393764
-        r_corr_gy: -0.6016504507191125
-        sigma8: 0.8133837825416024
-        sigmaLogM: 0.15
-        width: 0.8513303728359833
-      systematics:
-        - 'scos_plates'
-        - 'Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits'
-        - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "y_milca"
-      type: "y"
-      map: "data/maps/milca_ymaps.fits"
-      mask: "mask_tsz"
-      beam: 10.
-      systematics:
-        - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "y_nilc"
-      type: "y"
-      map: "data/maps/nilc_ymaps.fits"
-      mask: "mask_tsz"
-      beam: 10.
-      systematics:
-        - 'data/maps/lambda_sfd_ebv.fits'
-    - name: "dust_545"
-      type: "d"
-      map: "data/maps/HFI_SkyMap_545_2048_R2.02_full.fits"
-      mask: "mask_545"
-      beam: 10.
-    - name: "lens"
-      type: "k"
-      ns_independent: false
-      map: "data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits"
-      mask: "mask_lens_2015"
-      beam: False
-      systematics: None
-    # - name: "lens"
-    #   type: "k"
-    #   ns_independent: false
-    #   map: "data/maps/COM_Lensing_Szdeproj_4096_R3.00_TT_map.fits"
-    #   mask: "mask_lens_SZ_2018"
-    #   beam: False
-    #   systematics: None
-
-
-
-# MCMC
-mcmc:
-    # Name for this run
-    run_name: 'lensing_gyk'
-    # Maximum wavenumber in units of 1/Mpc
-    kmax: 1.
-    # Print debug information?
-    debug: False
-    # Emcee parameters
-    n_walkers: 96
-    n_steps: 1000
-    # Continue MCMC from previous iteration?
-    continue_mcmc: True
-    # Save parameters (separated by whitespace)
-    save_par: False
-    # Halo mass function
-    mfunc: "tinker08"
-    # Halo bias model
-    hbias: "tinker10"
-
-
-# Model parameters
-params:
-# Each item here corresponds to one of the parameters used in our model
-# Cosmological parameters must adopt the naming of CCL (see model.cosmo_utils)
-    - name: "lM0"
-      # Label for plotting
-      label: "M_0"
-      # Is this the same as another parameter? If so, put its name here.
-      alias: "lMmin"
-      # Is this a free parameter?
-      vary: False
-      # Fiducial value
-      value: 12.0
-      # Prior
-      prior:
-          # Allowed: "Gaussian" or "TopHat"
-          type: "TopHat"
-          # If "TopHat", put edges here.
-          # If "Gaussian", put [mean,sigma].
-          values: [10., 16.]
-    - name: "lM1"
-      label: "M_1"
-      vary: True
-      value: 13.0
-      prior:
-          type: "TopHat"
-          values: [10., 16.]
-    - name: "lMmin"
-      label: "M_{\\rm min}"
-      vary: True
-      value: 12.0
-      prior:
-          type: "TopHat"
-          values: [10., 16.]
-    - name: "fc"
-      label: "f_c"
-      vary: False
-      value: 1.0
-      prior:
-          type: "TopHat"
-          values: [0., 1.]
-    - name: "alpha"
-      label: "\\alpha"
-      vary: False
-      value: 1.0
-      prior:
-          type: "TopHat"
-          values: [0., 3.]
-    - name: "beta_max"
-      label: "\\beta_{\\rm max}"
-      alias: "beta_gal"
-    - name: "beta_gal"
-      label: "beta_g"
-      vary: False
-      value: 1.0
-      prior:
-          type: "TopHat"
-          values: [0.1, 10.]
-    - name: "sigmaLogM"
-      label: "\\sigma_{{\\rm ln}M}"
-      vary: False
-      value: 0.15
-      prior:
-          type: "TopHat"
-          values: [0.01, 1.]
-    - name: "b_hydro"
-      label: "b_H"
-      vary: True
-      value: 0.25
-      prior:
-          type: "TopHat"
-          values: [0., 1.]
-    - name: "r_corr_gy"
-      label: "\\rho_{gy}"
-      vary: True
-      value: 0.0
-      prior:
-          type: "TopHat"
-          values: [-1., 1.]
-    - name: "r_corr_gk"
-      label: "\\rho_{g\\kappa}"
-      vary: True
-      value: 0.0
-      prior:
-          type: "TopHat"
-          values: [-0.5, 0.5]
-    - name: "width"
-      label: "w_{N(z)}"
-      vary: True
-      value: 1.0
-      prior:
-          type: "TopHat"
-          values: [0.8, 1.2]
-    - name: "Omega_c"
-      label: "\\Omega_c"
-      vary: False
-      value: 0.26066676
-      prior:
-          type: "TopHat"
-          values: [0.1, 0.9]
-    - name: "Omega_b"
-      label: "\\Omega_b"
-      vary: False
-      value: 0.048974682
-      prior:
-          type: "TopHat"
-          values: [0.1, 0.9]
-    - name: "h"
-      label: "h"
-      vary: False
-      value: 0.6766
-      prior:
-          type: "TopHat"
-          values: [0.55, 0.80]
-    - name: "sigma8"
-      label: "\\sigma_8"
-      vary: True
-      value: 0.8102
-      prior:
-          type: "TopHat"
-          values: [0.50, 0.95]
-    - name: "n_s"
-      label: "n_s"
-      vary: False
-      value: 0.9665
-      prior:
-          type: "TopHat"
-          values: [0.8, 1.2]
-    # Halo Model correction - Gaussian approximation
-    - name: "a_HMcorr"
-      label: "\\a_\\textrm{HMcorr}"
-      vary: True
-      value: 0.36
-      prior:
-          type: "TopHat"
-          values: [0.1, 0.5]
-
-
-
-# List all the different combinations of
-# power spectra you want to analyze
+  lsplit: 52
+  nb_log: 28
+  nlb: 20
+  nlb_lin: 10
+  type: linlog
 data_vectors:
-    - type: 'Cl'
-      name: 'wisc2'
-      covar_type: 'comb_m'
-      twopoints:
-          - tracers: ['wisc2','wisc2']
-            lmin: 10
-          - tracers: ['wisc2','y_milca']
-            lmin: 0
-          - tracers: ['wisc2', 'lens']
-            lmin: 0
+- covar_type: comb_m
+  name: wisc2
+  twopoints:
+  - lmin: 10
+    tracers:
+    - wisc2
+    - wisc2
+  - lmin: 0
+    tracers:
+    - wisc2
+    - y_milca
+  - lmin: 0
+    tracers:
+    - wisc2
+    - lens
+  type: Cl
+global:
+  n_iter: 3
+  nside: 2048
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
+jk:
+  do: true
+  nside: 8
+  store_mcm: true
+maps:
+- beam: false
+  dndz: data/dndz/WISC_bin2.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4263815049334589
+    alpha: 1.0
+    b_hydro: 0.18613969938649388
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.549518891252172
+    lM1: 11.794952075732667
+    lMmin: 10.549518891252172
+    n_s: 0.9665
+    r_corr_gk: -0.2208312702470838
+    r_corr_gy: -0.6007288486023787
+    sigma8: 0.8135593078391262
+    sigmaLogM: 0.15
+    width: 0.8510867851364564
+  name: wisc2
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: 10.0
+  map: data/maps/milca_ymaps.fits
+  mask: mask_tsz
+  name: y_milca
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: y
+- beam: 10.0
+  map: data/maps/nilc_ymaps.fits
+  mask: mask_tsz
+  name: y_nilc
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: y
+- beam: 10.0
+  map: data/maps/HFI_SkyMap_545_2048_R2.02_full.fits
+  mask: mask_545
+  name: dust_545
+  type: d
+- beam: false
+  map: data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits
+  mask: mask_lens_2015
+  name: lens
+  ns_independent: false
+  systematics: None
+  type: k
+masks:
+  mask_545: data/maps/mask_planck20.fits
+  mask_lens_2015: data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits
+  mask_lowz: data/maps/mask_v3.fits
+  mask_tsz: data/maps/mask_planck60.fits
+mcmc:
+  continue_mcmc: true
+  debug: false
+  hbias: tinker10
+  kmax: 1.0
+  mfunc: tinker08
+  n_steps: 1000
+  n_walkers: 96
+  run_name: lensing_gyk
+  save_par: false
+params:
+- alias: lMmin
+  label: M_0
+  name: lM0
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  value: 12.0
+  vary: false
+- label: M_1
+  name: lM1
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  value: 13.0
+  vary: true
+- label: M_{\rm min}
+  name: lMmin
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  value: 12.0
+  vary: true
+- label: f_c
+  name: fc
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1.0
+  value: 1.0
+  vary: false
+- label: \alpha
+  name: alpha
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 3.0
+  value: 1.0
+  vary: false
+- alias: beta_gal
+  label: \beta_{\rm max}
+  name: beta_max
+- label: beta_g
+  name: beta_gal
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 10.0
+  value: 1.0
+  vary: false
+- label: \sigma_{{\rm ln}M}
+  name: sigmaLogM
+  prior:
+    type: TopHat
+    values:
+    - 0.01
+    - 1.0
+  value: 0.15
+  vary: false
+- label: b_H
+  name: b_hydro
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1.0
+  value: 0.25
+  vary: true
+- label: \rho_{gy}
+  name: r_corr_gy
+  prior:
+    type: TopHat
+    values:
+    - -1.0
+    - 1.0
+  value: 0.0
+  vary: true
+- label: \rho_{g\kappa}
+  name: r_corr_gk
+  prior:
+    type: TopHat
+    values:
+    - -0.5
+    - 0.5
+  value: 0.0
+  vary: true
+- label: w_{N(z)}
+  name: width
+  prior:
+    type: TopHat
+    values:
+    - 0.8
+    - 1.2
+  value: 1.0
+  vary: true
+- label: \Omega_c
+  name: Omega_c
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.9
+  value: 0.26066676
+  vary: false
+- label: \Omega_b
+  name: Omega_b
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.9
+  value: 0.048974682
+  vary: false
+- label: h
+  name: h
+  prior:
+    type: TopHat
+    values:
+    - 0.55
+    - 0.8
+  value: 0.6766
+  vary: false
+- label: \sigma_8
+  name: sigma8
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 0.95
+  value: 0.8102
+  vary: true
+- label: n_s
+  name: n_s
+  prior:
+    type: TopHat
+    values:
+    - 0.8
+    - 1.2
+  value: 0.9665
+  vary: false
+- label: \a_\textrm{HMcorr}
+  name: a_HMcorr
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.5
+  value: 0.36
+  vary: true
