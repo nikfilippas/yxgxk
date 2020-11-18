@@ -21,14 +21,16 @@ def dict_update(mdict, pars, vals, aliases):
     return mdict
 
 
-def update_params(fname, name, pars, vals):
+def update_params(fname_in, name, pars, vals):
     """
-    Updates yaml parameter file with specified values.""
+    Updates yaml parameter file with specified values.
+    Outputs a new file appended by `_bf` containing
+    the output of the minimizer.
 
     Parameters
     ----------
-    fname : str
-        Name of yaml file.
+    fname_in : str
+        Name of input yaml file.
     name : str
         Name of data vector.
     pars : str or list of strings
@@ -50,7 +52,7 @@ def update_params(fname, name, pars, vals):
     assert len(pars) == len(vals)
 
     # Open file
-    with open(fname) as f:
+    with open(fname_in) as f:
         doc = yaml.safe_load(f)
 
     # Grab aliases - format: {Y: X}, Y an alias for X
@@ -67,7 +69,8 @@ def update_params(fname, name, pars, vals):
             break
 
     # Write to file
-    with open(fname, "w") as f:
+    fname_out = "_bf.".join(fname_in.split("."))
+    with open(fname_out, "w") as f:
         yaml.safe_dump(doc, f)
 
 
