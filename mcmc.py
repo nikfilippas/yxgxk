@@ -3,7 +3,7 @@ import numpy as np
 from pyccl.halos.hmfunc import mass_function_from_name
 from pyccl.halos.hbias import halo_bias_from_name
 from analysis.params import ParamRun
-from likelihood.yaml_handler import update_params, update_nsteps
+from likelihood.yaml_handler import update_params
 from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.data import DataManager
@@ -15,13 +15,12 @@ from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 
 parser = ArgumentParser()
 parser.add_argument("fname_params", help="yaml target parameter file")
-parser.add_argument("--nsteps", help="MCMC steps", type=int)
+# attention: `args.no_mpi == True` by default, which may be misleading
+# when sampling and calling `use_mpi=args.no_mpi`
+parser.add_argument("--no-mpi", help="specify for no MPI", action="store_false")
 parser.add_argument("--jk-id", type=int, help="JK region")
 args = parser.parse_args()
 fname_params = args.fname_params
-if args.nsteps is not None:
-    update_nsteps(fname_params, args.nsteps)
-    print("Updated MCMC to %d steps." % args.nsteps)
 
 p = ParamRun(fname_params)
 kwargs = p.get_cosmo_pars()
@@ -44,7 +43,6 @@ def extract_map_p0(p, v, parnames):
     return p0
 
 
-par = []
 for v in p.get('data_vectors'):
     print(v['name'])
 
@@ -85,7 +83,6 @@ for v in p.get('data_vectors'):
     print(" Best-fit parameters:")
     for n, val, s in zip(sam.parnames, sam.p0, np.sqrt(np.diag(sam.covar))):
         print("  " + n + " : %.3lE +- %.3lE" % (val, s))
-        if n == p.get("mcmc")["save_par"]: par.append(v)
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
 
@@ -97,10 +94,4 @@ for v in p.get('data_vectors'):
         # Monte-carlo
         print(" Sampling:")
         sam.sample(carry_on=p.get('mcmc')['continue_mcmc'],
-                   verbosity=1, use_mpi=True)
-
-if len(par) > 0:
-    is_jk = str(jk_region) if bool(jk_region) else ""
-    fname = p.get_outdir() + "/" + p.get("mcmc")["save_par"] + \
-            "_" + p.get("mcmc")["run_name"] + "_" + is_jk
-    np.save(fname, np.array(par))
+                   verbosity=1, use_mpi=args.no_mpi)
