@@ -281,7 +281,6 @@ mcmc:
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Save parameters (separated by whitespace)
-    save_par: False
     # Halo mass function
     mfunc: "tinker08"
     # Halo bias model

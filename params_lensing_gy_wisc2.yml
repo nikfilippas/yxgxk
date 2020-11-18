@@ -96,7 +96,6 @@ mcmc:
   n_steps: 1000
   n_walkers: 96
   run_name: lensing_gy
-  save_par: false
 params:
 - alias: lMmin
   label: M_0
