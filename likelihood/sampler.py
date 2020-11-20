@@ -329,7 +329,7 @@ class Sampler(object):
             assert self.chain.size == self.probs.size*len(self.parnames), "Error in chain/prob files!"
             np.savetxt(self.prefix_out+"chain.txt", self.chain, fmt="%.18f", delimiter="\t")
             np.savetxt(self.prefix_out+"chainprobs.txt", self.probs, fmt="%.18f", delimiter="\t")
-        #exit(1)
+
         #reader = emcee.backends.HDFBackend(fname_chain, read_only=True)
         #self.chain = reader.get_chain(flat=True)
         #self.probs = reader.get_log_prob(flat=True)
