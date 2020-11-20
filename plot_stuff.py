@@ -14,7 +14,8 @@ from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 try:
     fname_params = sys.argv[1]
 except IndexError:
-    raise ValueError("Must provide param file name as command-line argument")
+    fname_params = "params_lensing_gyk.yml"
+    # raise ValueError("Must provide param file name as command-line argument")
 
 p = ParamRun(fname_params)
 kwargs = p.get_cosmo_pars()
@@ -25,8 +26,7 @@ cosmo = p.get_cosmo()
 hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)
 kwargs = p.get_cosmo_pars()
-hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction \
-                if p.get("mcmc").get("hm_correct") else None
+hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction
 
 
 
@@ -37,7 +37,7 @@ for v in p.get('data_vectors'):
     print(v['name'])
 
     # Construct data vector and covariance
-    d = DataManager(p, v, cosmo)
+    d = DataManager(p, v)
     z, nz = np.loadtxt(d.tracers[0][0].dndz, unpack=True)
     zmean = np.average(z, weights=nz)
     sigz = np.sqrt(np.sum(nz * (z - zmean)**2) / np.sum(nz))
@@ -49,11 +49,12 @@ for v in p.get('data_vectors'):
             cosmo_fid = cosmo
             hmc_fid = hmc
         else:
-            cosmo_fid = COSMO_ARGS(kwargs)
-            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+            cosmo_fid = COSMO_ARGS(pars)
+            hmc_fid = get_hmcalc(cosmo_fid, **pars)
         return get_theory(p, d, cosmo_fid, hmc_fid,
                           return_separated=False,
                           hm_correction=hm_correction,
+                          include_1h=True, include_2h=True,
                           **pars)
 
     def th1h(pars):
@@ -61,12 +62,12 @@ for v in p.get('data_vectors'):
             cosmo_fid = cosmo
             hmc_fid = hmc
         else:
-            cosmo_fid = COSMO_ARGS(kwargs)
-            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+            cosmo_fid = COSMO_ARGS(pars)
+            hmc_fid = get_hmcalc(cosmo_fid, **pars)
         return get_theory(p, d, cosmo_fid, hmc_fid,
                           return_separated=False,
-                          hm_correction=hm_correction,
-                          include_2h=False, include_1h=True,
+                          hm_correction=None,
+                          include_1h=True, include_2h=False,
                           **pars)
 
     def th2h(pars):
@@ -74,18 +75,17 @@ for v in p.get('data_vectors'):
             cosmo_fid = cosmo
             hmc_fid = hmc
         else:
-            cosmo_fid = COSMO_ARGS(kwargs)
-            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
+            cosmo_fid = COSMO_ARGS(pars)
+            hmc_fid = get_hmcalc(cosmo_fid, **pars)
         return get_theory(p, d, cosmo_fid, hmc_fid,
                           return_separated=False,
-                          hm_correction=hm_correction,
-                          include_2h=True, include_1h=False,
+                          hm_correction=None,
+                          include_1h=False, include_2h=True,
                           **pars)
 
     # Set up likelihood
     lik = Likelihood(p.get('params'), d.data_vector, d.covar, th,
                      debug=p.get('mcmc')['debug'])
-
     # Set up sampler
     sam = Sampler(lik.lnprob, lik.p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']), p.get('mcmc'))
@@ -95,14 +95,14 @@ for v in p.get('data_vectors'):
     sam.update_p0(sam.chain[np.argmax(sam.probs)])
 
     # Compute galaxy bias
-    zarr = np.linspace(zmean - sigz, zmean + sigz, 10)
-    bgchain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[0][0],
-                      **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
-    bychain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1],
-                      **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
+    # zarr = np.linspace(zmean - sigz, zmean + sigz, 10)
+    # bgchain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[0][0],
+    #                   **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
+    # bychain = np.array([hm_bias(cosmo, 1./(1 + zarr), d.tracers[1][1],
+    #                   **(lik.build_kwargs(p0))) for p0 in sam.chain[::100]])
 
-    bgmin, bg, bgmax = np.percentile(bgchain, [16, 50, 84])
-    bymin, by, bymax = np.percentile(bychain, [16, 50, 84])
+    # bgmin, bg, bgmax = np.percentile(bgchain, [16, 50, 84])
+    # bymin, by, bymax = np.percentile(bychain, [16, 50, 84])
 
     # Plot power spectra
     figs_cl = lik.plot_data(sam.p0, d, save_figures=True, save_data=True,
@@ -131,8 +131,8 @@ for v in p.get('data_vectors'):
             +v["name"]+".npy", np.array(pars))
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
-    print(" b_g = %.3lE +/- (%.3lE %.3lE) " % (bg, bg-bgmin, bgmax-bg))
-    print(" b_y = %.3lE +/- (%.3lE %.3lE) " % (by, by-bymin, bymax-by))
+    # print(" b_g = %.3lE +/- (%.3lE %.3lE) " % (bg, bg-bgmin, bgmax-bg))
+    # print(" b_y = %.3lE +/- (%.3lE %.3lE) " % (by, by-bymin, bymax-by))
 
 
 fig, ax = plt.subplots()
