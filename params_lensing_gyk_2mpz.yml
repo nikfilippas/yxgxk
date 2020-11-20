@@ -247,7 +247,7 @@ params:
     - 1.2
   value: 0.9665
   vary: false
-- label: \a_\textrm{HMcorr}
+- label: a_\textrm{HMcorr}
   name: a_HMcorr
   prior:
     type: TopHat
