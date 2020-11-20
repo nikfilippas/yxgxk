@@ -147,7 +147,8 @@ class DataManager(object):
         p (:obj:`ParamRun`): parameters for this run.
         v (dict): dictionary containing the list of two-point functions you
             want to analyze.
-        all_data (bool): whether to use all ells or form a mask
+        all_data (bool): whether to use all ells or form a mask.
+        jk_region (int): integer count defining a HEALPix jackknife region.
     """
     def __init__(self, p, v, all_data=False, jk_region=None):
         nside = p.get_nside()
