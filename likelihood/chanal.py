@@ -15,121 +15,6 @@ from model.hmcorr import HM_Gauss
 from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 from scipy.stats import norm
-_PP = norm.sf(-1)-norm.sf(1)
-
-
-
-def vpercentile(chain):
-    """Best fit and errors using manual watershed."""
-    from scipy.signal import savgol_filter
-    percentile = 100*_PP
-    pdf, x = np.histogram(chain, bins=100, density=True)
-    x = (x[:-1] + x[1:])/2
-
-    # smooth posterior
-    window = int(np.ceil(np.sqrt(pdf.size)) // 2 * 2 + 1)
-    pdf = savgol_filter(pdf, window, 3)
-
-    par_bf = x[np.argmax(pdf)]
-    eps = 0.005
-    cut = pdf.max()*np.arange(1-eps, 0, -eps)
-    for cc in cut:
-
-        bb = np.where(pdf-cc > 0)[0]
-        if bb.size < 2:
-            continue
-        par_min, par_max = x[bb[0]], x[bb[-1]]
-        N_enclosed = (par_min < chain) & (chain < par_max)
-        perc = 100*N_enclosed.sum()/chain.size
-        if perc > percentile:
-            break
-
-    return par_bf, par_min, par_max
-
-
-def gauss_kde(chain):
-    """Best fit and erros using Gaussian-KDE watershed."""
-    def get_prob(a, b, f):
-        xr=np.linspace(a, b, 128)
-        return simps(f(xr), x=xr)
-
-    def cutfunc(pthr, f, x_lim=None):
-        if x_lim is None:
-            x1, x2 = x_min, x_max
-        else:
-            x1, x2 = x_lim
-        r_lo = root_scalar(limfunc, args=(pthr, f), bracket=(x1, x_bf)).root
-        r_hi = root_scalar(limfunc, args=(pthr, f), bracket=(x_bf, x2)).root
-        pr = get_prob(r_lo, r_hi, f)
-        return pr-_PP
-
-    def extend_kde(f, X=20):
-        """Extend kde boundaries by X% in case of boundary inconsistency."""
-        import warnings
-        warnings.warn(("Posterior boundaries in some parameter(s) do not behave correctly. "
-                       "Extending boundaries by %d%%." % X), RuntimeWarning)
-        from scipy.interpolate import interp1d
-        X /= 100
-        xmin = (1-X)*x_min
-        xmax = (1+X)*x_max
-        xx = np.linspace(xmin, xmax, 256)
-        yy = f(xx)
-        f_new = interp1d(xx, yy, kind="cubic",
-                         bounds_error=False, fill_value=0)
-
-        import matplotlib.pyplot as plt
-        fig, ax = plt.subplots()
-        plt.ion()
-        xold = np.linspace(x_min, x_max, 256)
-        ax.plot(xx, yy, "r:", lw=3, label="new dist")
-        ax.plot(xold, f(xold), "k-", lw=3, label="original dist")
-        ax.legend(loc="best")
-        plt.show()
-        plt.pause(0.001)
-        return f_new, (xmin, xmax)
-
-    minfunc = lambda x, f: -f(x)
-    limfunc = lambda x, thr, f: np.atleast_1d(f(x))[0]-thr
-
-    x_min = np.amin(chain)
-    x_max = np.amax(chain)
-    F = gaussian_kde(chain)
-    x_bf = minimize_scalar(minfunc, args=(F), bracket=[x_min, x_max]).x[0]
-    p_bf = F(x_bf)[0]
-
-    # check robustness at the boundaries
-    bracket = (0.05*p_bf, 0.95*p_bf)
-    try:
-        p_thr = root_scalar(cutfunc, args=(F), bracket=bracket).root
-    except ValueError:
-        F, (x_min, x_max) = extend_kde(F)
-        p_thr = root_scalar(cutfunc, args=(F, (x_min, x_max)), bracket=bracket).root
-
-    x_lo = root_scalar(limfunc, args=(p_thr, F), bracket=(x_min, x_bf)).root
-    x_hi = root_scalar(limfunc, args=(p_thr, F), bracket=(x_bf, x_max)).root
-
-    return x_bf, x_lo, x_hi
-
-
-def get_summary_numbers(pars, chains, diff=True):
-    """Builds a best-fit dictionary, given a chain dictionary."""
-    def diff_func(Q):  # (-/+) instead of (vmin, vmax)
-        Q[1] = Q[0] - Q[1]
-        Q[2] = Q[2] - Q[0]
-        return Q
-
-    try:
-        Q = np.vstack([gauss_kde(chains[par]) for par in pars]).T
-    except ValueError as err:
-        print(err, "\nApproximating chain elements as delta-functions.")
-        Q = np.vstack([vpercentile(chains[par]) for par in pars]).T
-        # force data point to error boundary if outside
-        Q[1] = np.min([Q[0], Q[1]], axis=0)
-        Q[2] = np.max([Q[0], Q[2]], axis=0)
-
-    Q = Q if not diff else diff_func(Q)
-    Q = {par: Qi for par, Qi in zip(pars, Q.T)}
-    return Q
 
 
 class chan(object):
@@ -159,6 +44,7 @@ class chan(object):
         self.kwargs = self.p.get_cosmo_pars()
         self.hmc = get_hmcalc(self.cosmo, **self.kwargs)
         self.hm_correction = HM_Gauss(self.cosmo, **self.kwargs).hm_correction
+        self._PP = norm.sf(-1)-norm.sf(1)
 
 
     def _get_dndz(self, fname, width):
@@ -229,9 +115,9 @@ class chan(object):
 
         if ("bg" in fid_pars) or ("by" in fid_pars) or ("bk" in fid_pars):
             # skip every (for computationally expensive hm_bias)
-            b_skip = specargs.get("reduce_by_factor")
+            b_skip = specargs.get("thin")
             if b_skip is None:
-                print("'reduce_by_factor' not given. Defaulting to 100.")
+                print("'thin' not given. Defaulting to 100.")
                 b_skip = 100
 
         for s, v in enumerate(self.p.get("data_vectors")):
@@ -287,6 +173,133 @@ class chan(object):
         return {**preCHAINS, **CHAINS}
 
 
+    def get_burn_in(self, chain):
+        from emcee.autocorr import integrated_time
+        nsteps = self.p.get("mcmc")["n_steps"]
+        nwalkers = self.p.get("mcmc")["n_walkers"]
+        chain = chain.reshape((nsteps, nwalkers))
+        tau = integrated_time(chain, quiet=True)
+        # remove burn-in elements from chain
+        chain = chain[int(np.ceil(tau)):].flatten()
+        return chain
+
+    def vpercentile(self, chain):
+        """Best fit and errors using manual watershed."""
+        from scipy.signal import savgol_filter
+        percentile = 100*self._PP
+        pdf, x = np.histogram(chain, bins=100, density=True)
+        x = (x[:-1] + x[1:])/2
+
+        # smooth posterior
+        window = int(np.ceil(np.sqrt(pdf.size)) // 2 * 2 + 1)
+        pdf = savgol_filter(pdf, window, 3)
+
+        par_bf = x[np.argmax(pdf)]
+        eps = 0.005
+        cut = pdf.max()*np.arange(1-eps, 0, -eps)
+        for cc in cut:
+
+            bb = np.where(pdf-cc > 0)[0]
+            if bb.size < 2:
+                continue
+            par_min, par_max = x[bb[0]], x[bb[-1]]
+            N_enclosed = (par_min < chain) & (chain < par_max)
+            perc = 100*N_enclosed.sum()/chain.size
+            if perc > percentile:
+                break
+
+        return par_bf, par_min, par_max
+
+    def gauss_kde(self, chain, parname=None):
+        """Best fit and erros using Gaussian-KDE watershed."""
+        def get_prob(a, b, f):
+            xr=np.linspace(a, b, 128)
+            return simps(f(xr), x=xr)
+
+        def cutfunc(pthr, f, x_lim=None):
+            if x_lim is None:
+                x1, x2 = x_min, x_max
+            else:
+                x1, x2 = x_lim
+            r_lo = root_scalar(limfunc, args=(pthr, f), bracket=(x1, x_bf)).root
+            r_hi = root_scalar(limfunc, args=(pthr, f), bracket=(x_bf, x2)).root
+            pr = get_prob(r_lo, r_hi, f)
+            return pr-self._PP
+
+        def extend_kde(f):
+            """Extend kde boundaries in case of boundary inconsistency."""
+            import warnings
+            warnings.warn(("Posterior st.dev. hits prior bound for %s." % parname),
+                           RuntimeWarning)
+            from scipy.interpolate import interp1d
+            # retrieve prior boundaries for this parameter
+            for par in self.p.get("params"):
+                if par["name"] == parname:
+                    if par["prior"]["type"] == "TopHat":
+                        val = par["prior"]["values"]
+                    else:
+                        print("Prior type not `TopHat`!")
+                    break
+            xx = np.linspace(val[0], val[1], 256)
+            yy = f(xx)
+            yy[0] = yy[-1] = 0
+            f_new = interp1d(xx, yy, kind="cubic",
+                             bounds_error=False, fill_value=0)
+
+            import matplotlib.pyplot as plt
+            fig, ax = plt.subplots()
+            plt.ion()
+            xold = np.linspace(x_min, x_max, 256)
+            ax.plot(xx, yy, "r:", lw=2, label="new dist")
+            ax.plot(xold, f(xold), "k-", lw=2, label="original dist")
+            ax.legend(loc="best")
+            ax.set_title(parname)
+            plt.show()
+            plt.pause(0.001)
+            return f_new
+
+        minfunc = lambda x, f: -f(x)
+        limfunc = lambda x, thr, f: np.atleast_1d(f(x))[0]-thr
+
+        x_min = np.amin(chain)
+        x_max = np.amax(chain)
+        F = gaussian_kde(chain)
+        x_bf = minimize_scalar(minfunc, args=(F), bracket=[x_min, x_max]).x[0]
+        p_bf = F(x_bf)[0]
+
+        try:
+            p_thr = root_scalar(cutfunc, args=(F), x0=p_bf/2, x1=p_bf/3).root
+        except ValueError:
+            F = extend_kde(F)
+            p_thr = root_scalar(cutfunc, args=(F), x0=p_bf/2, x1=p_bf/3).root
+
+        x_lo = root_scalar(limfunc, args=(p_thr, F), bracket=(x_min, x_bf)).root
+        x_hi = root_scalar(limfunc, args=(p_thr, F), bracket=(x_bf, x_max)).root
+
+        return x_bf, x_lo, x_hi
+
+
+    def get_summary_numbers(self, pars, chains, diff=True):
+        """Builds a best-fit dictionary, given a chain dictionary."""
+        def diff_func(Q):  # (-/+) instead of (vmin, vmax)
+            Q[1] = Q[0] - Q[1]
+            Q[2] = Q[2] - Q[0]
+            return Q
+
+        try:
+            Q = np.vstack([self.gauss_kde(chains[par], parname=par) for par in pars]).T
+        except ValueError as err:
+            print(err, "\nApproximating chain elements as delta-functions.")
+            Q = np.vstack([self.vpercentile(chains[par]) for par in pars]).T
+            # force data point to error boundary if outside
+            Q[1] = np.min([Q[0], Q[1]], axis=0)
+            Q[2] = np.max([Q[0], Q[2]], axis=0)
+
+        Q = Q if not diff else diff_func(Q)
+        Q = {par: Qi for par, Qi in zip(pars, Q.T)}
+        return Q
+
+
     def get_best_fit(self, pars, diff=True, chains=None, **specargs):
         """Returns a dictionary containing the best-fit values & errors."""
         if type(pars) == str: pars = [pars]
@@ -300,8 +313,9 @@ class chan(object):
         for s, _ in enumerate(CHAINS["z"]):  # loop over all bins
             print("Calculating best-fit for z-bin %d/%d..." %
                   (s+1, len(CHAINS["z"])))
-            chains = {k: CHAINS[k][s] for k in CHAINS.keys() if k != "z"}
-            bf = get_summary_numbers(pars, chains, diff=diff)
+            # remove burn-in elements from chains while assmebling them
+            chains = {k: self.get_burn_in(CHAINS[k][s]) for k in CHAINS.keys() if k != "z"}
+            bf = self.get_summary_numbers(pars, chains, diff=diff)
 
             if s == 0:
                 BEST_FIT = bf
@@ -319,7 +333,7 @@ class chan(object):
 
         for s, v in enumerate(self.p.get("data_vectors")):
 
-            d = DataManager(self.p, v, self.cosmo, all_data=False)
+            d = DataManager(self.p, v, all_data=False)
             self.d = d
             lik = Likelihood(self.p.get('params'),
                              d.data_vector, d.covar,
