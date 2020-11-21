@@ -97,7 +97,7 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 1000
+  n_steps: 5000
   n_walkers: 96
   run_name: lensing_gyk
 params:
@@ -249,7 +249,7 @@ params:
     - 1.2
   value: 0.9665
   vary: false
-- label: \a_\textrm{HMcorr}
+- label: a_\textrm{HMcorr}
   name: a_HMcorr
   prior:
     type: TopHat

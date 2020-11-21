@@ -416,7 +416,7 @@ params:
           values: [0.8, 1.2]
     # Halo Model correction - Gaussian approximation
     - name: "a_HMcorr"
-      label: "\\a_\\textrm{HMcorr}"
+      label: "a_\\textrm{HMcorr}"
       vary: True
       value: 0.36
       prior:
