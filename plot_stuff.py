@@ -46,42 +46,48 @@ for v in p.get('data_vectors'):
     # Theory predictor wrapper
     def th(pars):
         if not cosmo_vary:
+            pars_fid = pars
             cosmo_fid = cosmo
             hmc_fid = hmc
         else:
-            cosmo_fid = COSMO_ARGS(pars)
-            hmc_fid = get_hmcalc(cosmo_fid, **pars)
+            pars_fid = {**p.get_cosmo_pars(), **pars}
+            cosmo_fid = COSMO_ARGS(pars_fid)
+            hmc_fid = get_hmcalc(cosmo_fid, **pars_fid)
         return get_theory(p, d, cosmo_fid, hmc_fid,
                           return_separated=False,
                           hm_correction=hm_correction,
                           include_1h=True, include_2h=True,
-                          **pars)
+                          **pars_fid)
 
     def th1h(pars):
         if not cosmo_vary:
+            pars_fid = pars
             cosmo_fid = cosmo
             hmc_fid = hmc
         else:
-            cosmo_fid = COSMO_ARGS(pars)
-            hmc_fid = get_hmcalc(cosmo_fid, **pars)
+            pars_fid = {**p.get_cosmo_pars(), **pars}
+            cosmo_fid = COSMO_ARGS(pars_fid)
+            hmc_fid = get_hmcalc(cosmo_fid, **pars_fid)
         return get_theory(p, d, cosmo_fid, hmc_fid,
                           return_separated=False,
                           hm_correction=None,
                           include_1h=True, include_2h=False,
-                          **pars)
+                          **pars_fid)
 
     def th2h(pars):
         if not cosmo_vary:
+            pars_fid = pars
             cosmo_fid = cosmo
             hmc_fid = hmc
         else:
-            cosmo_fid = COSMO_ARGS(pars)
-            hmc_fid = get_hmcalc(cosmo_fid, **pars)
+            pars_fid = {**p.get_cosmo_pars(), **pars}
+            cosmo_fid = COSMO_ARGS(pars_fid)
+            hmc_fid = get_hmcalc(cosmo_fid, **pars_fid)
         return get_theory(p, d, cosmo_fid, hmc_fid,
                           return_separated=False,
                           hm_correction=None,
                           include_1h=False, include_2h=True,
-                          **pars)
+                          **pars_fid)
 
     # Set up likelihood
     lik = Likelihood(p.get('params'), d.data_vector, d.covar, th,
@@ -127,7 +133,7 @@ for v in p.get('data_vectors'):
         chain = sam.chain
     pars.append(lik.chi2(sam.p0))
     pars.append(len(d.data_vector))
-    np.save(p.get_outdir() + "/best_fit_params_" + run_name + "_"
+    np.save(p.get_outdir() + "best_fit_params_" + run_name + "_"
             +v["name"]+".npy", np.array(pars))
     print(" chi^2 = %lf" % (lik.chi2(sam.p0)))
     print(" n_data = %d" % (len(d.data_vector)))
