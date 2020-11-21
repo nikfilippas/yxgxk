@@ -304,7 +304,7 @@ class Likelihood(object):
 
         # Print the chi^2 value in the first plot
         ax[0].text(0.7, 0.85,
-                   '$\\chi^2/{\\rm dof} = %.2lf / %d$' % (chi2, dof),
+                   '$\\chi^2/{\\rm N_d} = %.2lf / %d$' % (chi2, dof),
                    transform=ax[0].transAxes)
 
         if save_figures:
