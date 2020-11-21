@@ -93,7 +93,7 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 1000
+  n_steps: 3000
   n_walkers: 96
   run_name: lensing_gk
 params:
