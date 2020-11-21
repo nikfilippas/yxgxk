@@ -277,7 +277,7 @@ mcmc:
     debug: False
     # Emcee parameters
     n_walkers: 96
-    n_steps: 1000
+    n_steps: 5000
     # Continue MCMC from previous iteration?
     continue_mcmc: True
     # Halo mass function
