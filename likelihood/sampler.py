@@ -225,6 +225,7 @@ class Sampler(object):
         fname_chain = self.prefix_out+"chain"
         found_file = os.path.isfile(fname_chain+'.txt')
 
+        counter = 1
         if (not found_file) or (not carry_on):
             pos_ini = (np.array(self.p0)[None, :] +
                        0.001 * np.random.randn(self.nwalkers, self.ndim))
@@ -237,6 +238,7 @@ class Sampler(object):
             if old_chain.size != 0:
                 pos_ini = old_chain[-self.nwalkers:, :]
                 nsteps_use = max(self.nsteps-len(old_chain) // self.nwalkers, 0)
+                counter = len(old_chain) // self.nwalkers
                 # print(self.nsteps - len(old_chain) // self.nwalkers)
             else:
                 pos_ini = (np.array(self.p0)[None, :] +
@@ -249,14 +251,14 @@ class Sampler(object):
                                         self.lnprob,
                                         pool=pool_use)
 
-        counter = 1
         for pos, prob, _ in sampler.sample(pos_ini, iterations=nsteps_use):
             if pool.is_master():
-                print('Iteration done. Persisting.')
-                chain_file.persistSamplingValues(pos, prob)
-
-                if (counter % 10) == 0:
-                    print(f"Finished sample {counter}")
+                if verbosity > 0:
+                    print('Iteration done. Persisting.')
+                    chain_file.persistSamplingValues(pos, prob)
+    
+                    if (counter % 10) == 0:
+                        print(f"Finished sample {counter}")
             counter += 1
 
         pool.close()
