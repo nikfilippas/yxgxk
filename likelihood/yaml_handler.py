@@ -80,17 +80,3 @@ def update_nsteps(fname, nsteps):
         doc = yaml.safe_load(f)
         doc["mcmc"]["n_steps"] = nsteps
         yaml.safe_dump(doc, f)
-
-
-#### TEST CODE ####
-# # Update global parameters
-# for par, val in zip(pars, vals):
-#     for param in doc["params"]:
-#         if param["name"] == par:
-#             param["value"] = val
-
-#             if par in aliases:
-#                 for param in doc["params"]:
-#                     if param.get("alias") == par:
-#                         param["value"] = val
-#             break
