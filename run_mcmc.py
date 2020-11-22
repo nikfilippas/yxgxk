@@ -19,5 +19,5 @@ for v in V:
         yaml.safe_dump(doc, fo)
         print("Created file %s" % fname_out)
 
-    ex = 'addqueue -n 48 -q "cmb" -c %s -m 1 "/mnt/zfusers/nikfilippas/anaconda3/bin/python" mcmc.py %s' % (fname_out, fname_out)
+    ex = 'addqueue -n 48 -q cmb -c %s -m 1 /mnt/zfusers/nikfilippas/anaconda3/bin/python mcmc.py %s' % (fname_out, fname_out)
     subprocess.run(ex.split())
