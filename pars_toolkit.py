@@ -39,7 +39,7 @@ def split_zbins(fname_in):
     import copy
     V = copy.deepcopy(doc["data_vectors"])
     for v in V:
-        doc["data_vectors"] = v
+        doc["data_vectors"] = [v]
         fname_out = ("_"+v["name"]+".").join(fname_in.split("."))
         with open(fname_out, "w") as fo:
             yaml.safe_dump(doc, fo)
@@ -49,7 +49,7 @@ def update_nsteps(fname_in, nsteps):
     """Updates number of MCMC steps in yaml file."""
     with open(fname_in) as f:
         doc = yaml.safe_load(f)
-        
+
     doc["mcmc"]["n_steps"] = nsteps
     with open(fname_in, "w") as f:
         yaml.safe_dump(doc, f)
@@ -61,4 +61,3 @@ if args.split_zbins:
     split_zbins(fname_in)
 if args.nsteps is not None:
     update_nsteps(fname_in, args.nsteps)
-

@@ -5,7 +5,7 @@ bandpowers:
   nlb_lin: 10
   type: linlog
 data_vectors:
-  covar_type: comb_m
+- covar_type: comb_m
   name: wisc3
   twopoints:
   - lmin: 10
