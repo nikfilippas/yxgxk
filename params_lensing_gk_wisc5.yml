@@ -5,7 +5,7 @@ bandpowers:
   nlb_lin: 10
   type: linlog
 data_vectors:
-- covar_type: comb_m
+  covar_type: comb_m
   name: wisc5
   twopoints:
   - lmin: 10
@@ -26,6 +26,154 @@ jk:
   nside: 8
   store_mcm: true
 maps:
+- beam: false
+  dndz: data/dndz/2MPZ_bin1.txt
+  map: data/maps/2mpz_05_01_512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4999999999979514
+    alpha: 1.0
+    b_hydro: 0.7397101227237289
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.087727624860165
+    lM1: 11.49028189874889
+    lMmin: 10.087727624860165
+    n_s: 0.9665
+    r_corr_gk: 0.4999999999996133
+    r_corr_gy: -0.5118953733558925
+    sigma8: 0.9341955340863398
+    sigmaLogM: 0.15
+    width: 1.199999999993615
+  name: 2mpz
+  ns_independent: false
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin1.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4130220165954605
+    alpha: 1.0
+    b_hydro: 0.9115429279552035
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.567944862826979
+    lM1: 11.844904940292809
+    lMmin: 10.567944862826979
+    n_s: 0.9665
+    r_corr_gk: 0.3169407159580881
+    r_corr_gy: -0.479247470869696
+    sigma8: 0.7856825354974334
+    sigmaLogM: 0.15
+    width: 0.8025920922711607
+  name: wisc1
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin2.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.38884308081400903
+    alpha: 1.0
+    b_hydro: 0.8104050673727441
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.512485245675759
+    lM1: 11.811293304873075
+    lMmin: 10.512485245675759
+    n_s: 0.9665
+    r_corr_gk: -0.44910425091888967
+    r_corr_gy: -0.6016504464613353
+    sigma8: 0.8721510827811201
+    sigmaLogM: 0.15
+    width: 0.9047898749963174
+  name: wisc2
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin3.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4155655250163273
+    alpha: 1.0
+    b_hydro: 0.6338505823123863
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 11.287232096011717
+    lM1: 12.4865944563562
+    lMmin: 11.287232096011717
+    n_s: 0.9665
+    r_corr_gk: -0.2837038157973949
+    r_corr_gy: -0.6180336282090934
+    sigma8: 0.8238655709393059
+    sigmaLogM: 0.15
+    width: 1.0009087308821412
+  name: wisc3
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin4.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.47593755238198265
+    alpha: 1.0
+    b_hydro: 0.9890951936580739
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 12.016875475671192
+    lM1: 13.130358196534376
+    lMmin: 12.016875475671192
+    n_s: 0.9665
+    r_corr_gk: 0.24121978740515418
+    r_corr_gy: -0.5397816713862724
+    sigma8: 0.6884949369501229
+    sigmaLogM: 0.15
+    width: 1.1718742334128214
+  name: wisc4
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
 - beam: false
   dndz: data/dndz/WISC_bin5.txt
   map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits
@@ -93,7 +241,7 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 3000
+  n_steps: 10000
   n_walkers: 96
   run_name: lensing_gk
 params:
