@@ -31,6 +31,34 @@ jk:
   store_mcm: true
 maps:
 - beam: false
+  dndz: data/dndz/2MPZ_bin1.txt
+  map: data/maps/2mpz_05_01_512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4999999999999417
+    alpha: 1.0
+    b_hydro: 0.3576546355777399
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.085315410859083
+    lM1: 11.462264598146495
+    lMmin: 10.085315410859083
+    n_s: 0.9665
+    r_corr_gk: 0.4999999999996133
+    r_corr_gy: -0.5180490110675504
+    sigma8: 0.9123607320616338
+    sigmaLogM: 0.15
+    width: 1.199999999993615
+  name: 2mpz
+  ns_independent: false
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
   dndz: data/dndz/WISC_bin1.txt
   map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
   mask: mask_lowz
@@ -58,6 +86,126 @@ maps:
   systematics:
   - scos_plates
   - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin2.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4263815049334589
+    alpha: 1.0
+    b_hydro: 0.18613969938649388
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.549518891252172
+    lM1: 11.794952075732667
+    lMmin: 10.549518891252172
+    n_s: 0.9665
+    r_corr_gk: -0.2208312702470838
+    r_corr_gy: -0.6007288486023787
+    sigma8: 0.8135593078391262
+    sigmaLogM: 0.15
+    width: 0.8510867851364564
+  name: wisc2
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin3.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.43125654167037425
+    alpha: 1.0
+    b_hydro: 0.2477701135649129
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 11.287009954797128
+    lM1: 12.492171687067765
+    lMmin: 11.287009954797128
+    n_s: 0.9665
+    r_corr_gk: -0.3070409633738165
+    r_corr_gy: -0.6181685274388807
+    sigma8: 0.8261711618734866
+    sigmaLogM: 0.15
+    width: 1.0068863597705806
+  name: wisc3
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin4.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4832377868157949
+    alpha: 1.0
+    b_hydro: 0.0013925778789443094
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 12.001752625726413
+    lM1: 13.141353149853739
+    lMmin: 12.001752625726413
+    n_s: 0.9665
+    r_corr_gk: 0.08299973566287533
+    r_corr_gy: -0.5410596499371344
+    sigma8: 0.7168105004033559
+    sigmaLogM: 0.15
+    width: 1.1639824029540633
+  name: wisc4
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin5.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.1701704243193857
+    alpha: 1.0
+    b_hydro: 0.015256330538806538
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 12.463098851038191
+    lM1: 13.155318373907816
+    lMmin: 12.463098851038191
+    n_s: 0.9665
+    r_corr_gk: 0.49999999999298345
+    r_corr_gy: -0.6481492871443196
+    sigma8: 0.7250261576551703
+    sigmaLogM: 0.15
+    width: 1.1999999999999365
+  name: wisc5
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits
   - data/maps/lambda_sfd_ebv.fits
   type: g
 - beam: 10.0
@@ -97,7 +245,7 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 5000
+  n_steps: 10000
   n_walkers: 96
   run_name: lensing_gyk
 params:
@@ -249,7 +397,7 @@ params:
     - 1.2
   value: 0.9665
   vary: false
-- label: a_\textrm{HMcorr}
+- label: a_{\rm HMcorr}
   name: a_HMcorr
   prior:
     type: TopHat
