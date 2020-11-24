@@ -25,9 +25,12 @@ def update_params(fname_in):
                 for m0 in doc["maps"]:
                     if m0["name"] == m["name"]:
                         m0["model"] = m["model"]
+                        print("Updated %s model parameters." % m0["name"])
 
     with open(fname_in, "w") as f:
+        print("Writing to file...", end="")
         yaml.safe_dump(doc, f)
+        print("Done.")
 
 
 def split_zbins(fname_in):
