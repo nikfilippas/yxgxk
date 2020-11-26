@@ -186,16 +186,18 @@ class chan(object):
         taus = np.zeros((npars, nzbins))
         for i, par in enumerate(pars):
             for j, chain in enumerate(chains[par]):
+                # first dim should be time
                 chain = chain.reshape((nsteps, nwalkers))
-                taus[i, j] = integrated_time(chain, quiet=True)
+                taus[i, j] = integrated_time(chain, tol=20, quiet=True)
         return taus
 
     def remove_burn_in(self, chain):
         from emcee.autocorr import integrated_time
         nsteps = self.p.get("mcmc")["n_steps"]
         nwalkers = self.p.get("mcmc")["n_walkers"]
+        # first dim should be time
         chain = chain.reshape((nsteps, nwalkers))
-        tau = integrated_time(chain, quiet=True)
+        tau = integrated_time(chain, tol=20, quiet=True)
         # remove burn-in elements from chain
         chain = chain[int(np.ceil(tau)):].flatten()
         return chain
