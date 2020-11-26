@@ -366,7 +366,7 @@ class Likelihood(object):
             chain_eff = chain[:, indices]
             names_eff = pars
             labels_eff = [self.p_free_labels[idx] for idx in indices]
-            ranges_eff = [ranges[idx] for idx in indices]
+            ranges_eff = {par: ranges[par] for par in pars}
 
         samples = MCSamples(samples=chain_eff,
                             names=names_eff,
@@ -384,6 +384,6 @@ class Likelihood(object):
             if pars is None:
                 fname = prefix+'triangle.'+extension
             else:
-                fname = prefix+"triangle_"+"_".join(pars)+extension
+                fname = prefix+"triangle_"+"_".join(pars)+"."+extension
             g.export(fname)
         return g
