@@ -1,5 +1,6 @@
 import sys
 import numpy as np
+import warnings
 from analysis.params import ParamRun
 from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
@@ -15,8 +16,8 @@ from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 try:
     fname_params = sys.argv[1]
 except IndexError:
-    fname_params = "params_lensing_gyk.yml"
-    # raise ValueError("Must provide param file name as command-line argument")
+    fname_params = "params_lensing_gyk.yml"  # default for testing
+    raise ValueError("Must provide param file name as command-line argument")
 
 p = ParamRun(fname_params)
 kwargs = p.get_cosmo_pars()
@@ -30,9 +31,13 @@ kwargs = p.get_cosmo_pars()
 hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction
 # chain handler - get autocorrelation times to remove burn-in
 q = chan(fname_params)
+print("Loading chains...")
 chains = q.get_chains()
 chains.pop("z")
-taus = q.get_tau(chains)
+print("Computing chain autocorrelation times...")
+with warnings.catch_warnings(record=False) as w:
+    warnings.filterwarnings("ignore")
+    taus = q.get_tau(chains)
 
 zmeans = []
 bmeans = []
@@ -121,7 +126,7 @@ for s, v in enumerate(p.get('data_vectors')):
 
     # Plot likelihood
     figs_ch = lik.plot_chain(sam.chain, taus=taus[:,s],
-                             pars=None,
+                             pars=["sigma8", "b_hydro", "width"],
                              save_figure=True,
                              prefix=p.get_sampler_prefix(v['name']))
     print(" Best-fit parameters:")
