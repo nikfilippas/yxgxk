@@ -70,8 +70,11 @@ class chan(object):
                           **pars)
 
 
-    def get_chains(self, pars, **specargs):
+    def get_chains(self, pars=None, **specargs):
         """Returns a dictionary containing the chains of `pars`. """
+        # if `pars` is not set, collect chains for all free parameters
+        if pars is None:
+            pars = [par["name"] for par in self.p.get("params") if par.get("vary")]
 
         def bias_one(p0, num):
             """Calculates the halo model bias for a set of parameters."""
@@ -114,10 +117,10 @@ class chan(object):
                 continue
 
         if ("bg" in fid_pars) or ("by" in fid_pars) or ("bk" in fid_pars):
-            # skip every (for computationally expensive hm_bias)
+            # thin sample (for computationally expensive hm_bias)
             b_skip = specargs.get("thin")
             if b_skip is None:
-                print("'thin' not given. Defaulting to 100.")
+                print("Chain 'thin' factor not given. Defaulting to 100.")
                 b_skip = 100
 
         for s, v in enumerate(self.p.get("data_vectors")):
@@ -172,8 +175,22 @@ class chan(object):
 
         return {**preCHAINS, **CHAINS}
 
+    def get_tau(self, chains):
+        from emcee.autocorr import integrated_time
+        nsteps = self.p.get("mcmc")["n_steps"]
+        nwalkers = self.p.get("mcmc")["n_walkers"]
 
-    def get_burn_in(self, chain):
+        pars = list(chains.keys())
+        npars = len(pars)
+        nzbins = len(self.p.get("data_vectors"))
+        taus = np.zeros((npars, nzbins))
+        for i, par in enumerate(pars):
+            for j, chain in enumerate(chains[par]):
+                chain = chain.reshape((nsteps, nwalkers))
+                taus[i, j] = integrated_time(chain, quiet=True)
+        return taus
+
+    def remove_burn_in(self, chain):
         from emcee.autocorr import integrated_time
         nsteps = self.p.get("mcmc")["n_steps"]
         nwalkers = self.p.get("mcmc")["n_walkers"]
@@ -314,7 +331,7 @@ class chan(object):
             print("Calculating best-fit for z-bin %d/%d..." %
                   (s+1, len(CHAINS["z"])))
             # remove burn-in elements from chains while assmebling them
-            chains = {k: self.get_burn_in(CHAINS[k][s]) for k in CHAINS.keys() if k != "z"}
+            chains = {k: self.remove_burn_in(CHAINS[k][s]) for k in CHAINS.keys() if k != "z"}
             bf = self.get_summary_numbers(pars, chains, diff=diff)
 
             if s == 0:
