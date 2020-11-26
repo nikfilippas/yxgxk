@@ -126,7 +126,7 @@ for s, v in enumerate(p.get('data_vectors')):
 
     # Plot likelihood
     figs_ch = lik.plot_chain(sam.chain, taus=taus[:,s],
-                             pars=["sigma8", "b_hydro", "width"],
+                             pars=None,
                              save_figure=True,
                              prefix=p.get_sampler_prefix(v['name']))
     print(" Best-fit parameters:")
