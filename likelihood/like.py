@@ -316,8 +316,8 @@ class Likelihood(object):
         return figs
 
 
-    def plot_chain(self, chain, save_figure=False, prefix=None,
-                   extension='pdf'):
+    def plot_chain(self, chain, taus=None, pars=None,
+                   save_figure=False, prefix=None, extension='pdf'):
         """
         Produces a triangle plot from a chain, which can be
         saved to file automatically.
@@ -327,6 +327,9 @@ class Likelihood(object):
                 where `n_samples` is the number of samples in the
                 chain and `n_params` is the number of free parameters
                 for this likelihood run.
+            taus (array): array of length n_params, that contains
+                the autocorrelation times for the input chains.
+            which_pars (str or list): which parameters to plot
             save_figures (bool): if true, figures will be saved to
                 file. File names will take the form:
                 <`prefix`>triangle.<`extension`>
@@ -345,10 +348,30 @@ class Likelihood(object):
         for n,pr in zip(self.p_free_names,self.p_free_prior):
             if pr['type']=='TopHat':
                 ranges[n]=pr['values']
-        samples = MCSamples(samples=chain[nsamples//4:],
-                            names=self.p_free_names,
-                            labels=self.p_free_labels,
-                            ranges=ranges)
+
+        if taus is None:
+            chain_eff = chain[nsamples//4:]
+        else:
+            chain_eff = chain[2*int(np.ceil(taus.max())):]
+            print("Removed 2x max chain autocorrelation time.")
+
+        if pars is None:
+            names_eff = self.p_free_names
+            labels_eff = self.p_free_labels
+            ranges_eff = ranges
+        else:  # triangle plot with only some parameters
+            if type(pars) != list:
+                pars = [pars]
+            indices = [self.p_free_names.index(par) for par in pars]
+            chain_eff = chain[:, indices]
+            names_eff = pars
+            labels_eff = [self.p_free_labels[idx] for idx in indices]
+            ranges_eff = [ranges[idx] for idx in indices]
+
+        samples = MCSamples(samples=chain_eff,
+                            names=names_eff,
+                            labels=labels_eff,
+                            ranges=ranges_eff)
         samples.smooth_scale_2D=0.2
 
         # Triangle plot
@@ -358,6 +381,9 @@ class Likelihood(object):
         if save_figure:
             if prefix is None:
                 raise ValueError("Need a file prefix to save stuff")
-            fname = prefix+'triangle.'+extension
+            if pars is None:
+                fname = prefix+'triangle.'+extension
+            else:
+                fname = prefix+"triangle_"+"_".join(pars)+extension
             g.export(fname)
         return g

@@ -3,6 +3,7 @@ import numpy as np
 from analysis.params import ParamRun
 from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
+from likelihood.chanal import chan
 from model.data import DataManager
 from model.theory import get_theory
 import matplotlib.pyplot as plt
@@ -27,13 +28,16 @@ hmc = get_hmcalc(cosmo, **kwargs)
 cosmo_vary = COSMO_VARY(p)
 kwargs = p.get_cosmo_pars()
 hm_correction = HM_Gauss(cosmo, **kwargs).hm_correction
-
-
+# chain handler - get autocorrelation times to remove burn-in
+q = chan(fname_params)
+chains = q.get_chains()
+chains.pop("z")
+taus = q.get_tau(chains)
 
 zmeans = []
 bmeans = []
 sbmeans = [[],[]]  # min and max error bar
-for v in p.get('data_vectors'):
+for s, v in enumerate(p.get('data_vectors')):
     print(v['name'])
 
     # Construct data vector and covariance
@@ -116,7 +120,9 @@ for v in p.get('data_vectors'):
                             get_theory_1h=th1h, get_theory_2h=th2h)
 
     # Plot likelihood
-    figs_ch = lik.plot_chain(sam.chain, save_figure=True,
+    figs_ch = lik.plot_chain(sam.chain, taus=taus[:,s],
+                             pars=None,
+                             save_figure=True,
                              prefix=p.get_sampler_prefix(v['name']))
     print(" Best-fit parameters:")
     pars = []
