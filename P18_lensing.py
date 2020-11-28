@@ -58,17 +58,17 @@ wsp = nmt.NmtWorkspace()
 msk = hp.fitsfunc.read_map("data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits", dtype=float)
 field = nmt.NmtField(msk, [m15])
 wsp.compute_coupling_matrix(field, field, b)
-cl15nmt = wsp.decouple_cell(nmt.ucompte_coupled_cell(field, field)).T
+cl15nmt = wsp.decouple_cell(nmt.compute_coupled_cell(field, field)).T
 
 msk = hp.fitsfunc.read_map("data/maps/COM_Lensing_4096_R3.00_mask.fits", dtype=float)
 field = nmt.NmtField(msk, [m18])
 wsp.compute_coupling_matrix(field, field, b)
-cl18nmt = wsp.decouple_cell(nmt.ucompte_coupled_cell(field, field)).T
+cl18nmt = wsp.decouple_cell(nmt.compute_coupled_cell(field, field)).T
 
 msk = hp.fitsfunc.read_map("data/maps/COM_Lensing_Szdeproj_4096_R3.00_mask.fits", dtype=float)
 field = nmt.NmtField(msk, [m18])
 wsp.compute_coupling_matrix(field, field, b)
-cl18sznmt = wsp.decouple_cell(nmt.ucompte_coupled_cell(field, field)).T
+cl18sznmt = wsp.decouple_cell(nmt.compute_coupled_cell(field, field)).T
 
 plt.figure()
 plt.loglog(b.get_effective_ells(), cl15nmt, "bo", ms=1, label="NaMaster Cl from map, P15")
