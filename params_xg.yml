@@ -1,0 +1,500 @@
+bandpowers:
+  lsplit: 52
+  nb_log: 28
+  nlb: 20
+  nlb_lin: 10
+  type: linlog
+data_vectors:
+- covar_type: comb_m
+  name: 2mpz
+  twopoints:
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - 2mpz
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - wisc1
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - wisc2
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - wisc3
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - wisc4
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - wisc5
+  type: Cl
+- covar_type: comb_m
+  name: wisc1
+  twopoints:
+  - lmin: 0
+    tracers:
+    - wisc1
+    - wisc1
+  - lmin: 0
+    tracers:
+    - wisc1
+    - wisc2
+  - lmin: 0
+    tracers:
+    - wisc1
+    - wisc3
+  - lmin: 0
+    tracers:
+    - wisc1
+    - wisc4
+  - lmin: 0
+    tracers:
+    - wisc1
+    - wisc5
+  type: Cl
+- covar_type: comb_m
+  name: wisc2
+  twopoints:
+  - lmin: 0
+    tracers:
+    - wisc2
+    - wisc2
+  - lmin: 0
+    tracers:
+    - wisc2
+    - wisc3
+  - lmin: 0
+    tracers:
+    - wisc2
+    - wisc4
+  - lmin: 0
+    tracers:
+    - wisc2
+    - wisc5
+  type: Cl
+- covar_type: comb_m
+  name: wisc3
+  twopoints:
+  - lmin: 0
+    tracers:
+    - wisc3
+    - wisc3
+  - lmin: 0
+    tracers:
+    - wisc3
+    - wisc4
+  - lmin: 0
+    tracers:
+    - wisc3
+    - wisc5
+  type: Cl
+- covar_type: comb_m
+  name: wisc4
+  twopoints:
+  - lmin: 0
+    tracers:
+    - wisc4
+    - wisc4
+  - lmin: 0
+    tracers:
+    - wisc4
+    - wisc5
+  type: Cl
+- covar_type: comb_m
+  name: wisc5
+  twopoints:
+  - lmin: 0
+    tracers:
+    - wisc5
+    - wisc5
+  type: Cl
+global:
+  n_iter: 3
+  nside: 2048
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
+jk:
+  do: true
+  nside: 8
+  store_mcm: true
+maps:
+- beam: false
+  dndz: data/dndz/2MPZ_bin1.txt
+  map: data/maps/2mpz_05_01_512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4999999999999417
+    alpha: 1.0
+    b_hydro: 0.3576546355777399
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.085315410859083
+    lM1: 11.462264598146495
+    lMmin: 10.085315410859083
+    n_s: 0.9665
+    r_corr_gk: 0.4999999999996133
+    r_corr_gy: -0.5180490110675504
+    sigma8: 0.9123607320616338
+    sigmaLogM: 0.15
+    width: 1.199999999993615
+  name: 2mpz
+  ns_independent: false
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin1.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.44870102598332645
+    alpha: 1.0
+    b_hydro: 0.13505283039569332
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.56691541604829
+    lM1: 11.85605343275181
+    lMmin: 10.56691541604829
+    n_s: 0.9665
+    r_corr_gk: 0.15912677803453348
+    r_corr_gy: -0.6192207279578451
+    sigma8: 0.8000197829826369
+    sigmaLogM: 0.15
+    width: 0.8459739478693199
+  name: wisc1
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin2.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4263815049334589
+    alpha: 1.0
+    b_hydro: 0.18613969938649388
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 10.549518891252172
+    lM1: 11.794952075732667
+    lMmin: 10.549518891252172
+    n_s: 0.9665
+    r_corr_gk: -0.2208312702470838
+    r_corr_gy: -0.6007288486023787
+    sigma8: 0.8135593078391262
+    sigmaLogM: 0.15
+    width: 0.8510867851364564
+  name: wisc2
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin3.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.43125654167037425
+    alpha: 1.0
+    b_hydro: 0.2477701135649129
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 11.287009954797128
+    lM1: 12.492171687067765
+    lMmin: 11.287009954797128
+    n_s: 0.9665
+    r_corr_gk: -0.3070409633738165
+    r_corr_gy: -0.6181685274388807
+    sigma8: 0.8261711618734866
+    sigmaLogM: 0.15
+    width: 1.0068863597705806
+  name: wisc3
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin4.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.4832377868157949
+    alpha: 1.0
+    b_hydro: 0.0013925778789443094
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 12.001752625726413
+    lM1: 13.141353149853739
+    lMmin: 12.001752625726413
+    n_s: 0.9665
+    r_corr_gk: 0.08299973566287533
+    r_corr_gy: -0.5410596499371344
+    sigma8: 0.7168105004033559
+    sigmaLogM: 0.15
+    width: 1.1639824029540633
+  name: wisc4
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin5.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits
+  mask: mask_lowz
+  model:
+    Omega_b: 0.048974682
+    Omega_c: 0.26066676
+    a_HMcorr: 0.1701704243193857
+    alpha: 1.0
+    b_hydro: 0.015256330538806538
+    beta_gal: 1.0
+    beta_max: 1.0
+    fc: 1.0
+    h: 0.6766
+    lM0: 12.463098851038191
+    lM1: 13.155318373907816
+    lMmin: 12.463098851038191
+    n_s: 0.9665
+    r_corr_gk: 0.49999999999298345
+    r_corr_gy: -0.6481492871443196
+    sigma8: 0.7250261576551703
+    sigmaLogM: 0.15
+    width: 1.1999999999999365
+  name: wisc5
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits
+  - data/maps/lambda_sfd_ebv.fits
+  type: g
+- beam: 10.0
+  map: data/maps/milca_ymaps.fits
+  mask: mask_tsz
+  name: y_milca
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: y
+- beam: 10.0
+  map: data/maps/nilc_ymaps.fits
+  mask: mask_tsz
+  name: y_nilc
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: y
+- beam: 10.0
+  map: data/maps/HFI_SkyMap_545_2048_R2.02_full.fits
+  mask: mask_545
+  name: dust_545
+  type: d
+- beam: false
+  map: data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits
+  mask: mask_lens_2015
+  name: lens
+  ns_independent: false
+  systematics: None
+  type: k
+masks:
+  mask_545: data/maps/mask_planck20.fits
+  mask_lens_2015: data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits
+  mask_lowz: data/maps/mask_v3.fits
+  mask_tsz: data/maps/mask_planck60.fits
+mcmc:
+  continue_mcmc: true
+  debug: false
+  hbias: tinker10
+  kmax: 1.0
+  mfunc: tinker08
+  n_steps: 10000
+  n_walkers: 96
+  run_name: xg
+params:
+- alias: lMmin
+  label: M_0
+  name: lM0
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  value: 12.0
+  vary: false
+- label: M_1
+  name: lM1
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  value: 13.0
+  vary: true
+- label: M_{\rm min}
+  name: lMmin
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  value: 12.0
+  vary: true
+- label: f_c
+  name: fc
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1.0
+  value: 1.0
+  vary: false
+- label: \alpha
+  name: alpha
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 3.0
+  value: 1.0
+  vary: false
+- alias: beta_gal
+  label: \beta_{\rm max}
+  name: beta_max
+- label: beta_g
+  name: beta_gal
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 10.0
+  value: 1.0
+  vary: false
+- label: \sigma_{{\rm ln}M}
+  name: sigmaLogM
+  prior:
+    type: TopHat
+    values:
+    - 0.01
+    - 1.0
+  value: 0.15
+  vary: false
+- label: b_H
+  name: b_hydro
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1.0
+  value: 0.25
+  vary: true
+- label: \rho_{gy}
+  name: r_corr_gy
+  prior:
+    type: TopHat
+    values:
+    - -1.0
+    - 1.0
+  value: 0.0
+  vary: true
+- label: \rho_{g\kappa}
+  name: r_corr_gk
+  prior:
+    type: TopHat
+    values:
+    - -0.5
+    - 0.5
+  value: 0.0
+  vary: true
+- label: w_{N(z)}
+  name: width
+  prior:
+    type: TopHat
+    values:
+    - 0.8
+    - 1.2
+  value: 1.0
+  vary: true
+- label: \Omega_c
+  name: Omega_c
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.9
+  value: 0.26066676
+  vary: false
+- label: \Omega_b
+  name: Omega_b
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.9
+  value: 0.048974682
+  vary: false
+- label: h
+  name: h
+  prior:
+    type: TopHat
+    values:
+    - 0.55
+    - 0.8
+  value: 0.6766
+  vary: false
+- label: \sigma_8
+  name: sigma8
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 0.95
+  value: 0.8102
+  vary: true
+- label: n_s
+  name: n_s
+  prior:
+    type: TopHat
+    values:
+    - 0.8
+    - 1.2
+  value: 0.9665
+  vary: false
+- label: a_{\rm HMcorr}
+  name: a_HMcorr
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.5
+  value: 0.36
+  vary: true
