@@ -1,4 +1,5 @@
 import numpy as np
+from scipy.integrate import simps
 import pyccl as ccl
 from model.cosmo_utils import COSMO_CHECK
 
@@ -42,20 +43,14 @@ def get_2pt(p1, p2, **kwargs):
         return ccl.halos.Profile2ptR(r_corr=r_corr)
 
 
-def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
-                          include_1h=True, include_2h=True,
-                          hm_correction=None,
+def hm_ang_power_spectrum(cosmo, l, profiles,
                           kpts=128, zpts=8, **kwargs):
     """Angular power spectrum using CCL.
 
     Args:
         cosmo (~pyccl.core.Cosmology): a Cosmology object
-        hmc (`~pyccl.halos.halo_model.HMCalculator): halo model calculator
         l (`numpy.array`): effective multipoles to sample
         profiles (tuple of `model.data.ProfTracer`): profile and tracer pair
-        include_1h (`bool`): whether to include the 1-halo term
-        include_2h (`bool`): whether to include the 2-halo term
-        hm_correction (`func`): multiplicative function of `k` and `a`
         kpts (`int`): number of wavenumber integration points
         zpts (`int`): number of redshift integration points
         **kwagrs: Parametrisation of the profiles and cosmology.
@@ -65,35 +60,23 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     """
     COSMO_CHECK(cosmo, **kwargs)
     p1, p2 = profiles
-    p1.update_parameters(cosmo, **kwargs)
-    p2.update_parameters(cosmo, **kwargs)
 
-    # Set up covariance
-    p2pt = get_2pt(p1, p2, **kwargs)
+    p1.update_tracer(cosmo, **kwargs)
+    p2.update_tracer(cosmo, **kwargs)
+    p1.bias = kwargs["_".join(("bg", p1.name))]
+    p2.bias = kwargs["_".join(("bg", p2.name))]
 
-    k_arr = np.geomspace(1e-3, 1e2, kpts)
+    pkfunc = lambda k, a: p1.bias*p2.bias*ccl.linear_matter_power(cosmo, k, a)
+    pk2D = ccl.Pk2D(pkfunc=pkfunc, cosmo=cosmo, is_logp=False)
 
-    if profiles[0].type == "g":
-        zmin, zmax = profiles[0].zrange
-    elif profiles[1].type == "g":
-        zmin, zmax = profiles[1].zrange
-    else:
-        zmax = 1.0
-
-    a_arr = np.linspace(1/(1+zmax), 1, zpts)
-
-    if hm_correction is not None:
-        hm_correction_mod = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
-    else:
-        hm_correction_mod = None
-
-    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.profile, prof2=p2.profile,
-                                prof_2pt=p2pt,
-                                normprof1=(p1.type!='y'),  # don't normalise
-                                normprof2=(p2.type!='y'),  # pressure profile
-                                get_1h=include_1h, get_2h=include_2h,
-                                lk_arr=np.log(k_arr), a_arr=a_arr,
-                                f_ka=hm_correction_mod)
-
-    cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)
+    cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk2D)
     return cl
+
+
+def filter_kwargs(name, kwargs):
+    """Filters keyword-only arguments dictionary with keys
+    including custom string."""
+    d = {}
+    for k in kwargs:
+        if name in k:
+            pass

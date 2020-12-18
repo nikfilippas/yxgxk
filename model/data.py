@@ -21,7 +21,10 @@ class ProfTracer(object):
         self.type = m['type']
         self.beam = m['beam']
         self.syst = m.get('systematics')
+        self.kmax = kmax
         self.lmax = np.inf
+        self.zrange = [np.nan, np.nan]
+        self.bias = m['model'].get('bg')
         if m['type'] == 'y':
             self.profile = ccl.halos.HaloProfileArnaud()
         else:
@@ -68,7 +71,8 @@ class ProfTracer(object):
 
     def update_tracer(self, cosmo, **kwargs):
         if self.type == 'g':
-            nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs['width'])
+            self.width = kwargs.get("width")
+            nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/self.width)
             nz_new /= simps(nz_new, x=self.z)
             self.tracer = ccl.NumberCountsTracer(cosmo, False,
                                             (self.z, nz_new),
