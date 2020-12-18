@@ -120,8 +120,6 @@ maps:
     a_HMcorr: 0.4996537824025633
     alpha: 1.0
     b_hydro: 0.32935235687694947
-    beta_gal: 1.0
-    beta_max: 1.0
     fc: 1.0
     h: 0.6766
     lM0: 11.653556490729253
@@ -148,8 +146,6 @@ maps:
     a_HMcorr: 0.21515478
     alpha: 1.0
     b_hydro: 0.11877272
-    beta_gal: 1.0
-    beta_max: 1.0
     fc: 1.0
     h: 0.6766
     lM0: 10.59153793
@@ -178,8 +174,6 @@ maps:
     a_HMcorr: 0.21515478
     alpha: 1.0
     b_hydro: 0.11877272
-    beta_gal: 1.0
-    beta_max: 1.0
     fc: 1.0
     h: 0.6766
     lM0: 10.59153793
@@ -208,8 +202,6 @@ maps:
     a_HMcorr: 0.24627099
     alpha: 1.0
     b_hydro: 0.19452851
-    beta_gal: 1.0
-    beta_max: 1.0
     fc: 1.0
     h: 0.6766
     lM0: 11.32914985
@@ -238,8 +230,6 @@ maps:
     a_HMcorr: 0.25827266
     alpha: 1.0
     b_hydro: 0.26434493
-    beta_gal: 1.0
-    beta_max: 1.0
     fc: 1.0
     h: 0.6766
     lM0: 11.99335452
@@ -268,8 +258,6 @@ maps:
     a_HMcorr: 0.27359295
     alpha: 1.0
     b_hydro: 0.25261573
-    beta_gal: 1.0
-    beta_max: 1.0
     fc: 1.0
     h: 0.6766
     lM0: 12.55077359
@@ -373,18 +361,6 @@ params:
     values:
     - 0.0
     - 3.0
-  value: 1.0
-  vary: false
-- alias: beta_gal
-  label: \beta_{\rm max}
-  name: beta_max
-- label: beta_g
-  name: beta_gal
-  prior:
-    type: TopHat
-    values:
-    - 0.1
-    - 10.0
   value: 1.0
   vary: false
 - label: \sigma_{{\rm ln}M}
