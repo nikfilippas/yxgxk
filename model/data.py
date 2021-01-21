@@ -43,7 +43,8 @@ class ProfTracer(object):
                 self.lmax = kmax*chimean-0.5
 
                 self.bz = np.ones_like(self.z)
-                self.profile = ccl.halos.HaloProfileHOD(cM)
+                self.profile = ccl.halos.HaloProfileHOD(cM,
+                               ns_independent=m.get("ns_independent", False))
 
             elif m['type'] == 'k':
                 self.profile = ccl.halos.HaloProfileNFW(cM)
@@ -238,3 +239,6 @@ class DataManager(object):
 
                 nd2 += nd2_here
             nd1 += nd1_here
+
+    def update_profiles(self):
+        pass

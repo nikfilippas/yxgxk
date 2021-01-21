@@ -18,7 +18,7 @@ from model.trispectrum import hm_ang_1h_covariance
 from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import get_hmcalc
 from model.utils import beam_hpix, beam_gaussian
-from model.cosmo_utils import COSMO_ARGS, COSMO_DEFAULT
+from model.cosmo_utils import COSMO_ARGS, COSMO_DEFAULT, COSMO_KEYS
 from model.data import ProfTracer
 
 
@@ -92,6 +92,15 @@ def merge_models(models1, models2):
     '''Combine model dictionaries into a single average dictionary.'''
     models = models1.copy()
     for par in models:
+        # deal with cosmological parameters
+        if par in COSMO_KEYS:
+            if par in ["mass_function", "halo_bias"]:
+                continue
+            elif models1[par] == models2[par]:
+                continue
+            else:
+                raise ValueError("Mismatch in cosmological parameters!")
+        # profile parameters
         try:
             models[par] = (models1[par]+models2[par])/2
         except TypeError:  # not integer

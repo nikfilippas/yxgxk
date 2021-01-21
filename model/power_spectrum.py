@@ -56,6 +56,8 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
         include_1h (`bool`): whether to include the 1-halo term
         include_2h (`bool`): whether to include the 2-halo term
         hm_correction (`func`): multiplicative function of `k` and `a`
+        kpts (`int`): number of wavenumber integration points
+        zpts (`int`): number of redshift integration points
         **kwagrs: Parametrisation of the profiles and cosmology.
 
     Returns:
