@@ -1,0 +1,124 @@
+sampler:
+  mcmc:
+    learn_proposal: True
+    burn_in: 10
+    oversample_power: 1
+    drag: True
+    measure_speeds: True
+    max_samples: 100000
+
+params:
+  # Derived
+  sigma8:
+    prior:
+      min: 0.1
+      max: 1.1
+    ref:
+      dist: norm
+      loc: 0.8
+      scale: 0.05
+    latex: \sigma_8
+    proposal: 0.05
+  # Cosmo
+  Omega_c: 0.315
+  Omega_b: 0.049
+  h: 0.67
+  n_s: 0.96
+  m_nu: 0.
+  # Halo model params (should all start with 'input_params_prefix')
+  ygk_logMmin:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.01
+    ref:
+      dist: norm
+      loc: 0.02
+      scale: 0.01
+    proposal: 0.005
+  ygk_logM1:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.01
+    ref:
+      dist: norm
+      loc: 0.02
+      scale: 0.01
+    proposal: 0.005
+  ygk_bhydro:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.01
+    ref:
+      dist: norm
+      loc: 0.02
+      scale: 0.01
+    proposal: 0.005
+  ygk_rho_gy:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.01
+    ref:
+      dist: norm
+      loc: 0.02
+      scale: 0.01
+    proposal: 0.005
+  ygk_rho_gk:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.01
+    ref:
+      dist: norm
+      loc: 0.02
+      scale: 0.01
+    proposal: 0.005
+  ygk_width:
+    prior:
+      dist: norm
+      loc: 0.0
+      scale: 0.01
+    ref:
+      dist: norm
+      loc: 0.02
+      scale: 0.01
+    proposal: 0.005
+  ygk_sigmaLogM: 0.15
+  ygk_fc: 1.
+  ygk_alpha: 1.
+  ygk_aHM_gg: 0.5
+  ygk_aHM_gy: 0.5
+  ygk_aHM_gk: 0.5
+
+# CCL settings
+theory:
+  yxgxk_like.CCL:
+    transfer_function: boltzmann_camb
+    matter_pk: halofit
+    baryons_pk: nobaryons
+
+# Likelihood settings
+likelihood:
+  yxgxk_like.YxGxKLike:
+    input_params_prefix: ygk
+    dndz_file: ./data/dndz/2MPZ_bin1.txt
+    input_dir: /mnt/extraspace/nikfilippas/yxgxk/output_default
+    g_name: 2mpz
+    y_name: y_milca
+    k_name: lens
+    massfunc: tinker08
+    kmax: 1.
+    lmin_gg: 0.
+    use_y: True
+    use_k: True
+    covar_type: comb_m
+    scos_plate_template: True
+    nside: 2048
+    nside_g: 512
+
+debug: True
+
+output: 'cobaya_test/run0'
