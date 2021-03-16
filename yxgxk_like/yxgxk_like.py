@@ -289,12 +289,25 @@ class YxGxKLike(Likelihood):
                                     f_ka=hm_correction_mod)
 
         cl = ccl.angular_cl(cosmo, prof1.tracer, prof2.tracer, l, pk)
+        print(cl)
         return cl
 
     def _get_theory(self, **pars):
         res = self.provider.get_CCL()
         cosmo = res['cosmo']
         hmc = res['hmc']
+
+        # namespace of profile parameters
+        lM0_name = self.input_params_prefix + "_logMmin"  #HACK: just get this done
+        lM1_name = self.input_params_prefix + "_logM1"
+        lMmin_name = self.input_params_prefix + "_logMmin"
+        bh_name = self.input_params_prefix + "_bhydro"
+
+        pars["lM0"] = pars[lM0_name]
+        pars["lM1"] = pars[lM1_name]
+        pars["lMmin"] = pars[lMmin_name]
+        pars["b_hydro"] = pars[bh_name]
+
         cl_theory = []
         for xc in self.xcorr_data:
 
@@ -320,6 +333,13 @@ class YxGxKLike(Likelihood):
             # 3. get the 2pt function
             p2pt = self._get_2pt(prof1, prof2, r_corr=r_corr)
 
+            print(prof1.profile.lM0, prof1.profile.lM1, prof1.profile.lMmin)
+            if prof2.type == "g":
+                print(prof2.profile.lM0, prof2.profile.lM1, prof2.profile.lMmin)
+            else:
+                print(prof2.profile.b_hydro)
+
+
             # 4. compute Cell
             cl = self._get_angpow(cosmo, hmc,
                                   l=xc["ls"],
@@ -331,9 +351,12 @@ class YxGxKLike(Likelihood):
             # 5. do beams
             cl *= prof1.get_beam(xc["ls"])
             cl *= prof2.get_beam(xc["ls"])
+            # print(cl)
             cl_theory += cl.tolist()
 
         cl_theory = np.array(cl_theory)
+        # print(cl_theory)
+        # exit(1)
         return cl_theory
 
     def logp(self, **pars):
@@ -391,7 +414,6 @@ class HM_halofit(object):
         return self.rk_func(np.log10(k), a)
 
 
-
 class HM_Gauss(object):
     def __init__(self, cosmo,
                  lk_range=[-3, 2], nlk=128,
@@ -437,12 +459,13 @@ class HM_Gauss(object):
 def hm_eff():
     #TODO: interpolate lk_arr instead of k_arr
     cargs = {"Omega_c" : 0.2589,
-             "Omega_b" : 0.0486,
-             "h"       : 0.6774,
-             "sigma8"  : 0.8159,
-             "n_s"     : 0.9667}
+              "Omega_b" : 0.0486,
+              "h"       : 0.6774,
+              "sigma8"  : 0.8159,
+              "n_s"     : 0.9667}
     cosmo = ccl.Cosmology(**cargs)
     kwargs = {"mass_function": ccl.halos.mass_function_from_name("tinker08"),
               "halo_bias": ccl.halos.halo_bias_from_name("tinker10")}
-    hm = HM_Gauss(cosmo, **kwargs)
-    return hm.hm_correction
+    hmf = HM_Gauss(cosmo, **kwargs).hm_correction
+    np.save("hm_correction.npy", hmf, allow_pickle=True)
+    return hmf
