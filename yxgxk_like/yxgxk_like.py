@@ -238,7 +238,6 @@ class YxGxKLike(Likelihood):
 
         # 7. Initialize HM correction function
         self.hmcorr = hm_eff()
-        print(self.hmcorr)
 
     def _get_hmc(self, cosmo, mdef_delta=500, mdef_type='critical'):
         hmd = ccl.halos.MassDef(mdef_delta, mdef_type)
@@ -246,9 +245,6 @@ class YxGxKLike(Likelihood):
         bM = ccl.halos.halo_bias_from_name('tinker10')(cosmo, mass_def=hmd)
         hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
         return hmc
-
-    def _get_halo_model_correction(self):
-        pass
 
     def _get_scos_temp(self, ls, lplate_deg=5.):
         lp = np.radians(lplate_deg)
