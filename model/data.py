@@ -230,7 +230,7 @@ class DataManager(object):
                 with np.load(fname_cov) as f:
                     cov = f["cov"]
                     # transpose if needed
-                    if T or (this_loop not in looped):
+                    if T:# or (this_loop not in looped):
                         looped.append(this_loop)
                         cov = cov.T
                     cov = cov[m1][:, m2]  # Mask
