@@ -3,89 +3,12 @@ import numpy as numpy
 from cobaya.likelihood import Likelihood
 from cobaya.log import LoggedError
 from scipy.interpolate import interp1d
+from scipy.integrate import simps
 import numpy as np
 import os
 
 
-# Beams
-def beam_gaussian(l, fwhm_amin):
-    sigma_rad = np.radians(fwhm_amin / 2.355 / 60)
-    return np.exp(-0.5 * l * (l + 1) * sigma_rad**2)
-
-
-def beam_hpix(l, ns):
-    fwhm_hp_amin = 60 * 41.7 / ns
-    return beam_gaussian(l, fwhm_hp_amin)
-
-
-class ProfTracer(object):
-    """Provides a framework to update the profile and tracer
-    together as a pair.
-
-    Args:
-        m (`dict`): Dictionary of associated map, usually imported
-                    from `yaml` file using `analysis.ParamRun.get('maps')[N].
-    """
-    def __init__(self, m):
-        self.name = m['name']
-        self.type = m['type']
-        self.beam = m['beam']
-        self.nside = m['nside']
-        if m['type'] == 'y':
-            self.profile = ccl.halos.HaloProfileArnaud()
-        else:
-            hmd = ccl.halos.MassDef(500, 'critical')
-            cM = ccl.halos.ConcentrationDuffy08M500c(hmd)
-
-            if m['type'] == 'g':
-                # transpose N(z)'s
-                self.z, self.nz = m['dndz']
-                self.nzf = interp1d(self.z, self.nz, kind='cubic',
-                                    bounds_error=False, fill_value=0.)
-                self.z_avg = np.average(self.z, weights=self.nz)
-                self.zrange = self.z[self.nz >= 0.005].take([0, -1])
-                self.bz = np.ones_like(self.z)
-                self.profile = ccl.halos.HaloProfileHOD(cM,
-                                                        ns_independent=m.get("ns_independent", False))
-            elif m['type'] == 'k':
-                self.profile = ccl.halos.HaloProfileNFW(cM)
-        self.tracer = None
-
-    def get_beam(self, ls):
-        """
-        Returns beam associated with this tracer
-
-        Args:
-            ls (float or array): multipoles
-            ns (int): HEALPix resolution parameter.
-
-        Returns:
-            float or array: SHT of the beam for this tracer.
-        """
-        b0 = beam_hpix(ls, self.nside)
-        if self.beam > 0:
-            b0 *= beam_gaussian(ls, self.beam)
-        return b0
-
-    def update_tracer(self, cosmo, **kwargs):
-        if self.type == 'g':
-            nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs['width'])
-            nz_new /= simps(nz_new, x=self.z)
-            self.tracer = ccl.NumberCountsTracer(cosmo, False,
-                                            (self.z, nz_new),
-                                            (self.z, self.bz))
-        elif self.type == 'y':
-            self.tracer = ccl.SZTracer(cosmo)
-        elif self.type == 'k':
-            self.tracer = ccl.CMBLensingTracer(cosmo, 1100.)
-
-    def update_parameters(self, cosmo, **kwargs):
-        self.profile.update_parameters(**kwargs)
-        self.update_tracer(cosmo, **kwargs)
-
-
-
-class YxGxKLike(Likelihood):
+class gyk_like(Likelihood):
     input_params_prefix: str = ""
     dndz_file: str = ""
     input_dir: str = ""
@@ -138,7 +61,7 @@ class YxGxKLike(Likelihood):
                                                   'type': 'k',
                                                   'beam': 0.,
                                                   'nside': self.nside})
-        
+
     def initialize(self):
         # Read data
         # 1- Read dndz
@@ -227,7 +150,7 @@ class YxGxKLike(Likelihood):
             iccor = sigma2 * ict[:, None] * ict[None, :]
             self.inv_cov = ic - iccor
         else:
-            self.inv_cov = np.linalg.inv(covar)
+            self.inv_cov = np.linalg.inv(self.covar)
 
         # 6- Initialize profiles
         self.profs = self._get_profiles()
@@ -239,8 +162,17 @@ class YxGxKLike(Likelihood):
         hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
         return hmc
 
-    def _get_halo_model_correction(self):
-        pass
+    def _get_2pt(self, prof1, prof2, r_corr=0):
+        if prof1.type == prof2.type == 'g':
+            return ccl.halos.Profile2ptHOD()
+        elif prof1.type == prof2.type:
+            return ccl.halos.Profile2pt()
+        else:
+            return ccl.halos.Profile2ptR(r_corr=r_corr)
+
+    def _get_hmcorr(self, aHM=0.5):
+        hm = np.load("hm_correction.npy", allow_pickle=True).item(0)
+        return hm
 
     def _get_scos_temp(self, ls, lplate_deg=5.):
         lp = np.radians(lplate_deg)
@@ -249,14 +181,73 @@ class YxGxKLike(Likelihood):
     def get_requirements(self):
         return {'CCL': {'methods': {'hmc': self._get_hmc}}}
 
+    def cosmo_vanilla(self):
+        return ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, Omega_k=0,
+                             sigma8=0.81, n_s=0.96, h=0.67)
+
+    def _get_angpow(self, cosmo, hmc, l,
+                    prof1, prof_2pt, prof2,
+                    kpts=128, zpts=8, **pars):
+
+        k_arr = np.geomspace(1e-3, 1e2, kpts)
+
+        zmin, zmax = prof1.zrange  # assuming prof1.type=="g"
+        a_arr = np.linspace(1/(1+zmax), 1, zpts)
+
+        # get parameter according to passed profiles
+        aHM_name = self.input_params_prefix+"_aHM_"+prof1.type+prof2.type
+        aHM = pars.get(aHM_name)
+        kw = {"a_HMcorr": aHM}
+        hm_correction_mod = lambda k, a, cosmo: self._get_hmcorr(k_arr, a_arr, **kw)
+
+        pk = ccl.halo.halomod_Pk2D(cosmo, hmc,
+                                   prof=prof1.profile,
+                                   prof_2pt=prof_2pt,
+                                   prof2=prof2.profile,
+                                   normprof1=(prof1.type!="y"),
+                                   normprof2=(prof2.type!="y"),
+                                   get_1h=True,
+                                   get_2g=True,
+                                   lk_arr=np.log(k_arr),
+                                   a_arr=a_arr,
+                                   f_ka=hm_correction_mod)
+
+        cl = ccl.angular_cl(cosmo, prof1.tracer, prof2.tracer, l, pk)
+        return cl
+
     def _get_theory(self, **pars):
         res = self.provider.get_CCL()
         cosmo = res['cosmo']
         hmc = res['hmc']
         cl_theory = []
         for xc in self.xcorr_data:
-            cl = np.zeros_like(xc['ls'])
-            # Do beams
+            for p in self.profs:
+                if p["name"] == xc["name1"]:
+                    prof1 = p
+                    prof1.update_parameters(cosmo, **pars)
+                    break
+            for p in self.profs:
+                if p["name"] == xc["name2"]:
+                    prof2 = p
+                    prof2.update_parameters(cosmo, **pars)
+                    break
+
+            r_corr = pars.get(self.input_params_prefix+"_r_corr_%s%s"%(prof1.type, prof2.type))
+            if r_corr is None:
+                r_corr = pars.get(self.input_params_prefix+"_r_corr_%s%s"%(prof2.type, prof1.type))
+            if r_corr is None:
+                r_corr = 0
+            p2pt = self.get_2pt(prof1, prof2, r_corr=r_corr)
+            cl = self._get_angpow(cosmo, hmc,
+                                  l=xc["ls"],
+                                  prof1=prof1,
+                                  prof_2pt=p2pt,
+                                  prof2=prof2,
+                                  **pars)
+
+            cl *= prof1.beam(xc["ls"])
+            cl *= prof2.beam(xc["ls"])
+            cl = np.zeros_like(xc["ls"])
             cl_theory += cl.tolist()
         print(pars)
         return np.array(cl_theory)
@@ -266,3 +257,81 @@ class YxGxKLike(Likelihood):
         r = t - self.data_vec
         chi2 = np.dot(r, self.inv_cov.dot(r))
         return -0.5*chi2
+
+
+# Beams
+def beam_gaussian(l, fwhm_amin):
+    sigma_rad = np.radians(fwhm_amin / 2.355 / 60)
+    return np.exp(-0.5 * l * (l + 1) * sigma_rad**2)
+
+
+def beam_hpix(l, ns):
+    fwhm_hp_amin = 60 * 41.7 / ns
+    return beam_gaussian(l, fwhm_hp_amin)
+
+
+class ProfTracer(object):
+    """Provides a framework to update the profile and tracer
+    together as a pair.
+
+    Args:
+        m (`dict`): Dictionary of associated map, usually imported
+                    from `yaml` file using `analysis.ParamRun.get('maps')[N].
+    """
+    def __init__(self, m):
+        self.name = m['name']
+        self.type = m['type']
+        self.beam = m['beam']
+        self.nside = m['nside']
+        if m['type'] == 'y':
+            self.profile = ccl.halos.HaloProfileArnaud()
+        else:
+            hmd = ccl.halos.MassDef(500, 'critical')
+            cM = ccl.halos.ConcentrationDuffy08M500c(hmd)
+
+            if m['type'] == 'g':
+                # transpose N(z)'s
+                self.z, self.nz = m['dndz']
+                self.nzf = interp1d(self.z, self.nz, kind='cubic',
+                                    bounds_error=False, fill_value=0.)
+                self.z_avg = np.average(self.z, weights=self.nz)
+                self.zrange = self.z[self.nz >= 0.005].take([0, -1])
+                self.zrange = self.z[self.nz >= 0.005].take([0, -1])
+                self.bz = np.ones_like(self.z)
+                self.profile = ccl.halos.HaloProfileHOD(cM,
+                                                        ns_independent=m.get("ns_independent", False))
+            elif m['type'] == 'k':
+                self.profile = ccl.halos.HaloProfileNFW(cM)
+        self.tracer = None
+
+    def get_beam(self, ls):
+        """
+        Returns beam associated with this tracer
+
+        Args:
+            ls (float or array): multipoles
+            ns (int): HEALPix resolution parameter.
+
+        Returns:
+            float or array: SHT of the beam for this tracer.
+        """
+        b0 = beam_hpix(ls, self.nside)
+        if self.beam > 0:
+            b0 *= beam_gaussian(ls, self.beam)
+        return b0
+
+    def update_tracer(self, cosmo, **kwargs):
+        if self.type == 'g':
+            nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs['width'])
+            nz_new /= simps(nz_new, x=self.z)
+            self.tracer = ccl.NumberCountsTracer(cosmo, False,
+                                            (self.z, nz_new),
+                                            (self.z, self.bz))
+        elif self.type == 'y':
+            self.tracer = ccl.SZTracer(cosmo)
+        elif self.type == 'k':
+            self.tracer = ccl.CMBLensingTracer(cosmo, 1100.)
+
+    def update_parameters(self, cosmo, **kwargs):
+        self.profile.update_parameters(**kwargs)
+        self.update_tracer(cosmo, **kwargs)
