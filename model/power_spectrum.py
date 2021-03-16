@@ -87,13 +87,25 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     else:
         hm_correction_mod = None
 
-    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.profile, prof2=p2.profile,
+
+    print(p1.profile.lM0, p1.profile.lM1, p1.profile.lMmin)
+    if p2.type == "g":
+        print(p2.profile.lM0, p2.profile.lM1, p2.profile.lMmin)
+    else:
+        print(p2.profile.b_hydro)
+
+    pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
+                                prof=p1.profile,
                                 prof_2pt=p2pt,
+                                prof2=p2.profile,
                                 normprof1=(p1.type!='y'),  # don't normalise
                                 normprof2=(p2.type!='y'),  # pressure profile
-                                get_1h=include_1h, get_2h=include_2h,
-                                lk_arr=np.log(k_arr), a_arr=a_arr,
+                                get_1h=include_1h,
+                                get_2h=include_2h,
+                                lk_arr=np.log(k_arr),
+                                a_arr=a_arr,
                                 f_ka=hm_correction_mod)
 
     cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)
+    print(cl)
     return cl

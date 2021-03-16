@@ -21,8 +21,6 @@ def get_theory(p, dm, cosmo, hmc,
         **kwargs: Parametrisation of the profiles and cosmology.
     """
     COSMO_CHECK(cosmo, **kwargs)
-    kwargs["mass_function"] = p.get_cosmo_pars()["mass_function"]
-    kwargs["halo_bias"] = p.get_cosmo_pars()["halo_bias"]
 
     cls_out = []
     for tr, ls, bms in zip(dm.tracers, dm.ells, dm.beams):
@@ -31,10 +29,13 @@ def get_theory(p, dm, cosmo, hmc,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
                                    **kwargs)
-
+        # print(cl)
         cl *= bms  # multiply by beams
+
         if return_separated:
             cls_out.append(cl)
         else:
             cls_out += cl.tolist()
-    return np.array(cls_out)
+
+    cls_out = np.array(cls_out)
+    return cls_out

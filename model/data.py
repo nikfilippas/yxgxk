@@ -193,6 +193,7 @@ class DataManager(object):
                     nside_eff = 512 if t.type == 'g' else nside  # nside_g=512
                     bm *= t.get_beam(f['ls'][mask], nside_eff)
                 self.beams.append(bm)
+
                 # Contaminant templates
                 # Currently only supercosmos plate variations needed
                 temp=np.zeros_like(f['ls'])
