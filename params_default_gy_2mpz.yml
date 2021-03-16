@@ -33,22 +33,18 @@ maps:
   model:
     Omega_b: 0.0486
     Omega_c: 0.2589
-    a_HMcorr: 0.315
-    alpha: 1.0
-    b_hydro: 0.33652023
-    beta_gal: 1.0
-    beta_max: 1.0
-    fc: 1.0
     h: 0.6774
-    lM0: 11.66317664
+    n_s: 0.9667
+    sigma8: 0.8159
+    b_hydro: 0.33652023
     lM1: 12.99472018
     lMmin: 11.66317664
-    n_s: 0.9667
     r_corr_gy: -0.10361521
-    r_corr_gk: 0.
-    sigma8: 0.8159
-    sigmaLogM: 0.15
+    a_HMcorr: 0.315
     width: 1.19939348
+    alpha: 1.0
+    fc: 1.0
+    sigmaLogM: 0.15
   name: 2mpz
   ns_independent: false
   systematics:
@@ -165,15 +161,6 @@ params:
     - 1.0
   value: 0.0
   vary: true
-- label: \rho_{g\kappa}
-  name: r_corr_gk
-  prior:
-    type: TopHat
-    values:
-    - -0.5
-    - 0.5
-  value: 0.0
-  vary: true
 - label: w_{N(z)}
   name: width
   prior:
@@ -190,7 +177,7 @@ params:
     values:
     - 0.1
     - 0.9
-  value: 0.26066676
+  value: 0.2589
   vary: false
 - label: \Omega_b
   name: Omega_b
@@ -199,7 +186,7 @@ params:
     values:
     - 0.1
     - 0.9
-  value: 0.048974682
+  value: 0.0486
   vary: false
 - label: h
   name: h
@@ -208,7 +195,7 @@ params:
     values:
     - 0.55
     - 0.8
-  value: 0.6766
+  value: 0.6774
   vary: false
 - label: \sigma_8
   name: sigma8
@@ -226,7 +213,7 @@ params:
     values:
     - 0.8
     - 1.2
-  value: 0.9665
+  value: 0.9667
   vary: false
 - label: a_{\rm HMcorr}
   name: a_HMcorr
