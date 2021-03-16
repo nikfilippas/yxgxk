@@ -311,9 +311,9 @@ class YxGxKLike(Likelihood):
                     break
 
             # 2. get rho_ij
-            r_corr = pars.get(self.input_params_prefix+"_r_corr_%s%s"%(prof1.type, prof2.type))
+            r_corr = pars.get(self.input_params_prefix+"_rho_%s%s"%(prof1.type, prof2.type))
             if r_corr is None:
-                r_corr = pars.get(self.input_params_prefix+"_r_corr_%s%s"%(prof2.type, prof1.type))
+                r_corr = pars.get(self.input_params_prefix+"_rho_%s%s"%(prof2.type, prof1.type))
             if r_corr is None:
                 r_corr = 0
 
