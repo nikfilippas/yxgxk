@@ -25,67 +25,68 @@ params:
   h: 0.67
   n_s: 0.96
   m_nu: 0.
+
   # Halo model params (should all start with 'input_params_prefix')
   ygk_logMmin:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.01
+      min: 10
+      max: 16
     ref:
       dist: norm
-      loc: 0.02
-      scale: 0.01
-    proposal: 0.005
+      loc: 12
+      scale: 0.5
+    proposal: 0.05
+
   ygk_logM1:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.01
+      min: 10
+      max: 16
     ref:
       dist: norm
-      loc: 0.02
-      scale: 0.01
+      loc: 12
+      scale: 0.5
     proposal: 0.005
+
   ygk_bhydro:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.01
+      min: 0.01
+      max: 1
     ref:
       dist: norm
-      loc: 0.02
+      loc: 0.5
       scale: 0.01
     proposal: 0.005
+
   ygk_rho_gy:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.01
+      min: 0
+      max: 1
     ref:
       dist: norm
-      loc: 0.02
-      scale: 0.01
+      loc: 0.5
+      scale: 0.2
     proposal: 0.005
+
   ygk_rho_gk:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.01
+      min: 0
+      max: 1
     ref:
       dist: norm
-      loc: 0.02
-      scale: 0.01
+      loc: 0.5
+      scale: 0.2
     proposal: 0.005
+
   ygk_width:
     prior:
-      dist: norm
-      loc: 0.0
-      scale: 0.01
+      min: 0
+      max: 1
     ref:
       dist: norm
-      loc: 0.02
-      scale: 0.01
+      loc: 0.5
+      scale: 0.2
     proposal: 0.005
+
   ygk_sigmaLogM: 0.15
   ygk_fc: 1.
   ygk_alpha: 1.
@@ -119,6 +120,6 @@ likelihood:
     nside: 2048
     nside_g: 512
 
-debug: True
+debug: False
 
 output: 'cobaya_test/run0'
