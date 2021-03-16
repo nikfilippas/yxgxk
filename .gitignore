@@ -1,9 +1,14 @@
 # Directories
 __pycache__/
+*.egg*/
+build/
+dist/
+params/
 data/
 legacy/
 other/
 output_*/
+cobaya_test/
 .spyproject/
 
 # File extensions
