@@ -15,15 +15,15 @@ params:
       max: 1.1
     ref:
       dist: norm
-      loc: 0.8
+      loc: 0.8159
       scale: 0.05
     latex: \sigma_8
     proposal: 0.05
   # Cosmo
-  Omega_c: 0.315
-  Omega_b: 0.049
-  h: 0.67
-  n_s: 0.96
+  Omega_c: 0.2589
+  Omega_b: 0.0486
+  h: 0.6774
+  n_s: 0.9667
   m_nu: 0.
 
   # Halo model params (should all start with 'input_params_prefix')
@@ -33,7 +33,7 @@ params:
       max: 16
     ref:
       dist: norm
-      loc: 12
+      loc: 11.66317664
       scale: 0.5
     proposal: 0.05
 
@@ -43,7 +43,7 @@ params:
       max: 16
     ref:
       dist: norm
-      loc: 12
+      loc: 12.99472018
       scale: 0.5
     proposal: 0.005
 
@@ -53,7 +53,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 0.5
+      loc: 0.33652023
       scale: 0.01
     proposal: 0.005
 
@@ -63,19 +63,19 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 0.5
+      loc: -0.10361521
       scale: 0.2
     proposal: 0.005
 
-  ygk_rho_gk:
-    prior:
-      min: 0
-      max: 1
-    ref:
-      dist: norm
-      loc: 0.5
-      scale: 0.2
-    proposal: 0.005
+  # ygk_rho_gk:
+  #   prior:
+  #     min: 0
+  #     max: 1
+  #   ref:
+  #     dist: norm
+  #     loc: -0.10361521
+  #     scale: 0.2
+  #   proposal: 0.005
 
   ygk_width:
     prior:
@@ -83,16 +83,16 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 0.5
+      loc: 1.19939348
       scale: 0.2
     proposal: 0.005
 
   ygk_sigmaLogM: 0.15
   ygk_fc: 1.
   ygk_alpha: 1.
-  ygk_aHM_gg: 0.5
-  ygk_aHM_gy: 0.5
-  ygk_aHM_gk: 0.5
+  ygk_aHM_gg: 0.315
+  ygk_aHM_gy: 0.315
+  ygk_aHM_gk: 0.315
 
 # CCL settings
 theory:
@@ -114,9 +114,9 @@ likelihood:
     kmax: 1.
     lmin_gg: 0.
     use_y: True
-    use_k: True
+    use_k: False
     covar_type: comb_m
-    scos_plate_template: True
+    scos_plate_template: False
     nside: 2048
     nside_g: 512
 
