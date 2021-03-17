@@ -42,8 +42,8 @@ class ProfTracer(object):
                 self.z_avg = np.average(self.z, weights=self.nz)
                 self.zrange = self.z[self.nz >= 0.005].take([0, -1])
                 self.bz = np.ones_like(self.z)
-                self.profile = ccl.halos.HaloProfileHOD(cM,
-                                                        ns_independent=m.get("ns_independent", False))
+                ns_indep = m.get("ns_independent", False)
+                self.profile = ccl.halos.HaloProfileHOD(cM, ns_indep)
             elif m['type'] == 'k':
                 self.profile = ccl.halos.HaloProfileNFW(cM)
         self.tracer = None
@@ -66,7 +66,7 @@ class ProfTracer(object):
 
     def update_tracer(self, cosmo, **kwargs):
         if self.type == 'g':
-            nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs['ygk_width'])
+            nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs["width"])
             nz_new /= simps(nz_new, x=self.z)
             self.tracer = ccl.NumberCountsTracer(cosmo, False,
                                             (self.z, nz_new),
@@ -302,11 +302,13 @@ class YxGxKLike(Likelihood):
         lM1_name = self.input_params_prefix + "_logM1"
         lMmin_name = self.input_params_prefix + "_logMmin"
         bh_name = self.input_params_prefix + "_bhydro"
+        w_name = self.input_params_prefix + "_width"
 
         pars["lM0"] = pars[lM0_name]
         pars["lM1"] = pars[lM1_name]
         pars["lMmin"] = pars[lMmin_name]
         pars["b_hydro"] = pars[bh_name]
+        pars["width"] = pars[w_name]
 
         cl_theory = []
         for xc in self.xcorr_data:
@@ -339,6 +341,8 @@ class YxGxKLike(Likelihood):
             else:
                 print(prof2.profile.b_hydro)
 
+            print(prof1.profile._Ns(1e14, 1))
+            exit(1)
 
             # 4. compute Cell
             cl = self._get_angpow(cosmo, hmc,
