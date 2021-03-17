@@ -335,14 +335,14 @@ class YxGxKLike(Likelihood):
             # 3. get the 2pt function
             p2pt = self._get_2pt(prof1, prof2, r_corr=r_corr)
 
+            print("testing HOD params & bH")
             print(prof1.profile.lM0, prof1.profile.lM1, prof1.profile.lMmin)
             if prof2.type == "g":
                 print(prof2.profile.lM0, prof2.profile.lM1, prof2.profile.lMmin)
             else:
                 print(prof2.profile.b_hydro)
 
-            print(prof1.profile._Ns(1e14, 1))
-            exit(1)
+            print("Ns:", prof1.profile._Ns(1e14, 1))
 
             # 4. compute Cell
             cl = self._get_angpow(cosmo, hmc,

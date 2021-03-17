@@ -87,12 +87,14 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     else:
         hm_correction_mod = None
 
-
+    print("testing HOD patams & bH")
     print(p1.profile.lM0, p1.profile.lM1, p1.profile.lMmin)
     if p2.type == "g":
         print(p2.profile.lM0, p2.profile.lM1, p2.profile.lMmin)
     else:
         print(p2.profile.b_hydro)
+
+    print("Ns:", p1.profile._Ns(1e14, 1))
 
     pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
                                 prof=p1.profile,
