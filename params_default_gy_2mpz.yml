@@ -84,7 +84,7 @@ params:
     values:
     - 10.0
     - 16.0
-  value: 12.5
+  value: 11.66317664
   vary: false
 - label: M_1
   name: lM1
@@ -93,7 +93,7 @@ params:
     values:
     - 10.0
     - 16.0
-  value: 13.5
+  value: 12.99472018
   vary: true
 - label: M_{\rm min}
   name: lMmin
@@ -102,7 +102,7 @@ params:
     values:
     - 10.0
     - 16.0
-  value: 12.0
+  value: 11.66317664
   vary: true
 - label: f_c
   name: fc
@@ -122,18 +122,6 @@ params:
     - 3.0
   value: 1.0
   vary: false
-- alias: beta_gal
-  label: \beta_{\rm max}
-  name: beta_max
-- label: beta_g
-  name: beta_gal
-  prior:
-    type: TopHat
-    values:
-    - 0.1
-    - 10.0
-  value: 1.0
-  vary: false
 - label: \sigma_{{\rm ln}M}
   name: sigmaLogM
   prior:
@@ -150,7 +138,7 @@ params:
     values:
     - 0.0
     - 1.0
-  value: 0.3
+  value: 0.33652023
   vary: true
 - label: \rho_{gy}
   name: r_corr_gy
@@ -159,7 +147,7 @@ params:
     values:
     - -1.0
     - 1.0
-  value: 0.0
+  value: -0.10361521
   vary: true
 - label: w_{N(z)}
   name: width
@@ -168,7 +156,7 @@ params:
     values:
     - 0.8
     - 1.2
-  value: 1.0
+  value: 1.19939348
   vary: true
 - label: \Omega_c
   name: Omega_c
@@ -204,7 +192,7 @@ params:
     values:
     - 0.1
     - 0.9
-  value: 0.8102
+  value: 0.8159
   vary: true
 - label: n_s
   name: n_s
@@ -222,5 +210,5 @@ params:
     values:
     - 0.1
     - 0.5
-  value: 0.36
+  value: 0.315
   vary: true
