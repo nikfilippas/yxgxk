@@ -296,7 +296,7 @@ class YxGxKLike(Likelihood):
         hmc = res['hmc']
 
         # namespace of profile parameters
-        lM0_name = self.input_params_prefix + "_logMmin"  #HACK: just get this done
+        lM0_name = self.input_params_prefix + "_logMmin"  #HACK: coupled here
         lM1_name = self.input_params_prefix + "_logM1"
         lMmin_name = self.input_params_prefix + "_logMmin"
         bh_name = self.input_params_prefix + "_bhydro"
