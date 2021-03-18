@@ -287,9 +287,7 @@ class YxGxKLike(Likelihood):
                                     lk_arr=np.log(k_arr),
                                     a_arr=a_arr,
                                     f_ka=hm_correction_mod)
-
         cl = ccl.angular_cl(cosmo, prof1.tracer, prof2.tracer, l, pk)
-        print(cl)
         return cl
 
     def _get_theory(self, **pars):
@@ -303,12 +301,14 @@ class YxGxKLike(Likelihood):
         lMmin_name = self.input_params_prefix + "_logMmin"
         bh_name = self.input_params_prefix + "_bhydro"
         w_name = self.input_params_prefix + "_width"
+        slm_name = self.input_params_prefix + "_sigmaLogM"
 
         pars["lM0"] = pars[lM0_name]
         pars["lM1"] = pars[lM1_name]
         pars["lMmin"] = pars[lMmin_name]
         pars["b_hydro"] = pars[bh_name]
         pars["width"] = pars[w_name]
+        pars["sigmaLogM"] = pars[slm_name]
 
         cl_theory = []
         for xc in self.xcorr_data:
@@ -335,15 +335,6 @@ class YxGxKLike(Likelihood):
             # 3. get the 2pt function
             p2pt = self._get_2pt(prof1, prof2, r_corr=r_corr)
 
-            print("testing HOD params & bH")
-            print(prof1.profile.lM0, prof1.profile.lM1, prof1.profile.lMmin)
-            if prof2.type == "g":
-                print(prof2.profile.lM0, prof2.profile.lM1, prof2.profile.lMmin)
-            else:
-                print(prof2.profile.b_hydro)
-
-            print("Ns:", prof1.profile._Ns(1e14, 1))
-
             # 4. compute Cell
             cl = self._get_angpow(cosmo, hmc,
                                   l=xc["ls"],
@@ -355,12 +346,9 @@ class YxGxKLike(Likelihood):
             # 5. do beams
             cl *= prof1.get_beam(xc["ls"])
             cl *= prof2.get_beam(xc["ls"])
-            # print(cl)
             cl_theory += cl.tolist()
 
         cl_theory = np.array(cl_theory)
-        # print(cl_theory)
-        # exit(1)
         return cl_theory
 
     def logp(self, **pars):

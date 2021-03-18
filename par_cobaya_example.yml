@@ -83,7 +83,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 1.19939348
+      loc: 1.2
       scale: 0.2
     proposal: 0.005
 
