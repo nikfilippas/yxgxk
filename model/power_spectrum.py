@@ -17,7 +17,6 @@ def hm_bias(cosmo, hmc, a, profile, **kwargs):
     Returns:
         `numpy.array`: The halo model bias for the input profile.
     """
-    COSMO_CHECK(cosmo, **kwargs)
     profile.update_parameters(cosmo, **kwargs)
     bias = ccl.halos.halomod_bias_1pt(cosmo, hmc, 0.0001, a,
                                       profile.profile,
@@ -63,7 +62,6 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     Returns:
         `numpy.array`: Angular power spectrum of input profiles.
     """
-    COSMO_CHECK(cosmo, **kwargs)
     p1, p2 = profiles
     p1.update_parameters(cosmo, **kwargs)
     p2.update_parameters(cosmo, **kwargs)
@@ -87,15 +85,6 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     else:
         hm_correction_mod = None
 
-    print("testing HOD patams & bH")
-    print(p1.profile.lM0, p1.profile.lM1, p1.profile.lMmin)
-    if p2.type == "g":
-        print(p2.profile.lM0, p2.profile.lM1, p2.profile.lMmin)
-    else:
-        print(p2.profile.b_hydro)
-
-    print("Ns:", p1.profile._Ns(1e14, 1))
-
     pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
                                 prof=p1.profile,
                                 prof_2pt=p2pt,
@@ -109,5 +98,4 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                                 f_ka=hm_correction_mod)
 
     cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)
-    print(cl)
     return cl

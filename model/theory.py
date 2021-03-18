@@ -20,8 +20,6 @@ def get_theory(p, dm, cosmo, hmc,
             factor.
         **kwargs: Parametrisation of the profiles and cosmology.
     """
-    COSMO_CHECK(cosmo, **kwargs)
-
     cls_out = []
     for tr, ls, bms in zip(dm.tracers, dm.ells, dm.beams):
         cl = hm_ang_power_spectrum(cosmo, hmc, ls, tr,
