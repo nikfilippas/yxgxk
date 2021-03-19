@@ -459,5 +459,5 @@ def hm_eff():
     kwargs = {"mass_function": ccl.halos.mass_function_from_name("tinker08"),
               "halo_bias": ccl.halos.halo_bias_from_name("tinker10")}
     hmf = HM_Gauss(cosmo, **kwargs).hm_correction
-    np.save("hm_correction.npy", hmf, allow_pickle=True)
+    # np.save("hm_correction.npy", hmf, allow_pickle=True)
     return hmf
