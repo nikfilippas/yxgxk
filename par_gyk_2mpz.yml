@@ -14,15 +14,15 @@ params:
       max: 1.1
     ref:
       dist: norm
-      loc: 0.8159
+      loc: 0.8102
       scale: 0.05
     latex: \sigma_8
     proposal: 0.05
   # Cosmo
-  Omega_c: 0.2589
-  Omega_b: 0.0486
-  h: 0.6774
-  n_s: 0.9667
+  Omega_c: 0.26066676
+  Omega_b: 0.048974682
+  h: 0.6776
+  n_s: 0.9665
   m_nu: 0.
 
   # Halo model params (should all start with 'input_params_prefix')
@@ -32,7 +32,7 @@ params:
       max: 16
     ref:
       dist: norm
-      loc: 11.66317664
+      loc: 10.085315410859083
       scale: 0.5
     proposal: 0.05
 
@@ -42,7 +42,7 @@ params:
       max: 16
     ref:
       dist: norm
-      loc: 12.99472018
+      loc: 11.462264598146495
       scale: 0.5
     proposal: 0.005
 
@@ -52,7 +52,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 0.33652023
+      loc: 0.3576546355777399
       scale: 0.01
     proposal: 0.005
 
@@ -62,7 +62,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: -0.10361521
+      loc: -0.5180490110675504
       scale: 0.2
     proposal: 0.005
 
@@ -72,7 +72,7 @@ params:
         max: 1
       ref:
         dist: norm
-        loc: -0.10361521
+        loc: 0.4999999999996133
         scale: 0.2
        proposal: 0.005
 
@@ -82,7 +82,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 1.19939348
+      loc: 1.
       scale: 0.2
     proposal: 0.005
 
@@ -96,7 +96,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 0.315
+      loc: 0.4999999999999417
       scale: 0.2
     proposal: 0.005
 
@@ -106,7 +106,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 0.315
+      loc: 0.4999999999999417
       scale: 0.2
     proposal: 0.005
 
@@ -131,7 +131,7 @@ theory:
 likelihood:
   yxgxk_like.YxGxKLike:
     input_params_prefix: ygk
-    dndz_file: ./data/dndz/2MPZ_bin1.txt
+    dndz_file: ./data/dndz/2mpz_DIR.txt
     input_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
     g_name: 2mpz
     y_name: y_milca
