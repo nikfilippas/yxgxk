@@ -15,6 +15,7 @@ cobaya_test/
 *.pyc
 *.h5
 *.npy
+#!hm_correction.npy
 *.npz
 *.mcm
 *.cmcm
