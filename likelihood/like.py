@@ -26,6 +26,7 @@ class Likelihood(object):
         self.p0 = []
         self.get_theory = get_theory
         self.dv = data
+
         if template is not None:
             ic = np.linalg.inv(covar)
             ict = np.dot(ic, template)
@@ -36,6 +37,7 @@ class Likelihood(object):
         else:
             self.ic = np.linalg.inv(covar)
             self.t_bf = None
+
         self.cv = covar
         self.cvhalf = np.linalg.cholesky(self.cv)
         self.debug = debug

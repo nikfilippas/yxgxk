@@ -17,7 +17,6 @@ def hm_bias(cosmo, hmc, a, profile, **kwargs):
     Returns:
         `numpy.array`: The halo model bias for the input profile.
     """
-    COSMO_CHECK(cosmo, **kwargs)
     profile.update_parameters(cosmo, **kwargs)
     bias = ccl.halos.halomod_bias_1pt(cosmo, hmc, 0.0001, a,
                                       profile.profile,
@@ -63,7 +62,6 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     Returns:
         `numpy.array`: Angular power spectrum of input profiles.
     """
-    COSMO_CHECK(cosmo, **kwargs)
     p1, p2 = profiles
     p1.update_parameters(cosmo, **kwargs)
     p2.update_parameters(cosmo, **kwargs)
@@ -87,12 +85,16 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     else:
         hm_correction_mod = None
 
-    pk = ccl.halos.halomod_Pk2D(cosmo, hmc, prof=p1.profile, prof2=p2.profile,
+    pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
+                                prof=p1.profile,
                                 prof_2pt=p2pt,
+                                prof2=p2.profile,
                                 normprof1=(p1.type!='y'),  # don't normalise
                                 normprof2=(p2.type!='y'),  # pressure profile
-                                get_1h=include_1h, get_2h=include_2h,
-                                lk_arr=np.log(k_arr), a_arr=a_arr,
+                                get_1h=include_1h,
+                                get_2h=include_2h,
+                                lk_arr=np.log(k_arr),
+                                a_arr=a_arr,
                                 f_ka=hm_correction_mod)
 
     cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)

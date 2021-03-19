@@ -37,11 +37,9 @@ class ProfTracer(object):
                 self.z_avg = np.average(self.z, weights=self.nz)
                 self.zrange = self.z[self.nz >= 0.005].take([0, -1])
                 # determine max ell
-                zmean = np.average(self.z, weights=self.nz)
                 cosmo = COSMO_ARGS(m['model'])
-                chimean = ccl.comoving_radial_distance(cosmo, 1/(1+zmean))
+                chimean = ccl.comoving_radial_distance(cosmo, 1/(1+self.z_avg))
                 self.lmax = kmax*chimean-0.5
-
                 self.bz = np.ones_like(self.z)
                 self.profile = ccl.halos.HaloProfileHOD(cM,
                                ns_independent=m.get("ns_independent", False))
@@ -193,6 +191,7 @@ class DataManager(object):
                     nside_eff = 512 if t.type == 'g' else nside  # nside_g=512
                     bm *= t.get_beam(f['ls'][mask], nside_eff)
                 self.beams.append(bm)
+
                 # Contaminant templates
                 # Currently only supercosmos plate variations needed
                 temp=np.zeros_like(f['ls'])
@@ -213,7 +212,6 @@ class DataManager(object):
             self.templates = None
 
         # Now form covariance matrix in a block-wise fashion
-        looped = []
         self.covar = np.zeros([ndata, ndata])
         nd1 = 0
         for tp1, m1 in zip(v['twopoints'], mask_total):
@@ -224,14 +222,11 @@ class DataManager(object):
                 tr2 = [tracers[n] for n in tp2['tracers']]
                 nd2_here = np.sum(m2)  # Number of points for vector 2
 
-                this_loop = set((tr1[0].type+tr1[1].type, tr2[0].type+tr2[1].type))
                 # Read covariance block
                 fname_cov, T = choose_cov_file(p, tr1, tr2, v['covar_type'])
                 with np.load(fname_cov) as f:
                     cov = f["cov"]
-                    # transpose if needed
-                    if T:# or (this_loop not in looped):
-                        looped.append(this_loop)
+                    if T:
                         cov = cov.T
                     cov = cov[m1][:, m2]  # Mask
                     # Assign to block
