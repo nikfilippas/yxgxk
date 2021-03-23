@@ -1,10 +1,11 @@
+import os, sys
 from cobaya.model import get_model
 from cobaya.run import run
 import yaml
-import os
 
+fname_params = sys.argv[1]
 
-with open('par_cobaya_example.yml', "r") as fin:
+with open(fname_params, "r") as fin:
     info = yaml.load(fin, Loader=yaml.FullLoader)
 
 p0 = {}
