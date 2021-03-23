@@ -148,6 +148,6 @@ likelihood:
     nside: 2048
     nside_g: 512
 
-debug: True
+debug: False
 
 output: 'cobaya_lensing/run_2mpz'
