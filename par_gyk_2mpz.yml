@@ -66,59 +66,60 @@ params:
       scale: 0.2
     proposal: 0.005
 
-    ygk_rho_gk:
-      prior:
-        min: 0
-        max: 1
-      ref:
-        dist: norm
-        loc: 0.4999999999996133
-        scale: 0.2
-       proposal: 0.005
-
-  ygk_width:
+  ygk_rho_gk:
     prior:
       min: 0
       max: 1
     ref:
       dist: norm
-      loc: 1.
+      loc: 0.4999999999996133
       scale: 0.2
+    proposal: 0.005
+
+  ygk_width:
+    prior:
+      dist: norm
+      loc: 1
+      scale: 0.01
+    ref:
+      dist: norm
+      loc: 1.
+      scale: 0.01
     proposal: 0.005
 
   ygk_sigmaLogM: 0.15
   ygk_fc: 1.
   ygk_alpha: 1.
 
-  ygk_aHM_gg:
-    prior:
-      min: 0
-      max: 1
-    ref:
-      dist: norm
-      loc: 0.4999999999999417
-      scale: 0.2
-    proposal: 0.005
+  ygk_aHM_gg: 0.19910454
+    # prior:
+    #   min: 0
+    #   max: 1
+    # ref:
+    #   dist: norm
+    #   loc: 0.19910454
+    #   scale: 0.2
+    # proposal: 0.005
 
-  ygk_aHM_gy:
-    prior:
-      min: 0
-      max: 1
-    ref:
-      dist: norm
-      loc: 0.4999999999999417
-      scale: 0.2
-    proposal: 0.005
+  ygk_aHM_gy: 0.19910454
+    # prior:
+    #   min: 0
+    #   max: 1
+    # ref:
+    #   dist: norm
+    #   loc: 0.19910454
+    #   scale: 0.2
+    # proposal: 0.005
 
-  ygk_aHM_gk:
-    prior:
-      min: 0
-      max: 1
-    ref:
-      dist: norm
-      loc: 0.315
-      scale: 0.2
-    proposal: 0.005
+  ygk_aHM_gk: 0.19910454
+    # prior:
+    #   min: 0
+    #   max: 1
+    # ref:
+    #   dist: norm
+    #   loc: 0.19910454
+    #   scale: 0.2
+    # proposal: 0.005
 
 # CCL settings
 theory:
