@@ -66,15 +66,15 @@ params:
       scale: 0.2
     proposal: 0.005
 
-    ygk_rho_gk:
-      prior:
-        min: 0
-        max: 1
-      ref:
-        dist: norm
-        loc: 0.4999999999996133
-        scale: 0.2
-       proposal: 0.005
+  ygk_rho_gk:
+    prior:
+      min: 0
+      max: 1
+    ref:
+      dist: norm
+      loc: 0.4999999999996133
+      scale: 0.2
+    proposal: 0.005
 
   ygk_width:
     prior:
