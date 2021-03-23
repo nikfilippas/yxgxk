@@ -74,7 +74,7 @@ params:
         dist: norm
         loc: -0.10361521
         scale: 0.2
-       proposal: 0.005
+      proposal: 0.005
 
   ygk_width:
     prior:
