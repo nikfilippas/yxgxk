@@ -449,7 +449,6 @@ class HM_Gauss(object):
         return R.squeeze() if squeeze else R
 
 def hm_eff():
-    #TODO: interpolate lk_arr instead of k_arr
     cargs = {"Omega_c" : 0.2589,
               "Omega_b" : 0.0486,
               "h"       : 0.6774,
