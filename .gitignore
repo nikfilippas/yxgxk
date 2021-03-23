@@ -9,6 +9,7 @@ legacy/
 other/
 output_*/
 cobaya_test/
+cobaya_lensing/
 .spyproject/
 
 # File extensions
