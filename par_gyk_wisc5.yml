@@ -19,10 +19,10 @@ params:
     latex: \sigma_8
     proposal: 0.05
   # Cosmo
-  Omega_c: 0.2589
-  Omega_b: 0.0486
-  h: 0.6774
-  n_s: 0.9667
+  Omega_c: 0.26066676
+  Omega_b: 0.048974682
+  h: 0.6776
+  n_s: 0.9665
   m_nu: 0.
 
   # Halo model params (should all start with 'input_params_prefix')
@@ -32,7 +32,7 @@ params:
       max: 16
     ref:
       dist: norm
-      loc: 11.66317664
+      loc: 10.085315410859083
       scale: 0.5
     proposal: 0.05
 
@@ -42,7 +42,7 @@ params:
       max: 16
     ref:
       dist: norm
-      loc: 12.99472018
+      loc: 11.462264598146495
       scale: 0.5
     proposal: 0.005
 
@@ -52,7 +52,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: 0.33652023
+      loc: 0.3576546355777399
       scale: 0.01
     proposal: 0.005
 
@@ -62,7 +62,7 @@ params:
       max: 1
     ref:
       dist: norm
-      loc: -0.10361521
+      loc: -0.5180490110675504
       scale: 0.2
     proposal: 0.005
 
@@ -72,53 +72,54 @@ params:
         max: 1
       ref:
         dist: norm
-        loc: -0.10361521
+        loc: 0.4999999999996133
         scale: 0.2
        proposal: 0.005
 
   ygk_width:
     prior:
-      min: 0
-      max: 1
+      dist: norm
+      loc: 1
+      scale: 0.01
     ref:
       dist: norm
-      loc: 1.19939348
-      scale: 0.2
+      loc: 1.
+      scale: 0.01
     proposal: 0.005
 
   ygk_sigmaLogM: 0.15
   ygk_fc: 1.
   ygk_alpha: 1.
 
-  ygk_aHM_gg:
-    prior:
-      min: 0
-      max: 1
-    ref:
-      dist: norm
-      loc: 0.315
-      scale: 0.2
-    proposal: 0.005
+  ygk_aHM_gg: 0.28224283
+    # prior:
+    #   min: 0
+    #   max: 1
+    # ref:
+    #   dist: norm
+    #   loc: 0.28224283
+    #   scale: 0.2
+    # proposal: 0.005
 
-  ygk_aHM_gy:
-    prior:
-      min: 0
-      max: 1
-    ref:
-      dist: norm
-      loc: 0.315
-      scale: 0.2
-    proposal: 0.005
+  ygk_aHM_gy: 0.28224283
+    # prior:
+    #   min: 0
+    #   max: 1
+    # ref:
+    #   dist: norm
+    #   loc: 0.28224283
+    #   scale: 0.2
+    # proposal: 0.005
 
-  ygk_aHM_gk:
-    prior:
-      min: 0
-      max: 1
-    ref:
-      dist: norm
-      loc: 0.315
-      scale: 0.2
-    proposal: 0.005
+  ygk_aHM_gk: 0.28224283
+    # prior:
+    #   min: 0
+    #   max: 1
+    # ref:
+    #   dist: norm
+    #   loc: 0.28224283
+    #   scale: 0.2
+    # proposal: 0.005
 
 # CCL settings
 theory:
@@ -131,14 +132,14 @@ theory:
 likelihood:
   yxgxk_like.YxGxKLike:
     input_params_prefix: ygk
-    dndz_file: ./data/dndz/2MPZ_bin1.txt
+    dndz_file: ./data/dndz/wisc5_DIR.txt
     input_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
-    g_name: 2mpz
+    g_name: wisc5
     y_name: y_milca
     k_name: lens
     massfunc: tinker08
     kmax: 1.
-    lmin_gg: 0.
+    lmin_gg: 10.
     use_y: True
     use_k: True
     covar_type: comb_m
@@ -148,4 +149,4 @@ likelihood:
 
 debug: False
 
-output: 'cobaya_lensing/run_2mpz'
+output: 'cobaya_lensing/run_wisc5'
