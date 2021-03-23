@@ -34,8 +34,8 @@ params:
     ref:
       dist: norm
       loc: 10.566915700652395
-      scale: 0.5
-    proposal: 0.05
+      scale: 0.05
+    proposal: 0.005
 
   ygk_logM1:
     prior:
@@ -44,8 +44,8 @@ params:
     ref:
       dist: norm
       loc: 11.856040531728171
-      scale: 0.5
-    proposal: 0.005
+      scale: 0.05
+    proposal: 0.0005
 
   ygk_bhydro:
     prior:
@@ -54,27 +54,27 @@ params:
     ref:
       dist: norm
       loc: 0.13445529991375527
-      scale: 0.01
-    proposal: 0.005
+      scale: 0.05
+    proposal: 0.05
 
   ygk_rho_gy:
     prior:
-      min: 0
+      min: -1
       max: 1
     ref:
       dist: norm
       loc: -0.6191623216370346
-      scale: 0.2
+      scale: 0.02
     proposal: 0.005
 
   ygk_rho_gk:
     prior:
-      min: 0
+      min: -1
       max: 1
     ref:
       dist: norm
       loc: 0.15391042875162592
-      scale: 0.2
+      scale: 0.02
     proposal: 0.005
 
   ygk_width:

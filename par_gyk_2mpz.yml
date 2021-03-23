@@ -18,6 +18,7 @@ params:
       scale: 0.05
     latex: \sigma_8
     proposal: 0.05
+
   # Cosmo
   Omega_c: 0.26066676
   Omega_b: 0.048974682
@@ -33,8 +34,8 @@ params:
     ref:
       dist: norm
       loc: 10.085315410859083
-      scale: 0.5
-    proposal: 0.05
+      scale: 0.05
+    proposal: 0.005
 
   ygk_logM1:
     prior:
@@ -43,7 +44,7 @@ params:
     ref:
       dist: norm
       loc: 11.462264598146495
-      scale: 0.5
+      scale: 0.05
     proposal: 0.005
 
   ygk_bhydro:
@@ -53,27 +54,27 @@ params:
     ref:
       dist: norm
       loc: 0.3576546355777399
-      scale: 0.01
-    proposal: 0.005
+      scale: 0.05
+    proposal: 0.05
 
   ygk_rho_gy:
     prior:
-      min: 0
+      min: -1
       max: 1
     ref:
       dist: norm
       loc: -0.5180490110675504
-      scale: 0.2
+      scale: 0.02
     proposal: 0.005
 
   ygk_rho_gk:
     prior:
-      min: 0
+      min: -1
       max: 1
     ref:
       dist: norm
       loc: 0.4999999999996133
-      scale: 0.2
+      scale: 0.02
     proposal: 0.005
 
   ygk_width:
@@ -147,6 +148,6 @@ likelihood:
     nside: 2048
     nside_g: 512
 
-debug: False
+debug: True
 
 output: 'cobaya_lensing/run_2mpz'
