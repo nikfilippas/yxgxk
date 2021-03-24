@@ -5,6 +5,7 @@ build/
 dist/
 params/
 data/
+!data/dndz/*_DIR.txt
 legacy/
 other/
 output_*/
