@@ -273,8 +273,7 @@ class YxGxKLike(Likelihood):
         # get parameter according to passed profiles
         aHM_name = self.input_params_prefix+"_aHM_"+prof1.type+prof2.type
         aHM = pars.get(aHM_name)
-        kw = {"a_HMcorr": aHM}
-        hm_correction_mod = lambda k, a, cosmo: self.hmcorr(k, a, **kw)
+        hm_correction_mod = lambda k, a, cosmo: self.hmcorr(k, a, aHM)
 
         pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
                                     prof=prof1.profile,
@@ -349,6 +348,8 @@ class YxGxKLike(Likelihood):
             cl_theory += cl.tolist()
 
         cl_theory = np.array(cl_theory)
+        # print(cl_theory)
+        # exit(1)
         return cl_theory
 
     def logp(self, **pars):
@@ -365,41 +366,42 @@ import warnings
 from scipy.interpolate import interp2d
 from scipy.optimize import curve_fit
 
-def get_hmcalc(cosmo, mdef_delta=500, mdef_type="critical", **kw):
-    hmd = ccl.halos.MassDef(mdef_delta, mdef_type)
-    nM = ccl.halos.mass_function_from_name("tinker08")(cosmo, mass_def=hmd)
-    bM = ccl.halos.halo_bias_from_name("tinker10")(cosmo, mass_def=hmd)
-    hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
-    return hmc
-
 class HM_halofit(object):
     def __init__(self, cosmo,
-                  k_range=[1e-3, 5], nlk=128,
-                  z_range=[0., 1.], nz=32,
-                  Delta=200, rho_type='matter',
+                  k_range=[0.1, 5], nk=512,
+                  z_range=[0, 1], nz=32,
+                  Delta=500, rho_type='critical',
                   **kwargs):
+        # interpolation boundaries
+        k_arr = np.geomspace(*k_range, nk)
+        z_arr = np.linspace(*z_range, nz)
+        a_arr = 1/(1+z_arr)
 
-        k_arr = np.geomspace(k_range[0], k_range[1], nlk)
-        a_arr = 1/(1+np.linspace(z_range[0], z_range[1], nz))
+        # ratio of linear-to-nonlinear matter power
+        hmd = ccl.halos.MassDef(Delta, rho_type)
+        cM = ccl.halos.halos_extra.ConcentrationDuffy08M500c(hmd)
+        NFW = ccl.halos.profiles.HaloProfileNFW(cM)
 
         hmd = ccl.halos.MassDef(Delta, rho_type)
-        if (Delta, rho_type) == (200, "matter"):
-            cM = ccl.halos.ConcentrationDuffy08(hmd)
-        elif (Delta, rho_type) == (500, "critical"):
-            cM = ccl.halos.halos_extra.ConcentrationDuffy08M500c(hmd)
-        else:
-            raise ValueError("c(M) relation for Delta=(%d %s) not implemented." % (Delta, rho_type))
-        NFW = ccl.halos.profiles.HaloProfileNFW(cM)
-        hmc = get_hmcalc(cosmo, Delta, rho_type, **kwargs)
-        pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc, k_arr, a_arr, NFW,
-                                                 normprof1=True, normprof2=True)
+        nM = kwargs["mass_function"](cosmo, mass_def=hmd)
+        bM = kwargs["halo_bias"](cosmo, mass_def=hmd)
+        hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
 
+        pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc,
+                                                 k_arr, a_arr,
+                                                 NFW,
+                                                 normprof1=True,
+                                                 normprof2=True)
         pk_hf = np.array([ccl.nonlin_matter_power(cosmo, k_arr, a)
                           for a in a_arr])
+
         ratio = pk_hf / pk_hm
 
-        self.rk_func = interp2d(np.log10(k_arr), a_arr, ratio,
-                                bounds_error=False, fill_value=1)
+        self.rk_func = interp2d(np.log10(k_arr),
+                                a_arr,
+                                ratio,
+                                bounds_error=False,
+                                fill_value=1)
 
 
     def rk_interp(self, k, a, **kwargs):
@@ -408,34 +410,39 @@ class HM_halofit(object):
 
 class HM_Gauss(object):
     def __init__(self, cosmo,
-                 lk_range=[-3, 2], nlk=128,
-                 z_range=[0., 0.5], nz=32,
-                 **kwargs):
+                  k_range=[0.1, 5], nk=128,
+                  z_range=[0, 1], nz=32,
+                  **kwargs):
+        # HALOFIT prediction
         hf = HM_halofit(cosmo, **kwargs).rk_interp
-        k_arr = np.logspace(lk_range[0], lk_range[1], nlk)
-        a_arr = 1/(1+np.linspace(z_range[0], z_range[1], nz))
 
-        gauss = lambda k, A, k0, s: 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
+        # interpolation boundaries
+        k_arr = np.geomspace(*k_range, nk)
+        z_arr = np.linspace(*z_range, nz)
+        a_arr = 1/(1+z_arr)
 
+        # fit all parameters at all redshifts
         POPT = [[] for i in range(a_arr.size)]
         # catch covariance errors due to the `fill_value` step
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             for i, a in enumerate(a_arr):
-                popt, _ = curve_fit(gauss, k_arr, hf(k_arr, a))
+                popt, _ = curve_fit(self.gauss, k_arr, hf(k_arr, a))
                 POPT[i] = popt
-
         BF = np.vstack(POPT)
 
+        # interpolate best-fit parameters
         self.af = interp1d(a_arr, BF[:, 0], bounds_error=False, fill_value="extrapolate")
         self.k0f = interp1d(a_arr, BF[:, 1], bounds_error=False, fill_value=1.)
         self.sf = interp1d(a_arr, BF[:, 2], bounds_error=False, fill_value=1e64)
 
+    def gauss(self, k, A, k0, s):
+        return 1 + A * np.exp(-0.5 * (np.log10(k/k0)/s)**2)
 
-    def hm_correction(self, k, a, squeeze=True, **kwargs):
-        A = kwargs.get("a_HMcorr")
-        # overall best fit for non g- cross-correlations
-        if A is None: A = 0.315
+    def hm_correction(self, k, a, aHM=None, squeeze=True):
+        # best-fit amplitude if not passed
+        if aHM is None:
+            aHM = self.af(a)
 
         k0 = self.k0f(a)
         s = self.sf(a)
@@ -445,15 +452,15 @@ class HM_Gauss(object):
         k0 = k0[..., None]
         s = s[..., None]
 
-        R = 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
+        R = self.gauss(k, aHM, k0, s)
         return R.squeeze() if squeeze else R
 
 def hm_eff():
-    cargs = {"Omega_c" : 0.2589,
-              "Omega_b" : 0.0486,
-              "h"       : 0.6774,
-              "sigma8"  : 0.8159,
-              "n_s"     : 0.9667}
+    cargs = {"Omega_c" : 0.26066676,
+              "Omega_b" : 0.048974682,
+              "h"       : 0.6776,
+              "sigma8"  : 0.8102,
+              "n_s"     : 0.9665}
     cosmo = ccl.Cosmology(**cargs)
     kwargs = {"mass_function": ccl.halos.mass_function_from_name("tinker08"),
               "halo_bias": ccl.halos.halo_bias_from_name("tinker10")}
