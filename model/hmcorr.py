@@ -32,7 +32,7 @@ class HM_halofit(object):
     def __init__(self, cosmo,
                   k_range=[1e-3, 5], nlk=128,
                   z_range=[0., 1.], nz=32,
-                  Delta=200, rho_type='matter',
+                  Delta=500, rho_type='critical',
                   **kwargs):
 
         k_arr = np.geomspace(k_range[0], k_range[1], nlk)
