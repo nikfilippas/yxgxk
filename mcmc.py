@@ -89,8 +89,9 @@ for v in p.get('data_vectors'):
 
     # Set up sampler
     p0 = extract_map_p0(p, v, lik.p_free_names)  # p0 for particular map
-    print(dict(zip(lik.p_free_names, p0)))
-    print("chisq:", lik.chi2(p0))
+    # Benchmarks
+    # print(dict(zip(lik.p_free_names, p0)))
+    # print("chisq:", lik.chi2(p0))
     # exit(1)
     sam = Sampler(lik.lnprob, p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
@@ -110,8 +111,8 @@ for v in p.get('data_vectors'):
     print(" n_data = %d" % (len(d.data_vector)))
 
     # Update yaml file with best-fit parameters
-    update_params(fname_params, v["name"], sam.parnames, sam.p0)
-    print("Updated yaml file with best-fit parameters.")
+    # update_params(fname_params, v["name"], sam.parnames, sam.p0)
+    # print("Updated yaml file with best-fit parameters.")
 
     if sam.nsteps > 0:
         # Monte-carlo
