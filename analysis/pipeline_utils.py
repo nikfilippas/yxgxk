@@ -300,6 +300,8 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
         hmc = get_hmcalc(cosmo, **kwargs)
         # Calculate covariace
         dcov = hm_ang_1h_covariance(fsky, leff, cosmo, hmc, profiles, **kwargs)
+        dcov *= Beam(f11.name+f12.name, leff, p.get_nside())[:, None]
+        dcov *= Beam(f21.name+f22.name, leff, p.get_nside())[None, :]
         cov = Covariance(f11.name, f12.name, f21.name, f22.name, dcov)
         cov.to_file(p.get_outdir() + "/dcov_1h4pt_" +
                     f11.name + "_" + f12.name + "_" +
