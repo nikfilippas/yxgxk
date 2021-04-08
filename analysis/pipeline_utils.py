@@ -296,6 +296,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
         # Get single model parameter dictionary
         models_a = p.get_models()[f11.name]
         models_b = p.get_models()[f12.name]
+        print("models:", models_a, models_b)
         kwargs = merge_models(models_a, models_b)
         hmc = get_hmcalc(cosmo, **kwargs)
         # Calculate covariace
