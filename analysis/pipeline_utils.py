@@ -90,6 +90,10 @@ def get_profile(p, profname):
 
 def merge_models(models1, models2):
     '''Combine model dictionaries into a single average dictionary.'''
+    if models2 is None:
+        if models1 is None:
+            return {"b_hydro": 0.25}
+        return models1
     models = models1.copy()
     for par in models:
         # deal with cosmological parameters
