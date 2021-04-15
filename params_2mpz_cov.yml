@@ -168,17 +168,17 @@ params:
     - -1
     - 1
   value: 0.0
-  vary: true
+  vary: false
 
 - label: w_{N(z)}
   name: width
   prior:
     type: TopHat
     values:
-    - 0.8
-    - 1.2
+    - 0.95
+    - 1.05
   value: 1.0
-  vary: true
+  vary: false
 
 - label: \Omega_c
   name: Omega_c
@@ -203,7 +203,7 @@ params:
     - 0.5
     - 0.95
   value: 0.8102
-  vary: true
+  vary: false
 
 - label: n_s
   name: n_s
@@ -216,6 +216,6 @@ params:
     type: TopHat
     values:
     - 0.1
-    - 0.5
-  value: 0.19910454
+    - 1.0
+  value: 0.4999999999999417
   vary: false

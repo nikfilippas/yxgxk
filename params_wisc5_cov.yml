@@ -104,13 +104,9 @@ params:
 - alias: lMmin
   label: M_0
   name: lM0
-  prior:
-    type: TopHat
-    values:
-    - 10.0
-    - 16.0
   value: 12.0
   vary: false
+
 - label: M_1
   name: lM1
   prior:
@@ -120,6 +116,7 @@ params:
     - 16.0
   value: 13.0
   vary: true
+
 - label: M_{\rm min}
   name: lMmin
   prior:
@@ -129,45 +126,22 @@ params:
     - 16.0
   value: 12.0
   vary: true
+
 - label: f_c
   name: fc
-  prior:
-    type: TopHat
-    values:
-    - 0.0
-    - 1.0
   value: 1.0
   vary: false
+
 - label: \alpha
   name: alpha
-  prior:
-    type: TopHat
-    values:
-    - 0.0
-    - 3.0
   value: 1.0
   vary: false
-- alias: beta_gal
-  label: \beta_{\rm max}
-  name: beta_max
-- label: beta_g
-  name: beta_gal
-  prior:
-    type: TopHat
-    values:
-    - 0.1
-    - 10.0
-  value: 1.0
-  vary: false
+
 - label: \sigma_{{\rm ln}M}
   name: sigmaLogM
-  prior:
-    type: TopHat
-    values:
-    - 0.01
-    - 1.0
   value: 0.15
   vary: false
+
 - label: b_H
   name: b_hydro
   prior:
@@ -177,6 +151,7 @@ params:
     - 1.0
   value: 0.25
   vary: true
+
 - label: \rho_{gy}
   name: r_corr_gy
   prior:
@@ -186,51 +161,42 @@ params:
     - 1.0
   value: 0.0
   vary: true
+
 - label: \rho_{g\kappa}
   name: r_corr_gk
   prior:
     type: TopHat
     values:
-    - -0.5
-    - 0.5
+    - -1
+    - 1
   value: 0.0
-  vary: true
+  vary: false
+
 - label: w_{N(z)}
   name: width
   prior:
     type: TopHat
     values:
-    - 0.8
-    - 1.2
+    - 0.95
+    - 1.05
   value: 1.0
-  vary: true
+  vary: false
+
 - label: \Omega_c
   name: Omega_c
-  prior:
-    type: TopHat
-    values:
-    - 0.1
-    - 0.9
   value: 0.26066676
   vary: false
+
 - label: \Omega_b
   name: Omega_b
-  prior:
-    type: TopHat
-    values:
-    - 0.1
-    - 0.9
   value: 0.048974682
   vary: false
+
 - label: h
   name: h
-  prior:
-    type: TopHat
-    values:
-    - 0.55
-    - 0.8
   value: 0.6766
   vary: false
+
 - label: \sigma_8
   name: sigma8
   prior:
@@ -239,22 +205,19 @@ params:
     - 0.5
     - 0.95
   value: 0.8102
-  vary: true
+  vary: false
+
 - label: n_s
   name: n_s
-  prior:
-    type: TopHat
-    values:
-    - 0.8
-    - 1.2
   value: 0.9665
   vary: false
+
 - label: a_{\rm HMcorr}
   name: a_HMcorr
   prior:
     type: TopHat
     values:
     - 0.1
-    - 0.5
-  value: 0.36
-  vary: true
+    - 1.0
+  value: 0.1701704243193857
+  vary: false
