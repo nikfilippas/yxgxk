@@ -41,8 +41,9 @@ class ProfTracer(object):
                 chimean = ccl.comoving_radial_distance(cosmo, 1/(1+self.z_avg))
                 self.lmax = kmax*chimean-0.5
                 self.bz = np.ones_like(self.z)
-                self.profile = ccl.halos.HaloProfileHOD(cM,
-                               ns_independent=m.get("ns_independent", False))
+                self.profile = ccl.halos.HaloProfileHOD(cM)
+                # self.profile = ccl.halos.HaloProfileHOD(cM,
+                #                ns_independent=m.get("ns_independent", False))
 
             elif m['type'] == 'k':
                 self.profile = ccl.halos.HaloProfileNFW(cM)
