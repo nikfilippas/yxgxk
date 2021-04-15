@@ -81,7 +81,8 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     a_arr = np.linspace(1/(1+zmax), 1, zpts)
 
     if hm_correction is not None:
-        hm_correction_mod = lambda k, a, cosmo: hm_correction(k, a, **kwargs)
+        aHM = kwargs.get("aHM")
+        hm_correction_mod = lambda k, a, cosmo: hm_correction(k, a, aHM)
     else:
         hm_correction_mod = None
 
