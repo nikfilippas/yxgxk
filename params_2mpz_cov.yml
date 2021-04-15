@@ -41,19 +41,19 @@ maps:
   model:
     Omega_b: 0.048974682
     Omega_c: 0.26066676
-    a_HMcorr: 0.4999999999999417
+    a_HMcorr: 0.428
     alpha: 1.0
     b_hydro: 0.38
     beta_gal: 1.0
     beta_max: 1.0
     fc: 1.0
     h: 0.6766
-    lM0: 10.14
-    lM1: 11.39
-    lMmin: 10.085315410859083
+    lM0: 10.09
+    lM1: 11.34
+    lMmin: 10.09
     n_s: 0.9665
-    r_corr_gk: 0.4999999999996133
-    r_corr_gy: -0.0137
+    r_corr_gk: 0
+    r_corr_gy: -0.022
     sigma8: 0.8102
     sigmaLogM: 0.15
     width: 1.

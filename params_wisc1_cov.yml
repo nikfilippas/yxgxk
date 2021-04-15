@@ -39,17 +39,17 @@ maps:
     Omega_c: 0.26066676
     a_HMcorr: 0.44870102598332645
     alpha: 1.0
-    b_hydro: 0.13505283039569332
+    b_hydro: 0.2395
     beta_gal: 1.0
     beta_max: 1.0
     fc: 1.0
     h: 0.6766
-    lM0: 10.56691541604829
-    lM1: 11.85605343275181
-    lMmin: 10.56691541604829
+    lM0: 12.07
+    lM1: 13.41
+    lMmin: 12.07
     n_s: 0.9665
-    r_corr_gk: 0.15912677803453348
-    r_corr_gy: -0.6192207279578451
+    r_corr_gk: 0.
+    r_corr_gy: -0.539
     sigma8: 0.8102
     sigmaLogM: 0.15
     width: 1.
