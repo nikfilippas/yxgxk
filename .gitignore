@@ -9,6 +9,7 @@ data/
 legacy/
 other/
 output_*/
+cobaya_old/
 cobaya_test/
 cobaya_lensing/
 .spyproject/
@@ -22,6 +23,7 @@ cobaya_lensing/
 *.mcm
 *.cmcm
 *.out
+*.sh
 
 # Others
 .bashrc
