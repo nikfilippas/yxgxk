@@ -4,68 +4,73 @@ bandpowers:
   nlb: 20
   nlb_lin: 10
   type: linlog
-
 data_vectors:
 - covar_type: comb_m
-  name: 2mpz
+  name: wisc2
   twopoints:
+  - lmin: 10
+    tracers:
+    - wisc2
+    - wisc2
   - lmin: 0
     tracers:
-    - 2mpz
-    - 2mpz
-  - lmin: 0
-    tracers:
-    - 2mpz
+    - wisc2
     - y_milca
   - lmin: 0
     tracers:
-    - 2mpz
+    - wisc2
     - lens
   type: Cl
-
 global:
   n_iter: 3
   nside: 2048
-  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
-
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_cobaya
 jk:
   do: true
   nside: 8
   store_mcm: true
-
 maps:
 - beam: false
-  dndz: data/dndz/2mpz_DIR.txt
-  map: data/maps/2mpz_05_01_512.fits
+  dndz: data/dndz/wisc2_DIR.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
   mask: mask_lowz
   model:
     Omega_b: 0.048974682
     Omega_c: 0.26066676
-    a_HMcorr: 0.4999999999999417
+    a_HMcorr: 0.4263815049334589
     alpha: 1.0
-    b_hydro: 0.3576546355777399
+    b_hydro: 0.18613969938649388
     beta_gal: 1.0
     beta_max: 1.0
     fc: 1.0
     h: 0.6766
-    lM0: 10.085315410859083
-    lM1: 11.462264598146495
-    lMmin: 10.085315410859083
+    lM0: 10.549518891252172
+    lM1: 11.794952075732667
+    lMmin: 10.549518891252172
     n_s: 0.9665
-    r_corr_gk: 0.4999999999996133
-    r_corr_gy: -0.5180490110675504
-    sigma8: 0.9123607320616338
+    r_corr_gk: -0.2208312702470838
+    r_corr_gy: -0.6007288486023787
+    sigma8: 0.8135593078391262
     sigmaLogM: 0.15
-    width: 1.199999999993615
-  name: 2mpz
+    width: 0.8510867851364564
+  name: wisc2
   ns_independent: false
   systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
   - data/maps/lambda_sfd_ebv.fits
   type: g
 - beam: 10.0
   map: data/maps/milca_ymaps.fits
   mask: mask_tsz
   name: y_milca
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits
+  type: y
+- beam: 10.0
+  map: data/maps/nilc_ymaps.fits
+  mask: mask_tsz
+  name: y_nilc
   systematics:
   - data/maps/lambda_sfd_ebv.fits
   type: y
@@ -81,13 +86,11 @@ maps:
   ns_independent: false
   systematics: None
   type: k
-
 masks:
   mask_545: data/maps/mask_planck20.fits
   mask_lens_2015: data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits
   mask_lowz: data/maps/mask_v3.fits
   mask_tsz: data/maps/mask_planck60.fits
-
 mcmc:
   continue_mcmc: true
   debug: false
@@ -96,15 +99,18 @@ mcmc:
   mfunc: tinker08
   n_steps: 0
   n_walkers: 96
-  run_name: gyk_bf_emcee2cobaya
-
+  run_name: no_run
 params:
 - alias: lMmin
   label: M_0
   name: lM0
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
   value: 12.0
   vary: false
-
 - label: M_1
   name: lM1
   prior:
@@ -114,7 +120,6 @@ params:
     - 16.0
   value: 13.0
   vary: true
-
 - label: M_{\rm min}
   name: lMmin
   prior:
@@ -124,22 +129,45 @@ params:
     - 16.0
   value: 12.0
   vary: true
-
 - label: f_c
   name: fc
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1.0
   value: 1.0
   vary: false
-
 - label: \alpha
   name: alpha
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 3.0
   value: 1.0
   vary: false
-
+- alias: beta_gal
+  label: \beta_{\rm max}
+  name: beta_max
+- label: beta_g
+  name: beta_gal
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 10.0
+  value: 1.0
+  vary: false
 - label: \sigma_{{\rm ln}M}
   name: sigmaLogM
+  prior:
+    type: TopHat
+    values:
+    - 0.01
+    - 1.0
   value: 0.15
   vary: false
-
 - label: b_H
   name: b_hydro
   prior:
@@ -149,7 +177,6 @@ params:
     - 1.0
   value: 0.25
   vary: true
-
 - label: \rho_{gy}
   name: r_corr_gy
   prior:
@@ -159,17 +186,15 @@ params:
     - 1.0
   value: 0.0
   vary: true
-
 - label: \rho_{g\kappa}
   name: r_corr_gk
   prior:
     type: TopHat
     values:
-    - -1
-    - 1
+    - -0.5
+    - 0.5
   value: 0.0
   vary: true
-
 - label: w_{N(z)}
   name: width
   prior:
@@ -179,22 +204,33 @@ params:
     - 1.2
   value: 1.0
   vary: true
-
 - label: \Omega_c
   name: Omega_c
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.9
   value: 0.26066676
   vary: false
-
 - label: \Omega_b
   name: Omega_b
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 0.9
   value: 0.048974682
   vary: false
-
 - label: h
   name: h
+  prior:
+    type: TopHat
+    values:
+    - 0.55
+    - 0.8
   value: 0.6766
   vary: false
-
 - label: \sigma_8
   name: sigma8
   prior:
@@ -204,12 +240,15 @@ params:
     - 0.95
   value: 0.8102
   vary: true
-
 - label: n_s
   name: n_s
+  prior:
+    type: TopHat
+    values:
+    - 0.8
+    - 1.2
   value: 0.9665
   vary: false
-
 - label: a_{\rm HMcorr}
   name: a_HMcorr
   prior:
@@ -217,5 +256,5 @@ params:
     values:
     - 0.1
     - 0.5
-  value: 0.19910454
-  vary: false
+  value: 0.36
+  vary: true
