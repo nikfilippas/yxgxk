@@ -82,7 +82,7 @@ def get_profile(p, profname):
         kwargs["mass_function"] = cosmo_pars["mass_function"]
         kwargs["halo_bias"] = cosmo_pars["halo_bias"]
     else:
-        kwargs = {**p.get_cosmo_pars(), **{"b_hydro": 0.75}}
+        kwargs = {**p.get_cosmo_pars(), **{"b_hydro": 0.25}}
         cosmo = COSMO_DEFAULT()
     prof.update_parameters(cosmo, **kwargs)
     return prof, kwargs
@@ -90,10 +90,10 @@ def get_profile(p, profname):
 
 def merge_models(models1, models2):
     '''Combine model dictionaries into a single average dictionary.'''
-    if models2 is None:
-        if models1 is None:
-            return {"b_hydro": 0.25}
-        return models1
+    # if models2 is None:
+    #     if models1 is None:
+    #         return {"b_hydro": 0.25}
+    #     return models1
     models = models1.copy()
     for par in models:
         # deal with cosmological parameters
@@ -235,6 +235,8 @@ def model_xcorr(p, fields, xcorr):
                     if ('y' in (type1, type2)) and ('g' not in (type1, type2)):
                         kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.25}}
 
+                    print(kwargs1)
+                    print(kwargs2)
                     kwargs = merge_models(kwargs1, kwargs2)
                     cosmo = COSMO_ARGS(kwargs)
                     l = mcorr[name1][name2].leff
