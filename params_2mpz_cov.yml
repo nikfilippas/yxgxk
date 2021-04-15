@@ -43,20 +43,20 @@ maps:
     Omega_c: 0.26066676
     a_HMcorr: 0.4999999999999417
     alpha: 1.0
-    b_hydro: 0.3576546355777399
+    b_hydro: 0.38
     beta_gal: 1.0
     beta_max: 1.0
     fc: 1.0
     h: 0.6766
-    lM0: 10.085315410859083
-    lM1: 11.462264598146495
+    lM0: 10.14
+    lM1: 11.39
     lMmin: 10.085315410859083
     n_s: 0.9665
     r_corr_gk: 0.4999999999996133
-    r_corr_gy: -0.5180490110675504
+    r_corr_gy: -0.0137
     sigma8: 0.8102
     sigmaLogM: 0.15
-    width: 1.199999999993615
+    width: 1.
   name: 2mpz
   ns_independent: false
   systematics:

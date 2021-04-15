@@ -52,7 +52,7 @@ maps:
     r_corr_gy: -0.6007288486023787
     sigma8: 0.8102
     sigmaLogM: 0.15
-    width: 0.8510867851364564
+    width: 1.
   name: wisc2
   ns_independent: false
   systematics:
