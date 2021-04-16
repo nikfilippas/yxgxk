@@ -86,6 +86,7 @@ class Sampler(object):
 
     def chi2(self, p):
         chisq = -2*self.lnprob(p)
+        print(chisq)
         return chisq
 
     def update_p0(self, p0):
@@ -256,7 +257,7 @@ class Sampler(object):
                 if verbosity > 0:
                     print('Iteration done. Persisting.')
                     chain_file.persistSamplingValues(pos, prob)
-    
+
                     if (counter % 10) == 0:
                         print(f"Finished sample {counter}")
             counter += 1

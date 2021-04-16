@@ -235,8 +235,6 @@ def model_xcorr(p, fields, xcorr):
                     if ('y' in (type1, type2)) and ('g' not in (type1, type2)):
                         kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.25}}
 
-                    print(kwargs1)
-                    print(kwargs2)
                     kwargs = merge_models(kwargs1, kwargs2)
                     cosmo = COSMO_ARGS(kwargs)
                     l = mcorr[name1][name2].leff
