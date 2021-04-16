@@ -24,7 +24,7 @@ data_vectors:
 global:
   n_iter: 3
   nside: 2048
-  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_cobaya
 jk:
   do: true
   nside: 8
