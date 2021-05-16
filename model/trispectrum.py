@@ -25,9 +25,9 @@ def hm_1h_trispectrum(cosmo, hmc, k, a, profiles,
 
     I04 = []
     for aa in a_arr:
-        cov = hmc.I_0_4(cosmo, k, aa,
-                        p1.profile, p2pt_12, p2.profile,
-                        p3.profile, p2pt_34, p4.profile)
+        cov = hmc.I_0_22(cosmo, k, aa,
+                         p1.profile, p2pt_12, p2.profile,
+                         p3.profile, p2pt_34, p4.profile)
         for p in profiles:
             if p.type != 'y':
                 cov *= hmc.profile_norm(cosmo, aa, p.profile)
@@ -61,7 +61,6 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
     kwargs : parameter dictionary
         Parametrisation of the profiles and cosmology.
     """
-    COSMO_CHECK(cosmo, **kwargs)
     [p.update_parameters(cosmo, **kwargs) for p in profiles]
     p1, p2, p3, p4 = profiles
 
@@ -97,9 +96,9 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
     t1h = np.zeros([len(a), len(l), len(l)])
     for ii, (aa, cchi) in enumerate(zip(a, chi)):
         k = (l+1/2)/cchi
-        cov = hmc.I_0_4(cosmo, k, aa,
-                        p1.profile, p2pt_12, p2.profile,
-                        p3.profile, p2pt_34, p4.profile)
+        cov = hmc.I_0_22(cosmo, k, aa,
+                         p1.profile, p2pt_12, p2.profile,
+                         p3.profile, p2pt_34, p4.profile)
         for p in profiles:
             if p.type != 'y':
                 cov *= hmc.profile_norm(cosmo, aa, p.profile)
