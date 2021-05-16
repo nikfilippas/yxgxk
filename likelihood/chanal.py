@@ -43,7 +43,7 @@ class chan(object):
         self.cosmo_vary = COSMO_VARY(self.p)
         self.kwargs = self.p.get_cosmo_pars()
         self.hmc = get_hmcalc(self.cosmo, **self.kwargs)
-        self.hm_correction = HM_Gauss(self.cosmo, **self.kwargs).hm_correction
+        self.hm_correction = np.load("hm_correction.npy", allow_pickle=True).item()
         self._PP = norm.sf(-1)-norm.sf(1)
 
 
@@ -61,7 +61,8 @@ class chan(object):
     def _th(self, pars):
         if self.cosmo_vary:
             cosmo = COSMO_ARGS(pars)
-            hmc = get_hmcalc(cosmo, **self.p.get_cosmo_pars())
+            hmc = get_hmcalc(cosmo, **{"mass_function": self.p.get_massfunc(),
+                                       "halo_bias": self.p.get_halobias()})
         else:
             cosmo = self.cosmo
             hmc = self.hmc
@@ -80,7 +81,8 @@ class chan(object):
             """Calculates the halo model bias for a set of parameters."""
             if self.cosmo_vary:
                 cosmo = COSMO_ARGS(pars)
-                hmc = get_hmcalc(cosmo, **self.p.get_cosmo_pars())
+                hmc = get_hmcalc(cosmo, **{"mass_function": self.p.get_massfunc(),
+                                           "halo_bias": self.p.get_halobias()})
             else:
                 cosmo = self.cosmo
                 hmc = self.hmc
