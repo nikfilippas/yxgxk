@@ -26,13 +26,14 @@ class Field(object):
     """
     def __init__(self, nside, name, mask_id,
                  fname_mask, fname_map, fname_dndz,
-                 field_mask=0, field_map=0, is_ndens=True,
+                 field_mask=0, field_map=0, is_ndens=None,
                  syst_list=None, n_iter=3):
         self.name = name
         self.nside = nside
         self.n_iter = n_iter
         self.mask_id = mask_id
         self.fname_mask = fname_mask
+        assert is_ndens is not None, "Declare whether field is Delta_g!"
         self.is_ndens = is_ndens  # True if this is a delta_gal map
         # Read mask
         self.mask = hp.ud_grade(hp.read_map(fname_mask, field=field_mask,
