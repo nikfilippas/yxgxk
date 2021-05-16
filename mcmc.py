@@ -60,9 +60,9 @@ for v in p.get('data_vectors'):
 
     # Theory predictor wrapper
     if not cosmo_vary:
-        kwargs = p.get_cosmo_pars()
         cosmo = p.get_cosmo()
-        hmc = get_hmcalc(cosmo, **kwargs)
+        hmc = get_hmcalc(cosmo, **{"mass_function": p.get_massfunc(),
+                                   "halo_bias": p.get_halobias()})
 
         def th(kwargs):
             """Theory for fixed cosmology."""
@@ -72,8 +72,8 @@ for v in p.get('data_vectors'):
                               hm_correction=hm_correction,
                               **kwargs)
     else:
-        temp = {"mass_function": ccl.halos.mass_function_from_name(p.get_massfunc()),
-                "halo_bias": ccl.halos.halo_bias_from_name(p.get_halobias())}
+        temp = {"mass_function": p.get_massfunc(),
+                "halo_bias": p.get_halobias()}
         def th(kwargs):
             """Theory for free cosmology."""
             kwargs = {**temp, **kwargs}
