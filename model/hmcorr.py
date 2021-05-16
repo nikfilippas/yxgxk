@@ -42,7 +42,7 @@ class HM_halofit(object):
         if (Delta, rho_type) == (200, "matter"):
             cM = ccl.halos.ConcentrationDuffy08(hmd)
         elif (Delta, rho_type) == (500, "critical"):
-            cM = ccl.halos.halos_extra.ConcentrationDuffy08M500c(hmd)
+            cM = ccl.halos.halos_extra.ConcentrationDuffy08(hmd)
         else:
             raise ValueError("c(M) relation for Delta=(%d %s) not implemented." % (Delta, rho_type))
         NFW = ccl.halos.profiles.HaloProfileNFW(cM)
