@@ -61,6 +61,21 @@ def COSMO_ARGS(kwargs):
         return ccl.Cosmology(**cosmoargs)
 
 
+def COSMO_ARGS_EMU(cc, kwargs):
+    """ Uses the emulator to produce cosmology. """
+    cosmoargs = {k: kwargs[k] for k in kwargs if k in COSMO_KEYS}
+    if not cosmoargs:
+        cosmo = COSMO_DEFAULT()
+        if not cosmo.has_growth:
+            cosmo.compute_growth()
+        return cosmo
+    else:
+        cosmo = cc.Cosmology(**cosmoargs)
+        if not cosmo.has_growth:
+            cosmo.compute_growth()
+        return cosmo
+
+
 def COSMO_CHECK(cosmo, **kwargs):
     """
     Verifies that the cosmology object passed is in line

@@ -71,10 +71,10 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
 
     k_arr = np.geomspace(1e-3, 1e2, kpts)
 
-    if profiles[0].type == "g":
-        zmin, zmax = profiles[0].zrange
-    elif profiles[1].type == "g":
-        zmin, zmax = profiles[1].zrange
+    if p1.type == "g":
+        zmin, zmax = p1.zrange
+    elif p2.type == "g":
+        zmin, zmax = p2.zrange
     else:
         zmax = 1.0
 
