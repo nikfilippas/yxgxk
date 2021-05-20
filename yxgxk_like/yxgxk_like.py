@@ -28,11 +28,13 @@ class ProfTracer(object):
         self.type = m['type']
         self.beam = m['beam']
         self.nside = m['nside']
+        self.profile = None
+        self.tracer = None
         if m['type'] == 'y':
-            self.profile = ccl.halos.HaloProfileArnaud()
+            self.profile = ccl.halos.HaloProfilePressureGNFW()
         else:
             hmd = ccl.halos.MassDef(500, 'critical')
-            cM = ccl.halos.ConcentrationDuffy08M500c(hmd)
+            cM = ccl.halos.ConcentrationDuffy08(hmd)
 
             if m['type'] == 'g':
                 # transpose N(z)'s
@@ -43,10 +45,16 @@ class ProfTracer(object):
                 self.zrange = self.z[self.nz >= 0.005].take([0, -1])
                 self.bz = np.ones_like(self.z)
                 ns_indep = m.get("ns_independent", False)
-                self.profile = ccl.halos.HaloProfileHOD(cM, ns_indep)
+                self.profile = ccl.halos.HaloProfileHOD(cM, ns_independent=ns_indep)
             elif m['type'] == 'k':
                 self.profile = ccl.halos.HaloProfileNFW(cM)
-        self.tracer = None
+        if self.profile is not None:
+            try:
+                args = self.profile.update_parameters.__code__.co_varnames
+                argcount = self.profile.update_parameters.__code__.co_argcount
+                self.args = args[1: argcount]  # discard self & locals
+            except AttributeError:
+                self.args = {}
 
     def get_beam(self, ls):
         """
@@ -64,6 +72,10 @@ class ProfTracer(object):
             b0 *= beam_gaussian(ls, self.beam)
         return b0
 
+    def select_pars(self, kwargs):
+        """ Output the kwargs used by the profile. """
+        return {key: kwargs.get(key) for key in self.args}
+
     def update_tracer(self, cosmo, **kwargs):
         if self.type == 'g':
             nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs["width"])
@@ -77,9 +89,9 @@ class ProfTracer(object):
             self.tracer = ccl.CMBLensingTracer(cosmo, 1100.)
 
     def update_parameters(self, cosmo, **kwargs):
-        self.profile.update_parameters(**kwargs)
+        if self.type != "k":
+            self.profile.update_parameters(**self.select_pars(kwargs))
         self.update_tracer(cosmo, **kwargs)
-
 
 
 class YxGxKLike(Likelihood):
@@ -110,7 +122,7 @@ class YxGxKLike(Likelihood):
             return d['cov'].T
 
     def _get_lmax(self):
-        cosmo = ccl.Cosmology(Omega_c=0.25, Omega_b=0.05, h=0.67, n_s=0.96, sigma8=0.8)
+        cosmo = ccl.CosmologyVanillaLCDM()
         zmean = np.sum(self.z*self.dndz)/np.sum(self.dndz)
         chi = ccl.comoving_radial_distance(cosmo, 1./(1+zmean))
         return self.kmax * chi - 0.5
@@ -295,19 +307,17 @@ class YxGxKLike(Likelihood):
         hmc = res['hmc']
 
         # namespace of profile parameters
-        lM0_name = self.input_params_prefix + "_logMmin"  #HACK: coupled here
-        lM1_name = self.input_params_prefix + "_logM1"
-        lMmin_name = self.input_params_prefix + "_logMmin"
-        bh_name = self.input_params_prefix + "_bhydro"
+        lM0_name = self.input_params_prefix + "_lM0_0"  #HACK: coupled here
+        lM1_name = self.input_params_prefix + "_lM1_0"
+        lMmin_name = self.input_params_prefix + "_lMmin_0"
+        bh_name = self.input_params_prefix + "_mass_bias"
         w_name = self.input_params_prefix + "_width"
-        slm_name = self.input_params_prefix + "_sigmaLogM"
 
-        pars["lM0"] = pars[lM0_name]
-        pars["lM1"] = pars[lM1_name]
-        pars["lMmin"] = pars[lMmin_name]
-        pars["b_hydro"] = pars[bh_name]
+        pars["lM0_0"] = pars[lM0_name]
+        pars["lM1_0"] = pars[lM1_name]
+        pars["lMmin_0"] = pars[lMmin_name]
+        pars["mass_bias"] = pars[bh_name]
         pars["width"] = pars[w_name]
-        pars["sigmaLogM"] = pars[slm_name]
 
         cl_theory = []
         for xc in self.xcorr_data:
@@ -379,7 +389,7 @@ class HM_halofit(object):
 
         # ratio of linear-to-nonlinear matter power
         hmd = ccl.halos.MassDef(Delta, rho_type)
-        cM = ccl.halos.halos_extra.ConcentrationDuffy08M500c(hmd)
+        cM = ccl.halos.halos_extra.ConcentrationDuffy08(hmd)
         NFW = ccl.halos.profiles.HaloProfileNFW(cM)
 
         hmd = ccl.halos.MassDef(Delta, rho_type)
@@ -457,10 +467,10 @@ class HM_Gauss(object):
 
 def hm_eff():
     cargs = {"Omega_c" : 0.26066676,
-              "Omega_b" : 0.048974682,
-              "h"       : 0.6776,
-              "sigma8"  : 0.8102,
-              "n_s"     : 0.9665}
+             "Omega_b" : 0.048974682,
+             "h"       : 0.6776,
+             "sigma8"  : 0.8102,
+             "n_s"     : 0.9665}
     cosmo = ccl.Cosmology(**cargs)
     kwargs = {"mass_function": ccl.halos.mass_function_from_name("tinker08"),
               "halo_bias": ccl.halos.halo_bias_from_name("tinker10")}
