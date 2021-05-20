@@ -21,7 +21,10 @@ class ParamRun(object):
     def get_massfunc(self):
         """Get preferred mass function."""
         try:
-            return self.p['mcmc']['mfunc']
+            mf = self.p["mcmc"]["mfunc"]
+            mf = mf.lower()
+            mf = mf[0].upper() + mf[1:]
+            return mass_function_from_name(mf)
         except KeyError:
             raise ValueError("Provide cosmological mass function.")
 
@@ -29,7 +32,10 @@ class ParamRun(object):
     def get_halobias(self):
         """Get preferred halo bias model."""
         try:
-            return self.p['mcmc']['hbias']
+            hb = self.p["mcmc"]["hbias"]
+            hb = hb.lower()
+            hb = hb[0].upper() + hb[1:]
+            return halo_bias_from_name(hb)
         except KeyError:
             raise ValueError("Provide halo bias model.")
 
@@ -40,9 +46,9 @@ class ParamRun(object):
         pars = {par["name"]: par["value"] for par in self.p.get("params") \
                                           if par["name"] in COSMO_KEYS}
         if hmfunc:
-            pars["mass_function"] = mass_function_from_name(self.get_massfunc())
+            pars["mass_function"] = self.get_massfunc()
         if hmbias:
-            pars["halo_bias"] = halo_bias_from_name(self.get_halobias())
+            pars["halo_bias"] = self.get_halobias()
         return pars
 
 
