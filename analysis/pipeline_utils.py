@@ -77,12 +77,11 @@ def get_profile(p, profname):
     prof = ProfTracer(m)
     if prof.type == "g":
         kwargs = m["model"]
-        cosmo = COSMO_ARGS(kwargs)
-        cosmo_pars = p.get_cosmo_pars()
-        kwargs["mass_function"] = cosmo_pars["mass_function"]
-        kwargs["halo_bias"] = cosmo_pars["halo_bias"]
+        cosmo = COSMO_ARGS_EMU(kwargs)
+        kwargs["mass_function"] = p.get_massfunc()
+        kwargs["halo_bias"] = p.get_halobias()
     else:
-        kwargs = {**p.get_cosmo_pars(), **{"b_hydro": 0.25}}
+        kwargs = {**p.get_cosmo_pars(), **{"mass_bias": 0.75}}
         cosmo = COSMO_DEFAULT()
     prof.update_parameters(cosmo, **kwargs)
     return prof, kwargs
@@ -92,7 +91,7 @@ def merge_models(models1, models2):
     '''Combine model dictionaries into a single average dictionary.'''
     if models2 is None:
         if models1 is None:
-            return {"b_hydro": 0.25}
+            return {"mass_bias": 0.75}
         return models1
     models = models1.copy()
     for par in models:
@@ -206,7 +205,7 @@ def get_xcorr(p, fields, jk_region=None, save_windows=True):
 
 def model_xcorr(p, fields, xcorr):
     """Models the angular power spectrum."""
-    hm_correction = HM_Gauss(p.get_cosmo(), **p.get_cosmo_pars()).hm_correction
+    hm_correction = np.load("hm_correction.npy", allow_pickle=True).item()
 
     # copy & reset shape
     mcorr = copy.deepcopy(xcorr)
@@ -233,9 +232,9 @@ def model_xcorr(p, fields, xcorr):
 
                     # best fit from 1909.09102
                     if ('y' in (type1, type2)) and ('g' not in (type1, type2)):
-                        kwargs1 = kwargs2 = {**kwargs1, **{'b_hydro': 0.25}}
+                        kwargs1 = kwargs2 = {**kwargs1, **{'mass_bias': 0.75}}
 
-                    kwargs = merge_models(kwargs1, kwargs2)
+                    kwargs = kwargs1
                     cosmo = COSMO_ARGS(kwargs)
                     l = mcorr[name1][name2].leff
                     hmc = get_hmcalc(cosmo, **kwargs)
@@ -295,13 +294,13 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
                 cosmo = COSMO_ARGS(kwargs)  # TODO: final cosmo is used
                 prof.update_parameters(cosmo, **kwargs)
             else:
-                prof.update_parameters(COSMO_DEFAULT(), **{"b_hydro": 0.25})
+                prof.update_parameters(COSMO_DEFAULT(), **{"mass_bias": 0.75})
             profiles[i] = prof
         # Get single model parameter dictionary
         models_a = p.get_models()[f11.name]
         models_b = p.get_models()[f12.name]
         print("models:", models_a, models_b)
-        kwargs = merge_models(models_a, models_b)
+        kwargs = models_a
         hmc = get_hmcalc(cosmo, **kwargs)
         # Calculate covariace
         dcov = hm_ang_1h_covariance(fsky, leff, cosmo, hmc, profiles, **kwargs)
