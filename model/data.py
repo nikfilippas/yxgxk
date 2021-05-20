@@ -22,6 +22,8 @@ class ProfTracer(object):
         self.beam = m['beam']
         self.syst = m.get('systematics')
         self.lmax = np.inf
+        self.profile = None
+        self.tracer = None
         if m['type'] == 'y':
             self.profile = ccl.halos.HaloProfilePressureGNFW()
         else:
@@ -46,8 +48,13 @@ class ProfTracer(object):
 
             elif m['type'] == 'k':
                 self.profile = ccl.halos.HaloProfileNFW(cM)
-        self.tracer = None
-        self.args = self.profile.update_parameters.__code__.co_varnames[1:]
+        if self.profile is not None:
+            try:
+                args = self.profile.update_parameters.__code__.co_varnames
+                argcount = self.profile.update_parameters.__code__.co_argcount
+                self.args = args[1: argcount]  # discard self & locals
+            except AttributeError:
+                self.args = {}
 
     def get_beam(self, ls, ns):
         """
@@ -77,12 +84,13 @@ class ProfTracer(object):
                                             (self.z, nz_new),
                                             (self.z, self.bz))
         elif self.type == 'y':
-            self.tracer = ccl.SZTracer(cosmo)
+            self.tracer = ccl.tSZTracer(cosmo)
         elif self.type == 'k':
             self.tracer = ccl.CMBLensingTracer(cosmo, 1100.)
 
     def update_parameters(self, cosmo, **kwargs):
-        self.profile.update_parameters(self.select_pars(kwargs))
+        if self.type != "k":
+            self.profile.update_parameters(**self.select_pars(kwargs))
         self.update_tracer(cosmo, **kwargs)
 
 
@@ -137,7 +145,6 @@ def choose_cov_file(p, tracers1, tracers2, suffix):
     raise ValueError("Can't find Cov file for " +
                      tracers1[0].name+", "+tracers1[1].name+", " +
                      tracers2[0].name+", "+tracers2[1].name)
-    return None
 
 def window_plates(l, lplate_deg):
     lp = np.radians(lplate_deg)
