@@ -4,7 +4,7 @@ from scipy.interpolate import interp1d
 from scipy.integrate import simps
 import pyccl as ccl
 from .utils import beam_gaussian, beam_hpix
-from .cosmo_utils import COSMO_ARGS
+from .cosmo_utils import COSMO_ARGS_EMU
 
 
 class ProfTracer(object):
@@ -39,7 +39,7 @@ class ProfTracer(object):
                 self.z_avg = np.average(self.z, weights=self.nz)
                 self.zrange = self.z[self.nz >= 0.005].take([0, -1])
                 # determine max ell
-                cosmo = COSMO_ARGS(m['model'])
+                cosmo = COSMO_ARGS_EMU(m['model'])
                 chimean = ccl.comoving_radial_distance(cosmo, 1/(1+self.z_avg))
                 self.lmax = kmax*chimean-0.5
                 self.bz = np.ones_like(self.z)
@@ -68,7 +68,7 @@ class ProfTracer(object):
             float or array: SHT of the beam for this tracer.
         """
         b0 = beam_hpix(ls, ns)
-        if self.beam:
+        if self.beam > 0:
             b0 *= beam_gaussian(ls, self.beam)
         return b0
 
