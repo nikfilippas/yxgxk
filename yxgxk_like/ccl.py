@@ -37,6 +37,8 @@ in CCL, so this is far from general.
 
 import pyccl as ccl
 from cobaya.theory import Theory
+from .ccl_baccoemu import ccl_baccoemu
+
 
 
 class CCL(Theory):
@@ -59,6 +61,10 @@ class CCL(Theory):
 
     def initialize(self):
         self._required_results = {}
+        self.use_emu = "baccoemu" in [self.transfer_function,
+                                      self.matter_pk]
+        if self.use_emu:
+            self.cc = ccl_baccoemu()
 
     def get_requirements(self):
         return {}
@@ -88,19 +94,20 @@ class CCL(Theory):
 
     def calculate(self, state, want_derived=True, **params_values_dict):
         # Generate the CCL cosmology object which can then be used downstream
-        cosmo = ccl.Cosmology(Omega_c=self.provider.get_param('Omega_c'),
-                              Omega_b=self.provider.get_param('Omega_b'),
-                              h=self.provider.get_param('h'),
-                              n_s=self.provider.get_param('n_s'),
-                              sigma8=self.provider.get_param('sigma8'),
-                              T_CMB=2.7255,
-                              m_nu=self.provider.get_param('m_nu'),
-                              transfer_function=self.transfer_function,
-                              matter_power_spectrum=self.matter_pk,
-                              baryons_power_spectrum=self.baryons_pk)
+        cosmo_pars = {"Omega_c": self.provider.get_param("Omega_c"),
+                      "Omega_b": self.provider.get_param("Omega_b"),
+                      "h": self.provider.get_param("h"),
+                      "sigma8": self.provider.get_param("sigma8"),
+                      "baryons_power_spectrum": self.baryons_pk}
+        if not self.use_emu:
+            cosmo_pars["transfer_function"] = self.transfer_function
+            cosmo_pars["matter_power_spectrum"] = self.matter_pk
+            cosmo = ccl.Cosmology(**cosmo_pars)
+        else:
+            cosmo = ccl.CosmologyCalculator(**cosmo_pars)
 
         state['CCL'] = {'cosmo': cosmo}
-        ccl.sigma8(cosmo)
+        # ccl.sigma8(cosmo)
         # Compute sigma8 (we should actually only do this if required -- TODO)
         #state['derived'] = {'sigma8': ccl.sigma8(cosmo)}
         for req_res, method in self._required_results.items():

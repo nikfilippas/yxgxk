@@ -335,9 +335,9 @@ class YxGxKLike(Likelihood):
                     break
 
             # 2. get rho_ij
-            r_corr = pars.get(self.input_params_prefix+"_rho_%s%s"%(prof1.type, prof2.type))
+            r_corr = pars.get(self.input_params_prefix+"_r_corr_%s%s"%(prof1.type, prof2.type))
             if r_corr is None:
-                r_corr = pars.get(self.input_params_prefix+"_rho_%s%s"%(prof2.type, prof1.type))
+                r_corr = pars.get(self.input_params_prefix+"_r_corr_%s%s"%(prof2.type, prof1.type))
             if r_corr is None:
                 r_corr = 0
 
@@ -389,7 +389,7 @@ class HM_halofit(object):
 
         # ratio of linear-to-nonlinear matter power
         hmd = ccl.halos.MassDef(Delta, rho_type)
-        cM = ccl.halos.halos_extra.ConcentrationDuffy08(hmd)
+        cM = ccl.halos.ConcentrationDuffy08(hmd)
         NFW = ccl.halos.profiles.HaloProfileNFW(cM)
 
         hmd = ccl.halos.MassDef(Delta, rho_type)
@@ -472,8 +472,8 @@ def hm_eff():
              "sigma8"  : 0.8102,
              "n_s"     : 0.9665}
     cosmo = ccl.Cosmology(**cargs)
-    kwargs = {"mass_function": ccl.halos.mass_function_from_name("tinker08"),
-              "halo_bias": ccl.halos.halo_bias_from_name("tinker10")}
+    kwargs = {"mass_function": ccl.halos.mass_function_from_name("Tinker08"),
+              "halo_bias": ccl.halos.halo_bias_from_name("Tinker10")}
     hmf = HM_Gauss(cosmo, **kwargs).hm_correction
     # np.save("hm_correction.npy", hmf, allow_pickle=True)
     return hmf
