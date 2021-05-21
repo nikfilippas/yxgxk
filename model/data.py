@@ -39,7 +39,7 @@ class ProfTracer(object):
                 self.z_avg = np.average(self.z, weights=self.nz)
                 self.zrange = self.z[self.nz >= 0.005].take([0, -1])
                 # determine max ell
-                cosmo = COSMO_ARGS_EMU(m['model'])
+                cosmo = ccl.CosmologyVanillaLCDM()
                 chimean = ccl.comoving_radial_distance(cosmo, 1/(1+self.z_avg))
                 self.lmax = kmax*chimean-0.5
                 self.bz = np.ones_like(self.z)
