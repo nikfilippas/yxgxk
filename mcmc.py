@@ -1,6 +1,5 @@
 from argparse import ArgumentParser
 import numpy as np
-import pyccl as ccl
 from analysis.params import ParamRun
 from likelihood.yaml_handler import update_params
 from likelihood.like import Likelihood
@@ -10,7 +9,7 @@ from model.theory import get_theory
 from model.hmcorr import HM_Gauss
 from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS_EMU
-from model.ccl_baccoemu import ccl_baccoemu
+from likelihood.ccl_baccoemu import ccl_baccoemu
 cc = ccl_baccoemu()  # load emulator
 
 
@@ -92,9 +91,9 @@ for v in p.get('data_vectors'):
     # Set up sampler
     p0 = extract_map_p0(p, v, lik.p_free_names)  # p0 for particular map
     # Benchmarks
-    # print(dict(zip(lik.p_free_names, p0)))
-    # print("chisq:", lik.chi2(p0))
-    # exit(1)
+    print(dict(zip(lik.p_free_names, p0)))
+    print("chisq:", lik.chi2(p0))
+    exit(1)
     sam = Sampler(lik.lnprob, p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
                   p.get('mcmc'))
