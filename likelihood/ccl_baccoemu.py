@@ -126,7 +126,7 @@ class ccl_baccoemu(object):
                                              pk_linear=pk_linear,
                                              pk_nonlin=pk_nonlin)
 
-    def Cosmology(self, Omega_c=None, Omega_b=None,
+    def Cosmology(self, *, Omega_c=None, Omega_b=None,
                   h=None, sigma8=None, n_s=None,
                   m_nu=0, w0=-1, wa=0,
                   M_c=14, eta=-0.3, beta=-0.22,
@@ -143,6 +143,17 @@ class ccl_baccoemu(object):
         `baryons_power_spectrum="arico"`.
         """
         # check input
+        if Omega_c is None:
+            raise ValueError("Must set Omega_c")
+        if Omega_b is None:
+            raise ValueError("Must set Omega_b")
+        if h is None:
+            raise ValueError("Must set h")
+        if sigma8 is None:
+            raise ValueError("Must set sigma8")
+        if n_s is None:
+            raise ValueError("Must set n_s")
+
         self.has_baryons = baryons_power_spectrum == "arico"
         self.has_nonlin = True if self.has_baryons else nonlin_power_spectrum
 
