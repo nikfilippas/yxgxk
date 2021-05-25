@@ -1,4 +1,3 @@
-import baccoemu
 import pyccl as ccl
 import numpy as np
 
@@ -25,6 +24,7 @@ class ccl_baccoemu(object):
     """
 
     def __init__(self):
+        import baccoemu
         self.emu = baccoemu.Matter_powerspectrum("nn")
         self._initialize()
 
