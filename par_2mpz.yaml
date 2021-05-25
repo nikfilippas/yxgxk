@@ -24,50 +24,49 @@ params:
   Omega_b: 0.048974682
   h: 0.6776
   n_s: 0.9665
-  m_nu: 0.
 
   # Halo model params (should all start with 'input_params_prefix')
-  ygk_logMmin:
+  ygk_lMmin_0:
     prior:
       min: 10
       max: 16
     ref:
       dist: norm
-      loc: 10.5
+      loc: 10.09
       scale: 0.05
     proposal: 0.005
 
-  ygk_logM1:
+  ygk_lM1_0:
     prior:
       min: 10
       max: 16
     ref:
       dist: norm
-      loc: 11.8
+      loc: 11.34
       scale: 0.05
     proposal: 0.005
 
-  ygk_bhydro:
+  ygk_mass_bias:
     prior:
       min: 0.01
       max: 1
     ref:
       dist: norm
-      loc: 0.25
+      loc: 0.62
       scale: 0.05
     proposal: 0.05
 
-  ygk_rho_gy:
+  ygk_r_corr_gy:
     prior:
       min: -1
       max: 1
     ref:
       dist: norm
-      loc: 0.
+      loc: -0.022
       scale: 0.02
     proposal: 0.005
 
-  ygk_rho_gk: 0.
+  ygk_r_corr_gk: 0.
     # prior:
     #   min: -1
     #   max: 1
@@ -77,18 +76,18 @@ params:
     #   scale: 0.02
     # proposal: 0.005
 
-  ygk_width:
-    prior:
-      dist: norm
-      loc: 1
-      scale: 0.01
-    ref:
-      dist: norm
-      loc: 1.
-      scale: 0.01
-    proposal: 0.005
+  ygk_width: 1.
+    # prior:
+    #   dist: norm
+    #   loc: 1
+    #   scale: 0.01
+    # ref:
+    #   dist: norm
+    #   loc: 1.
+    #   scale: 0.01
+    # proposal: 0.005
 
-  ygk_sigmaLogM: 0.15
+  ygk_siglM_0: 0.15
   ygk_fc: 1.
   ygk_alpha: 1.
 
@@ -134,13 +133,14 @@ likelihood:
   yxgxk_like.YxGxKLike:
     input_params_prefix: ygk
     dndz_file: ./data/dndz/2mpz_DIR.txt
-    input_dir: /mnt/extraspace/nikfilippas/yxgxk/output_cobaya
+    input_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
     g_name: 2mpz
     y_name: y_milca
     k_name: lens
-    massfunc: tinker08
+    massfunc: Tinker08
+    halobias: Tinker10
     kmax: 1.
-    lmin_gg: 10.
+    lmin_gg: 0.
     use_y: True
     use_k: True
     covar_type: comb_m
