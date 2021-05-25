@@ -53,7 +53,7 @@ class ProfTracer(object):
                 args = self.profile.update_parameters.__code__.co_varnames
                 argcount = self.profile.update_parameters.__code__.co_argcount
                 self.args = args[1: argcount]  # discard self & locals
-            except AttributeError:
+            except AttributeError:  # profile has no parameters
                 self.args = {}
 
     def get_beam(self, ls):
@@ -84,7 +84,7 @@ class ProfTracer(object):
                                             (self.z, nz_new),
                                             (self.z, self.bz))
         elif self.type == 'y':
-            self.tracer = ccl.SZTracer(cosmo)
+            self.tracer = ccl.tSZTracer(cosmo)
         elif self.type == 'k':
             self.tracer = ccl.CMBLensingTracer(cosmo, 1100.)
 
@@ -104,6 +104,7 @@ class YxGxKLike(Likelihood):
     use_y: bool = False
     use_k: bool = False
     massfunc: str = ""
+    halobias: str = ""
     kmax: float = 1.
     lmin_gg: float = 0
     covar_type: str = ""
@@ -254,7 +255,7 @@ class YxGxKLike(Likelihood):
     def _get_hmc(self, cosmo, mdef_delta=500, mdef_type='critical'):
         hmd = ccl.halos.MassDef(mdef_delta, mdef_type)
         nM = ccl.halos.mass_function_from_name(self.massfunc)(cosmo, mass_def=hmd)
-        bM = ccl.halos.halo_bias_from_name('tinker10')(cosmo, mass_def=hmd)
+        bM = ccl.halos.halo_bias_from_name(self.halobias)(cosmo, mass_def=hmd)
         hmc = ccl.halos.HMCalculator(cosmo, nM, bM, hmd)
         return hmc
 
@@ -307,7 +308,7 @@ class YxGxKLike(Likelihood):
         hmc = res['hmc']
 
         # namespace of profile parameters
-        lM0_name = self.input_params_prefix + "_lM0_0"  #HACK: coupled here
+        lM0_name = self.input_params_prefix + "_lMmin_0"  #HACK: coupled here
         lM1_name = self.input_params_prefix + "_lM1_0"
         lMmin_name = self.input_params_prefix + "_lMmin_0"
         bh_name = self.input_params_prefix + "_mass_bias"
@@ -358,7 +359,7 @@ class YxGxKLike(Likelihood):
             cl_theory += cl.tolist()
 
         cl_theory = np.array(cl_theory)
-        # print(cl_theory)
+        print(cl_theory)
         # exit(1)
         return cl_theory
 
