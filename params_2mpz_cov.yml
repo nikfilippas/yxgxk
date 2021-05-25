@@ -94,6 +94,7 @@ mcmc:
   n_steps: 1000
   n_walkers: 96
   run_name: no_run
+  transfer_function: boltzmann_camb
 
 params:
 - alias: lMmin_0
