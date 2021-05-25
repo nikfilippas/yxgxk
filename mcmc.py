@@ -8,9 +8,8 @@ from model.data import DataManager
 from model.theory import get_theory
 from model.hmcorr import HM_Gauss
 from model.utils import get_hmcalc
-from model.cosmo_utils import COSMO_VARY, COSMO_ARGS_EMU
+from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 from likelihood.ccl_baccoemu import ccl_baccoemu
-cc = ccl_baccoemu()  # load emulator
 
 
 parser = ArgumentParser()
@@ -25,6 +24,10 @@ fname_params = args.fname_params
 p = ParamRun(fname_params)
 cosmo_vary = COSMO_VARY(p)  # vary cosmology in this analysis?
 hm_correction = np.load("hm_correction.npy", allow_pickle=True).item()
+if p.get("mcmc")["transfer_function"] == "baccoemu":
+    cc = ccl_baccoemu()  # load emulator
+else:
+    cc = None
 
 # Jackknives
 jk_region = args.jk_id
@@ -78,7 +81,7 @@ for v in p.get('data_vectors'):
         def th(kwargs):
             """Theory for free cosmology."""
             kwargs = {**temp, **kwargs}
-            cosmo_fid = COSMO_ARGS_EMU(cc, kwargs)
+            cosmo_fid = COSMO_ARGS(kwargs, transfer=cc)
             hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
             return get_theory(p, d, cosmo_fid, hmc_fid,
                               hm_correction=hm_correction,
