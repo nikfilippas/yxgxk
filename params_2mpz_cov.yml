@@ -26,7 +26,7 @@ data_vectors:
 global:
   n_iter: 3
   nside: 2048
-  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_cobaya
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
 
 jk:
   do: true
@@ -41,21 +41,18 @@ maps:
   model:
     Omega_b: 0.048974682
     Omega_c: 0.26066676
-    a_HMcorr: 0.428
-    alpha: 1.0
-    b_hydro: 0.38
-    beta_gal: 1.0
-    beta_max: 1.0
-    fc: 1.0
+    a_HM_gg: 1.37469835
+    a_HM_gy: 1.37469835
+    a_HM_gk: 1.37469835
+    mass_bias: 0.62
     h: 0.6766
-    lM0: 10.09
-    lM1: 11.34
-    lMmin: 10.09
+    lM0_0: 10.09
+    lM1_0: 11.34
+    lMmin_0: 10.09
     n_s: 0.9665
     r_corr_gk: 0
     r_corr_gy: -0.022
     sigma8: 0.8102
-    sigmaLogM: 0.15
     width: 1.
   name: 2mpz
   ns_independent: false
@@ -94,19 +91,19 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 0
+  n_steps: 1000
   n_walkers: 96
   run_name: no_run
 
 params:
-- alias: lMmin
+- alias: lMmin_0
   label: M_0
-  name: lM0
+  name: lM0_0
   value: 12.0
   vary: false
 
 - label: M_1
-  name: lM1
+  name: lM1_0
   prior:
     type: TopHat
     values:
@@ -116,7 +113,7 @@ params:
   vary: true
 
 - label: M_{\rm min}
-  name: lMmin
+  name: lMmin_0
   prior:
     type: TopHat
     values:
@@ -125,23 +122,23 @@ params:
   value: 12.0
   vary: true
 
-- label: f_c
-  name: fc
+- label: f_c_0
+  name: fc_0
   value: 1.0
   vary: false
 
 - label: \alpha
-  name: alpha
+  name: alpha_0
   value: 1.0
   vary: false
 
 - label: \sigma_{{\rm ln}M}
-  name: sigmaLogM
+  name: siglM_0
   value: 0.15
   vary: false
 
 - label: b_H
-  name: b_hydro
+  name: mass_bias
   prior:
     type: TopHat
     values:
@@ -200,7 +197,7 @@ params:
   prior:
     type: TopHat
     values:
-    - 0.5
+    - 0.60
     - 0.95
   value: 0.8102
   vary: false
@@ -210,12 +207,32 @@ params:
   value: 0.9665
   vary: false
 
-- label: a_{\rm HMcorr}
-  name: a_HMcorr
+- label: a_{\rm HM}
+  name: a_HM_gg
   prior:
     type: TopHat
     values:
     - 0.1
     - 1.0
-  value: 0.4999999999999417
+  value: 1.
+  vary: false
+
+- label: a_{\rm HM}
+  name: a_HM_gy
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 1.0
+  value: 1.
+  vary: false
+
+- label: a_{\rm HM}
+  name: a_HM_gk
+  prior:
+    type: TopHat
+    values:
+    - 0.1
+    - 1.0
+  value: 1.
   vary: false
