@@ -53,7 +53,7 @@ class ProfTracer(object):
                 args = self.profile.update_parameters.__code__.co_varnames
                 argcount = self.profile.update_parameters.__code__.co_argcount
                 self.args = args[1: argcount]  # discard self & locals
-            except AttributeError:
+            except AttributeError:  # profile has no parameters
                 self.args = {}
 
     def get_beam(self, ls, ns):
