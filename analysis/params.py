@@ -4,6 +4,7 @@ from pyccl.halos.hmfunc import mass_function_from_name
 from pyccl.halos.hbias import halo_bias_from_name
 from .bandpowers import Bandpowers
 from model.cosmo_utils import COSMO_KEYS
+from likelihood.ccl_baccoemu import ccl_baccoemu
 
 
 

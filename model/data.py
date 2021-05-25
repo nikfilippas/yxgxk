@@ -4,7 +4,6 @@ from scipy.interpolate import interp1d
 from scipy.integrate import simps
 import pyccl as ccl
 from .utils import beam_gaussian, beam_hpix
-from .cosmo_utils import COSMO_ARGS_EMU
 
 
 class ProfTracer(object):
