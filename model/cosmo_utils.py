@@ -49,20 +49,21 @@ def COSMO_DEFAULT():
                          mass_function="tinker")
 
 
-def COSMO_ARGS(kwargs):
-    """
-    Produces ``pyccl.Cosmology`` object by extracting appropriate
-    cosmological keys from dictionary of keyword-arguments.
-    """
-    cosmoargs = {k: kwargs[k] for k in kwargs if k in COSMO_KEYS}
-    if not cosmoargs:
-        return COSMO_DEFAULT()
-    else:
-        return ccl.Cosmology(**cosmoargs)
+# def COSMO_ARGS(kwargs):
+#     """
+#     Produces ``pyccl.Cosmology`` object by extracting appropriate
+#     cosmological keys from dictionary of keyword-arguments.
+#     """
+#     cosmoargs = {k: kwargs[k] for k in kwargs if k in COSMO_KEYS}
+#     if not cosmoargs:
+#         return COSMO_DEFAULT()
+#     else:
+#         return ccl.Cosmology(**cosmoargs)
 
 
-def COSMO_ARGS_EMU(cc, kwargs):
+def COSMO_ARGS(kwargs, transfer=None):
     """ Uses the emulator to produce cosmology. """
+    C = transfer if transfer is not None else ccl
     cosmoargs = {k: kwargs[k] for k in kwargs if k in COSMO_KEYS}
     if not cosmoargs:
         cosmo = COSMO_DEFAULT()
@@ -70,7 +71,7 @@ def COSMO_ARGS_EMU(cc, kwargs):
             cosmo.compute_growth()
         return cosmo
     else:
-        cosmo = cc.Cosmology(**cosmoargs)
+        cosmo = C.Cosmology(**cosmoargs)
         if not cosmo.has_growth:
             cosmo.compute_growth()
         return cosmo
