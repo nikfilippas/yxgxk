@@ -37,8 +37,6 @@ in CCL, so this is far from general.
 
 import pyccl as ccl
 from cobaya.theory import Theory
-from .ccl_baccoemu import ccl_baccoemu
-
 
 
 class CCL(Theory):
@@ -56,14 +54,14 @@ class CCL(Theory):
               'Omega_b': None,
               'h': None,
               'n_s': None,
-              'sigma8': None,
-              'm_nu': None}
+              'sigma8': None}
 
     def initialize(self):
         self._required_results = {}
         self.use_emu = "baccoemu" in [self.transfer_function,
                                       self.matter_pk]
         if self.use_emu:
+            from .ccl_baccoemu import ccl_baccoemu
             self.cc = ccl_baccoemu()
 
     def get_requirements(self):
@@ -98,7 +96,9 @@ class CCL(Theory):
                       "Omega_b": self.provider.get_param("Omega_b"),
                       "h": self.provider.get_param("h"),
                       "sigma8": self.provider.get_param("sigma8"),
+                      "n_s": self.provider.get_param("n_s"),
                       "baryons_power_spectrum": self.baryons_pk}
+
         if not self.use_emu:
             cosmo_pars["transfer_function"] = self.transfer_function
             cosmo_pars["matter_power_spectrum"] = self.matter_pk
