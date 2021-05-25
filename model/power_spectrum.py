@@ -1,6 +1,5 @@
 import numpy as np
 import pyccl as ccl
-from model.cosmo_utils import COSMO_CHECK
 
 
 def hm_bias(cosmo, hmc, a, profile, **kwargs):
@@ -99,4 +98,5 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                                 f_ka=hm_correction_mod)
 
     cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)
+    print(cl)
     return cl
