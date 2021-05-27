@@ -90,7 +90,7 @@ class HM_Gauss(object):
         .. note: Same `kmax` as HALOFIT since we calibrate against it
     """
     def __init__(self, cosmo,
-                 k_range=[1e-3, 5], nlk=128,
+                 k_range=[0.1, 5], nlk=128,
                  z_range=[0., 1.], nz=32,
                  **kwargs):
         hf = HM_halofit(cosmo, **kwargs).rk_interp
