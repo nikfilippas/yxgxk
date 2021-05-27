@@ -88,8 +88,8 @@ params:
     # proposal: 0.005
 
   ygk_siglM_0: 0.15
-  ygk_fc: 1.
-  ygk_alpha: 1.
+  ygk_fc_0: 1.
+  ygk_alpha_0: 1.
 
   ygk_aHM_gg: 1.37469835
     # prior:
