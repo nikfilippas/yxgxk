@@ -50,7 +50,7 @@ maps:
     lM1_0: 11.34
     lMmin_0: 10.09
     n_s: 0.9665
-    r_corr_gk: 0
+    r_corr_gk: 0.
     r_corr_gy: -0.022
     sigma8: 0.8102
     width: 1.
@@ -100,7 +100,7 @@ params:
 - alias: lMmin_0
   label: M_0
   name: lM0_0
-  value: 12.0
+  value: 10.09
   vary: false
 
 - label: M_1
@@ -110,7 +110,7 @@ params:
     values:
     - 10.0
     - 16.0
-  value: 13.0
+  value: 11.34
   vary: true
 
 - label: M_{\rm min}
@@ -120,7 +120,7 @@ params:
     values:
     - 10.0
     - 16.0
-  value: 12.0
+  value: 10.09
   vary: true
 
 - label: f_c_0
@@ -145,7 +145,7 @@ params:
     values:
     - 0.0
     - 1.0
-  value: 0.25
+  value: 0.62
   vary: true
 
 - label: \rho_{gy}
@@ -215,7 +215,7 @@ params:
     values:
     - 0.1
     - 1.0
-  value: 1.
+  value: 1.37469835
   vary: false
 
 - label: a_{\rm HM}
@@ -225,7 +225,7 @@ params:
     values:
     - 0.1
     - 1.0
-  value: 1.
+  value: 1.37469835
   vary: false
 
 - label: a_{\rm HM}
@@ -235,5 +235,5 @@ params:
     values:
     - 0.1
     - 1.0
-  value: 1.
+  value: 1.37469835
   vary: false
