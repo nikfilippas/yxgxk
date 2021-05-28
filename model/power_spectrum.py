@@ -68,7 +68,7 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     # Set up covariance
     p2pt = get_2pt(p1, p2, **kwargs)
 
-    k_arr = np.geomspace(1e-3, 1e2, kpts)
+    k_arr = np.logspace(-3, 2, kpts)
 
     if p1.type == "g":
         zmin, zmax = p1.zrange
@@ -98,5 +98,4 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                                 f_ka=hm_correction_mod)
 
     cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)
-    print(cl)
     return cl

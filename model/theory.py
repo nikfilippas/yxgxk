@@ -1,6 +1,5 @@
 import numpy as np
 from .power_spectrum import hm_ang_power_spectrum
-from .cosmo_utils import COSMO_CHECK
 
 
 def get_theory(p, dm, cosmo, hmc,
@@ -27,7 +26,6 @@ def get_theory(p, dm, cosmo, hmc,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
                                    **kwargs)
-        # print(cl)
         cl *= bms  # multiply by beams
 
         if return_separated:
@@ -36,4 +34,6 @@ def get_theory(p, dm, cosmo, hmc,
             cls_out += cl.tolist()
 
     cls_out = np.array(cls_out)
+    # print(cls_out)
+    # exit(1)
     return cls_out

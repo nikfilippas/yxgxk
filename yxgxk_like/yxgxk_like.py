@@ -7,7 +7,6 @@ from scipy.integrate import simps
 import numpy as np
 import os
 
-
 # Beams
 def beam_gaussian(l, fwhm_amin):
     sigma_rad = np.radians(fwhm_amin / 2.355 / 60)
@@ -278,7 +277,7 @@ class YxGxKLike(Likelihood):
                     prof1, prof_2pt, prof2,
                     kpts=128, zpts=8, **pars):
 
-        k_arr = np.geomspace(1e-3, 1e2, kpts)
+        k_arr = np.logspace(-3, 2, kpts)
 
         zmin, zmax = prof1.zrange  # assuming prof1.type=="g"
         a_arr = np.linspace(1/(1+zmax), 1, zpts)
@@ -359,7 +358,7 @@ class YxGxKLike(Likelihood):
             cl_theory += cl.tolist()
 
         cl_theory = np.array(cl_theory)
-        print(cl_theory)
+        # print(cl_theory)
         # exit(1)
         return cl_theory
 
@@ -387,6 +386,7 @@ class HM_halofit(object):
         k_arr = np.geomspace(*k_range, nk)
         z_arr = np.linspace(*z_range, nz)
         a_arr = 1/(1+z_arr)
+        a_arr = a_arr[::-1]
 
         # ratio of linear-to-nonlinear matter power
         hmd = ccl.halos.MassDef(Delta, rho_type)
@@ -421,8 +421,8 @@ class HM_halofit(object):
 
 class HM_Gauss(object):
     def __init__(self, cosmo,
-                  k_range=[0.1, 5], nk=128,
-                  z_range=[0, 1], nz=32,
+                  k_range=[0.1, 5.], nk=128,
+                  z_range=[0., 1.], nz=32,
                   **kwargs):
         # HALOFIT prediction
         hf = HM_halofit(cosmo, **kwargs).rk_interp
@@ -431,6 +431,7 @@ class HM_Gauss(object):
         k_arr = np.geomspace(*k_range, nk)
         z_arr = np.linspace(*z_range, nz)
         a_arr = 1/(1+z_arr)
+        a_arr = a_arr[::-1]
 
         # fit all parameters at all redshifts
         POPT = [[] for i in range(a_arr.size)]
