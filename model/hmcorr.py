@@ -30,32 +30,34 @@ class HM_halofit(object):
     .. note: non-linear prediction accurate up to `k~5`
     """
     def __init__(self, cosmo,
-                  k_range=[1e-3, 5], nlk=128,
+                  k_range=[0.1, 5], nlk=512,
                   z_range=[0., 1.], nz=32,
                   Delta=500, rho_type='critical',
                   **kwargs):
 
-        k_arr = np.geomspace(k_range[0], k_range[1], nlk)
-        a_arr = 1/(1+np.linspace(z_range[0], z_range[1], nz))
+        k_arr = np.geomspace(*k_range, nlk)
+        a_arr = 1/(1+np.linspace(*z_range, nz))
+        a_arr = a_arr[::-1]
 
         hmd = ccl.halos.MassDef(Delta, rho_type)
-        if (Delta, rho_type) == (200, "matter"):
-            cM = ccl.halos.ConcentrationDuffy08(hmd)
-        elif (Delta, rho_type) == (500, "critical"):
-            cM = ccl.halos.halos_extra.ConcentrationDuffy08(hmd)
-        else:
-            raise ValueError("c(M) relation for Delta=(%d %s) not implemented." % (Delta, rho_type))
+        cM = ccl.halos.ConcentrationDuffy08(hmd)
         NFW = ccl.halos.profiles.HaloProfileNFW(cM)
         hmc = get_hmcalc(cosmo, Delta, rho_type, **kwargs)
-        pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc, k_arr, a_arr, NFW,
-                                                 normprof1=True, normprof2=True)
+        pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc,
+                                                 k_arr, a_arr,
+                                                 NFW,
+                                                 normprof1=True,
+                                                 normprof2=True)
 
         pk_hf = np.array([ccl.nonlin_matter_power(cosmo, k_arr, a)
                           for a in a_arr])
         ratio = pk_hf / pk_hm
 
-        self.rk_func = interp2d(np.log10(k_arr), a_arr, ratio,
-                                bounds_error=False, fill_value=1)
+        self.rk_func = interp2d(np.log10(k_arr),
+                                a_arr,
+                                ratio,
+                                bounds_error=False,
+                                fill_value=1)
 
 
     def rk_interp(self, k, a, **kwargs):
@@ -90,12 +92,13 @@ class HM_Gauss(object):
         .. note: Same `kmax` as HALOFIT since we calibrate against it
     """
     def __init__(self, cosmo,
-                 k_range=[0.1, 5], nlk=128,
+                 k_range=[0.1, 5.], nlk=128,
                  z_range=[0., 1.], nz=32,
                  **kwargs):
         hf = HM_halofit(cosmo, **kwargs).rk_interp
-        k_arr = np.geomspace(k_range[0], k_range[1], nlk)
-        a_arr = 1/(1+np.linspace(z_range[0], z_range[1], nz))
+        k_arr = np.geomspace(*k_range, nlk)
+        a_arr = 1/(1+np.linspace(*z_range, nz))
+        a_arr = a_arr[::-1]
 
         gauss = lambda k, A, k0, s: 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
 
@@ -114,7 +117,7 @@ class HM_Gauss(object):
         self.sf = interp1d(a_arr, BF[:, 2], bounds_error=False, fill_value=1e64)
 
 
-    def hm_correction(self, k, a, squeeze=True, **kwargs):
+    def hm_correction(self, k, a, aHM=None, squeeze=True):
         """
         Halo model correction as a function of wavenumber and scale factor.
 
@@ -127,9 +130,8 @@ class HM_Gauss(object):
         Returns:
             R (float ot array): halo model correction for given k
         """
-        A = kwargs.get("a_HMcorr")
-        # overall best fit for non g- cross-correlations
-        if A is None: A = 0.315
+        if aHM is None:
+            aHM = self.af(a)
 
         k0 = self.k0f(a)
         s = self.sf(a)
@@ -139,5 +141,5 @@ class HM_Gauss(object):
         k0 = k0[..., None]
         s = s[..., None]
 
-        R = 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
+        R = 1 + aHM * np.exp(-0.5*(np.log10(k/k0)/s)**2)
         return R.squeeze() if squeeze else R
