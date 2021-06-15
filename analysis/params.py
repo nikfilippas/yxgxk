@@ -1,11 +1,9 @@
 import yaml
-import pyccl as ccl
 from pyccl.halos.hmfunc import mass_function_from_name
 from pyccl.halos.hbias import halo_bias_from_name
 from .bandpowers import Bandpowers
-from model.cosmo_utils import COSMO_KEYS
+from model.cosmo_utils import COSMO_KEYS, COSMO_ARGS
 from likelihood.ccl_baccoemu import ccl_baccoemu
-
 
 
 class ParamRun(object):
@@ -17,7 +15,7 @@ class ParamRun(object):
     def __init__(self, fname):
         with open(fname) as f:
             self.p = yaml.safe_load(f)
-
+        self.check_trf = False
 
     def get_massfunc(self):
         """Get preferred mass function."""
@@ -29,7 +27,6 @@ class ParamRun(object):
         except KeyError:
             raise ValueError("Provide cosmological mass function.")
 
-
     def get_halobias(self):
         """Get preferred halo bias model."""
         try:
@@ -39,7 +36,6 @@ class ParamRun(object):
             return halo_bias_from_name(hb)
         except KeyError:
             raise ValueError("Provide halo bias model.")
-
 
     def get_cosmo_pars(self, hmfunc=True, hmbias=True):
         """Extract cosmological parameters from yaml file."""
@@ -52,12 +48,20 @@ class ParamRun(object):
             pars["halo_bias"] = self.get_halobias()
         return pars
 
+    def check_emu(self):
+        if not self.check_trf:
+            if self.get("mcmc")["transfer_function"] == "baccoemu":
+                self.cc = ccl_baccoemu()  # load emulator
+            else:
+                self.cc = None
+            self.check_trf = True
 
     def get_cosmo(self):
         """Get default cosmology."""
+        self.check_emu()
         pars = self.get_cosmo_pars(hmfunc=False, hmbias=False)
-        return ccl.Cosmology(**pars)
-
+        # return ccl.Cosmology(**pars)
+        return COSMO_ARGS(pars, transfer=self.cc)
 
     def get_outdir(self):
         """Get output directory
@@ -70,7 +74,6 @@ class ParamRun(object):
             outdir += "/"
         return outdir
 
-
     def get_niter(self):
         """Get ``pymaster.Field`` number of alm iterations.
 
@@ -78,7 +81,6 @@ class ParamRun(object):
             int: integer number of iterations
         """
         return self.p['global']['n_iter']
-
 
     def get_sampler_prefix(self, data_name):
         """Get file prefix for sampler-related files.
@@ -91,7 +93,6 @@ class ParamRun(object):
         fname += data_name + "_"
         return fname
 
-
     def get_bandpowers(self):
         """Create a `Bandpowers` object from input.
 
@@ -100,7 +101,6 @@ class ParamRun(object):
         """
         return Bandpowers(self.p['global']['nside'],
                           self.p['bandpowers'])
-
 
     def get_models(self):
         """Compile set of models from input.
@@ -112,7 +112,6 @@ class ParamRun(object):
         for d in self.p['maps']:
             models[d['name']] = d.get('model')
         return models
-
 
     def get_fname_mcm(self, mask1, mask2, jk_region=None):
         """Get file name for the mode-coupling matrix associated with
@@ -131,7 +130,6 @@ class ParamRun(object):
         fname += ".mcm"
         return fname
 
-
     def get_prefix_cls(self, name1, name2):
         """Get file prefix for power spectra.
 
@@ -142,7 +140,6 @@ class ParamRun(object):
             str: file prefix.
         """
         return self.get_outdir()+"cls_"+name1+"_"+name2
-
 
     def get_fname_cls(self, name1, name2, jk_region=None):
         """Get file name for power spectra.
@@ -161,7 +158,6 @@ class ParamRun(object):
         # print(fname)
         return fname
 
-
     def get_fname_cmcm(self, mask1, mask2, mask3, mask4):
         """Get file name for the coupling coefficients associated with
         the calculation of a covariance matrix.
@@ -176,7 +172,6 @@ class ParamRun(object):
         fname += "_".join([mask1, mask2, mask3, mask4])
         fname += ".cmcm"
         return fname
-
 
     def get_fname_cov(self, name1, name2, name3, name4, suffix):
         """Get file name for the the covariance matrix of power spectra
@@ -197,16 +192,13 @@ class ParamRun(object):
         fname += ".npz"
         return fname
 
-
     def get(self, k):
         """Return a section of the param file from its name."""
         return self.p.get(k)
 
-
     def do_jk(self):
         """Return true if JKs are requested."""
         return self.p['jk']['do']
-
 
     def get_nside(self):
         """Return HEALPix resolution."""
