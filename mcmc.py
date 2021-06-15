@@ -6,7 +6,6 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.data import DataManager
 from model.theory import get_theory
-from model.hmcorr import HM_Gauss
 from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 from likelihood.ccl_baccoemu import ccl_baccoemu
@@ -23,7 +22,6 @@ fname_params = args.fname_params
 
 p = ParamRun(fname_params)
 cosmo_vary = COSMO_VARY(p)  # vary cosmology in this analysis?
-hm_correction = np.load("hm_correction.npy", allow_pickle=True).item()
 if p.get("mcmc")["transfer_function"] == "baccoemu":
     cc = ccl_baccoemu()  # load emulator
 else:
@@ -65,16 +63,14 @@ for v in p.get('data_vectors'):
     # Theory predictor wrapper
     if not cosmo_vary:
         cosmo = p.get_cosmo()
-        hmc = get_hmcalc(cosmo, **{"mass_function": p.get_massfunc(),
-                                   "halo_bias": p.get_halobias()})
+        hmc = get_hmcalc(mass_function=p.get_massfunc(),
+                         halo_bias=p.get_halobias())
 
         def th(kwargs):
             """Theory for fixed cosmology."""
             cosmo_fid = cosmo
             hmc_fid = hmc
-            return get_theory(p, d, cosmo_fid, hmc_fid,
-                              hm_correction=hm_correction,
-                              **kwargs)
+            return get_theory(p, d, cosmo_fid, hmc_fid, **kwargs)
     else:
         temp = {"mass_function": p.get_massfunc(),
                 "halo_bias": p.get_halobias()}
@@ -82,10 +78,8 @@ for v in p.get('data_vectors'):
             """Theory for free cosmology."""
             kwargs = {**temp, **kwargs}
             cosmo_fid = COSMO_ARGS(kwargs, transfer=cc)
-            hmc_fid = get_hmcalc(cosmo_fid, **kwargs)
-            return get_theory(p, d, cosmo_fid, hmc_fid,
-                              hm_correction=hm_correction,
-                              **kwargs)
+            hmc_fid = get_hmcalc(**kwargs)
+            return get_theory(p, d, cosmo_fid, hmc_fid, **kwargs)
 
     # Set up likelihood
     lik = Likelihood(p.get('params'), d.data_vector, d.covar, th,
@@ -96,7 +90,7 @@ for v in p.get('data_vectors'):
     # Benchmarks
     print(dict(zip(lik.p_free_names, p0)))
     print("chisq:", lik.chi2(p0))
-    exit(1)
+    # exit(1)
     sam = Sampler(lik.lnprob, p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
                   p.get('mcmc'))

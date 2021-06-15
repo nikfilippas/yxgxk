@@ -37,12 +37,11 @@ def get_2pt(p1, p2, **kwargs):
                 r_corr = 0
                 print(' -- 2pt covariance for %sx%s defaulting to 0' %
                      (p1.type, p2.type))
-        return ccl.halos.Profile2ptR(r_corr=r_corr)
+        return ccl.halos.Profile2pt(r_corr=r_corr)
 
 
 def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                           include_1h=True, include_2h=True,
-                          hm_correction=None,
                           kpts=128, zpts=8, **kwargs):
     """Angular power spectrum using CCL.
 
@@ -53,7 +52,6 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
         profiles (tuple of `model.data.ProfTracer`): profile and tracer pair
         include_1h (`bool`): whether to include the 1-halo term
         include_2h (`bool`): whether to include the 2-halo term
-        hm_correction (`func`): multiplicative function of `k` and `a`
         kpts (`int`): number of wavenumber integration points
         zpts (`int`): number of redshift integration points
         **kwagrs: Parametrisation of the profiles and cosmology.
@@ -79,23 +77,30 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
 
     a_arr = np.linspace(1/(1+zmax), 1, zpts)
 
-    if hm_correction is not None:
-        aHM = kwargs.get("a_HM_" + p1.type + p2.type)
-        hm_correction_mod = lambda k, a, cosmo: hm_correction(k, a, aHM)
+    aHM = kwargs.get("a_HM_" + p1.type + p2.type)
+    if aHM is not None:
+        hm_correction = lambda a: aHM
     else:
-        hm_correction_mod = None
+        hm_correction = None
+
+    sHM = kwargs.get("s_HM_" + p1.type + p2.type)
+    if sHM is not None:
+        supress_func = lambda a: sHM
+    else:
+        supress_func = None
 
     pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
                                 prof=p1.profile,
                                 prof_2pt=p2pt,
                                 prof2=p2.profile,
-                                normprof1=(p1.type!='y'),  # don't normalise
+                                normprof=(p1.type!='y'),   # don't normalise
                                 normprof2=(p2.type!='y'),  # pressure profile
                                 get_1h=include_1h,
                                 get_2h=include_2h,
                                 lk_arr=np.log(k_arr),
                                 a_arr=a_arr,
-                                f_ka=hm_correction_mod)
+                                smooth_transition=hm_correction,
+                                supress_1h=supress_func)
 
-    cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, l, pk)
+    cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, ell=l, p_of_k_a=pk)
     return cl

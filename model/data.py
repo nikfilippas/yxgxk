@@ -27,7 +27,7 @@ class ProfTracer(object):
             self.profile = ccl.halos.HaloProfilePressureGNFW()
         else:
             hmd = ccl.halos.MassDef(500, 'critical')
-            cM = ccl.halos.ConcentrationDuffy08(hmd)
+            cM = ccl.halos.ConcentrationDuffy08(mass_def=hmd)
 
             if m['type'] == 'g':
                 # transpose N(z)'s
@@ -43,10 +43,11 @@ class ProfTracer(object):
                 self.lmax = kmax*chimean-0.5
                 self.bz = np.ones_like(self.z)
                 ns_ind = m.get("ns_independent", False)
-                self.profile = ccl.halos.HaloProfileHOD(cM, ns_independent=ns_ind)
+                self.profile = ccl.halos.HaloProfileHOD(c_m_relation=cM,
+                                                        ns_independent=ns_ind)
 
             elif m['type'] == 'k':
-                self.profile = ccl.halos.HaloProfileNFW(cM)
+                self.profile = ccl.halos.HaloProfileNFW(c_m_relation=cM)
         if self.profile is not None:
             try:
                 args = self.profile.update_parameters.__code__.co_varnames
@@ -79,13 +80,13 @@ class ProfTracer(object):
         if self.type == 'g':
             nz_new = self.nzf(self.z_avg + (self.z-self.z_avg)/kwargs['width'])
             nz_new /= simps(nz_new, x=self.z)
-            self.tracer = ccl.NumberCountsTracer(cosmo, False,
-                                            (self.z, nz_new),
-                                            (self.z, self.bz))
+            self.tracer = ccl.NumberCountsTracer(cosmo, has_rsd=False,
+                                                 dndz=(self.z, nz_new),
+                                                 bias=(self.z, self.bz))
         elif self.type == 'y':
             self.tracer = ccl.tSZTracer(cosmo)
         elif self.type == 'k':
-            self.tracer = ccl.CMBLensingTracer(cosmo, 1100.)
+            self.tracer = ccl.CMBLensingTracer(cosmo, z_source=1100.)
 
     def update_parameters(self, cosmo, **kwargs):
         if self.type != "k":
