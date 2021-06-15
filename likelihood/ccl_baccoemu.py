@@ -37,7 +37,7 @@ class ccl_baccoemu(object):
                     "theta_out", "theta_inn", "M_inn"]
         self.pars = dict.fromkeys(emu_keys)
 
-    def update_parameters(self, Omega_c=None, Omega_b=None,
+    def update_parameters(self, *, Omega_c=None, Omega_b=None,
                           h=None, sigma8=None, n_s=None,
                           w0=None, wa=None, m_nu=None,
                           M_c=None, eta=None, beta=None,
