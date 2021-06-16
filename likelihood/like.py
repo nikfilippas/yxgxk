@@ -171,7 +171,9 @@ class Likelihood(object):
         if self.debug:
             print(par, -2 * pr)
 
-        return -2 * pr
+        c2 = -2 * pr
+        # print(c2)
+        return c2
 
 
     def plot_data(self, par, dvec, save_figures=False, save_data=False,

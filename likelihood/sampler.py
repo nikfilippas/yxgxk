@@ -86,7 +86,7 @@ class Sampler(object):
 
     def chi2(self, p):
         chisq = -2*self.lnprob(p)
-        # print(chisq)
+        print(chisq)
         return chisq
 
     def update_p0(self, p0):
