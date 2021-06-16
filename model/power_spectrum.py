@@ -42,7 +42,7 @@ def get_2pt(p1, p2, **kwargs):
 
 def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                           include_1h=True, include_2h=True,
-                          kpts=128, zpts=8, **kwargs):
+                          kpts=128, zpts=32, **kwargs):
     """Angular power spectrum using CCL.
 
     Args:
@@ -73,9 +73,9 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
     elif p2.type == "g":
         zmin, zmax = p2.zrange
     else:
-        zmax = 1.0
+        zmax = 6.0
 
-    a_arr = np.linspace(1/(1+zmax), 1, zpts)
+    a_arr = np.linspace(1/(1+zmax), 1., zpts)
 
     aHM = kwargs.get("a_HM_" + p1.type + p2.type)
     if aHM is not None:
