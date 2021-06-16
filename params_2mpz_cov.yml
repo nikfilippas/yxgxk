@@ -17,10 +17,10 @@ data_vectors:
     tracers:
     - 2mpz
     - y_milca
-  # - lmin: 0
-  #   tracers:
-  #   - 2mpz
-  #   - lens
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - lens
   type: Cl
 
 global:
@@ -41,22 +41,23 @@ maps:
   model:
     Omega_b: 0.048974682
     Omega_c: 0.26066676
-    a_HM_gg: 1.37469835
-    a_HM_gy: 1.37469835
-    a_HM_gk: 1.37469835
-    s_HM_gg: 0.04
-    s_HM_gy: 0.04
-    s_HM_gk: 0.04
-    mass_bias: 0.663
+    a_HM_gg: 0.7
+    a_HM_gy: 0.7
+    a_HM_gk: 0.7
+    s_HM_gg: 0.05
+    s_HM_gy: 0.05
+    s_HM_gk: 0.05
+    mass_bias: 0.8
     h: 0.6766
-    lM0_0: 11.66
-    lM1_0: 12.99
-    lMmin_0: 11.66
+    lM0_0: 11.20
+    lM1_0: 12.46
+    lMmin_0: 11.20
     n_s: 0.9665
-    r_corr_gk: 0.
-    r_corr_gy: -0.104
+    r_corr_gk: 0.0
+    r_corr_gy: -0.5663
+    r_corr_gk: 0.0
     sigma8: 0.8102
-    width: 1.
+    width: 1.0
   name: 2mpz
   ns_independent: false
   systematics:
@@ -94,9 +95,9 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 1000
-  n_walkers: 2
-  run_name: new_run
+  n_steps: 0
+  n_walkers: 96
+  run_name: test_run3
   transfer_function: baccoemu
 
 params:
@@ -216,19 +217,19 @@ params:
   prior:
     type: TopHat
     values:
-    - 0.1
-    - 1.0
-  value: 1.37469835
-  vary: false
+    - 0.5
+    - 1.5
+  value: 1.0
+  vary: true
 
 - label: a_{\rm HM}
   name: a_HM_gy
   prior:
     type: TopHat
     values:
-    - 0.1
-    - 1.0
-  value: 1.37469835
+    - 0.5
+    - 1.5
+  value: 1.0
   vary: false
 
 - label: a_{\rm HM}
@@ -236,9 +237,9 @@ params:
   prior:
     type: TopHat
     values:
-    - 0.1
-    - 1.0
-  value: 1.37469835
+    - 0.5
+    - 1.5
+  value: 1.0
   vary: false
 
 - label: s_{\rm HM}
@@ -246,8 +247,8 @@ params:
   prior:
     type: TopHat
     values:
-    - 0.1
-    - 1.0
+    - 0.0
+    - 1e+16
   value: 0.04
   vary: false
 
@@ -256,8 +257,8 @@ params:
   prior:
     type: TopHat
     values:
-    - 0.1
-    - 1.0
+    - 0.0
+    - 1e+16
   value: 0.04
   vary: false
 
@@ -266,7 +267,7 @@ params:
   prior:
     type: TopHat
     values:
-    - 0.1
-    - 1.0
+    - 0.0
+    - 1e+16
   value: 0.04
   vary: false
