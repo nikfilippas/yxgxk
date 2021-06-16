@@ -24,8 +24,15 @@ class ccl_baccoemu(object):
     """
 
     def __init__(self):
+        import os
+        import warnings
+        # supress TensorFlow GPU warnings for baccoemu
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
         import baccoemu
-        self.emu = baccoemu.Matter_powerspectrum("nn")
+        with warnings.catch_warnings():
+            # supress baccoemu pickling warnings
+            warnings.simplefilter("ignore")
+            self.emu = baccoemu.Matter_powerspectrum("nn")
         self._initialize()
 
     def _initialize(self):
