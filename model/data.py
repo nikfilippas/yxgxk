@@ -51,8 +51,9 @@ class ProfTracer(object):
         if self.profile is not None:
             try:
                 args = self.profile.update_parameters.__code__.co_varnames
-                argcount = self.profile.update_parameters.__code__.co_argcount
-                self.args = args[1: argcount]  # discard self & locals
+                code = self.profile.update_parameters.__code__
+                count = code.co_argcount + code.co_kwonlyargcount
+                self.args = args[1: count]  # discard self & locals
             except AttributeError:  # profile has no parameters
                 self.args = {}
 
@@ -74,7 +75,8 @@ class ProfTracer(object):
 
     def select_pars(self, kwargs):
         """ Output the kwargs used by the profile. """
-        return {key: kwargs.get(key) for key in self.args}
+        pars_dict = {key: kwargs.get(key) for key in self.args}
+        return pars_dict
 
     def update_tracer(self, cosmo, **kwargs):
         if self.type == 'g':
