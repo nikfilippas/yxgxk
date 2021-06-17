@@ -42,7 +42,7 @@ def get_2pt(p1, p2, **kwargs):
 
 def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                           include_1h=True, include_2h=True,
-                          kpts=128, zpts=32, **kwargs):
+                          kpts=128, zpts=16, **kwargs):
     """Angular power spectrum using CCL.
 
     Args:
