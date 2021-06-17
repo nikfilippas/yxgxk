@@ -22,6 +22,7 @@ def get_theory(p, dm, cosmo, hmc,
         cl = hm_ang_power_spectrum(cosmo, hmc, ls, tr,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
+                                   zpts=p.get("mcmc")["zpts"],
                                    **kwargs)
         cl *= bms  # multiply by beams
 

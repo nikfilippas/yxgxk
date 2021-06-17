@@ -99,6 +99,7 @@ mcmc:
   n_walkers: 96
   run_name: test_run3
   transfer_function: baccoemu
+  zpts: 16
 
 params:
 - alias: lMmin_0
