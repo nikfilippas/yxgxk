@@ -2,6 +2,7 @@ import pymaster as nmt
 import numpy as np
 import healpy as hp
 import os
+import warnings
 
 
 class Field(object):
@@ -36,12 +37,15 @@ class Field(object):
         assert is_ndens is not None, "Declare whether field is Delta_g!"
         self.is_ndens = is_ndens  # True if this is a delta_gal map
         # Read mask
-        self.mask = hp.ud_grade(hp.read_map(fname_mask, field=field_mask,
-                                            verbose=False, dtype=float),
-                                nside_out=nside, dtype=float)
-        # Read map
-        map0 = hp.read_map(fname_map, field=field_map,
-                           verbose=False, dtype=float, partial=False)
+        with warnings.catch_warnings():
+            # ignore FITS file indexing scheme (IDXSCHM)
+            warnings.simplefilter("ignore")
+            self.mask = hp.ud_grade(hp.read_map(fname_mask, field=field_mask,
+                                                verbose=False, dtype=float),
+                                    nside_out=nside, dtype=float)
+            # Read map
+            map0 = hp.read_map(fname_map, field=field_map,
+                               verbose=False, dtype=float, partial=False)
         self.nside_original = hp.npix2nside(len(map0))
         if is_ndens:
             map0 = hp.alm2map(hp.map2alm(map0), nside, verbose=False)
@@ -72,19 +76,21 @@ class Field(object):
             self.dndz = None
 
         # Load contaminant templates
-        temp = None
-        if syst_list is not None:
-            for sname in syst_list:
-                if os.path.isfile(sname):
-                    if temp is None:
-                        temp = []
-                    t = hp.ud_grade(hp.read_map(sname,
-                                                verbose=False,
-                                                dtype=float,
-                                                partial=False),
-                                    nside_out=nside, dtype=float)
-                    t_mean = np.sum(t * self.mask)/np.sum(self.mask)
-                    temp.append([mask_bn * (t-t_mean)])
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            temp = None
+            if syst_list is not None:
+                for sname in syst_list:
+                    if os.path.isfile(sname):
+                        if temp is None:
+                            temp = []
+                        t = hp.ud_grade(hp.read_map(sname,
+                                                    verbose=False,
+                                                    dtype=float,
+                                                    partial=False),
+                                        nside_out=nside, dtype=float)
+                        t_mean = np.sum(t * self.mask)/np.sum(self.mask)
+                        temp.append([mask_bn * (t-t_mean)])
 
         # Generate NmtField
         self.field = nmt.NmtField(self.mask, [map], templates=temp, n_iter=n_iter)
