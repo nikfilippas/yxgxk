@@ -80,10 +80,10 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
     a = 1/(1+z)
     chi = ccl.comoving_radial_distance(cosmo, a)
 
-    w1 = profiles[0].tracer.get_kernel(chi).squeeze()
-    w2 = profiles[1].tracer.get_kernel(chi).squeeze()
-    w3 = profiles[2].tracer.get_kernel(chi).squeeze()
-    w4 = profiles[3].tracer.get_kernel(chi).squeeze()
+    w1 = profiles[0].tracer.get_kernel(chi=chi).squeeze()
+    w2 = profiles[1].tracer.get_kernel(chi=chi).squeeze()
+    w3 = profiles[2].tracer.get_kernel(chi=chi).squeeze()
+    w4 = profiles[3].tracer.get_kernel(chi=chi).squeeze()
     H_inv = (2997.92458 * jac/(ccl.h_over_h0(cosmo, a)*cosmo["h"]))  # c*z/H(z)
     N = w1*w2*w3*w4*H_inv/(4*np.pi*fsky*chi**6)
 
@@ -97,8 +97,9 @@ def hm_ang_1h_covariance(fsky, l, cosmo, hmc, profiles,
     for ii, (aa, cchi) in enumerate(zip(a, chi)):
         k = (l+1/2)/cchi
         cov = hmc.I_0_22(cosmo, k, aa,
-                         p1.profile, p2pt_12, p2.profile,
-                         p3.profile, p2pt_34, p4.profile)
+                         prof=p1.profile, prof2=p2.profile,
+                         prof3=p3.profile, prof4=p4.profile,
+                         prof12_2pt=p2pt_12, prof34_2pt=p2pt_34)
         for p in profiles:
             if p.type != 'y':
                 cov *= hmc.profile_norm(cosmo, aa, p.profile)

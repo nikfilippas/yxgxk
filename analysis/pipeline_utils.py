@@ -77,7 +77,7 @@ def get_profile(p, profname):
     prof = ProfTracer(m)
     if prof.type == "g":
         kwargs = m["model"]
-        cosmo = COSMO_ARGS_EMU(kwargs)
+        cosmo = COSMO_ARGS(kwargs)
         kwargs["mass_function"] = p.get_massfunc()
         kwargs["halo_bias"] = p.get_halobias()
     else:
@@ -186,7 +186,7 @@ def get_power_spectrum(p, f1, f2, jk_region=None, save_windows=True):
 
 
 def get_xcorr(p, fields, jk_region=None, save_windows=True):
-    """Constructs a 2-level dictionary of cross-correlations."""
+    """Construct a 2-level dictionary of cross-correlations."""
     xcorr = {}
 
     for name1 in fields:
@@ -204,9 +204,7 @@ def get_xcorr(p, fields, jk_region=None, save_windows=True):
 
 
 def model_xcorr(p, fields, xcorr):
-    """Models the angular power spectrum."""
-    hm_correction = np.load("hm_correction.npy", allow_pickle=True).item()
-
+    """Model the angular power spectrum."""
     # copy & reset shape
     mcorr = copy.deepcopy(xcorr)
     for name1 in mcorr:
@@ -237,9 +235,8 @@ def model_xcorr(p, fields, xcorr):
                     kwargs = kwargs1
                     cosmo = COSMO_ARGS(kwargs)
                     l = mcorr[name1][name2].leff
-                    hmc = get_hmcalc(cosmo, **kwargs)
+                    hmc = get_hmcalc(**kwargs)
                     cl = hm_ang_power_spectrum(cosmo, hmc, l, (prof1, prof2),
-                                               hm_correction=hm_correction,
                                                **kwargs)
                     if type1 == type2 == 'g':
                         nl = np.load(p.get_fname_cls(f1.name, f2.name))['nls']
@@ -301,7 +298,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
         models_b = p.get_models()[f12.name]
         print("models:", models_a, models_b)
         kwargs = models_a
-        hmc = get_hmcalc(cosmo, **kwargs)
+        hmc = get_hmcalc(**kwargs)
         # Calculate covariace
         dcov = hm_ang_1h_covariance(fsky, leff, cosmo, hmc, profiles, **kwargs)
         dcov *= Beam(f11.name+f12.name, leff, p.get_nside())[:, None]
