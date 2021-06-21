@@ -44,8 +44,8 @@ maps:
     mass_bias: 0.6596
     sigma8: 0.8102
     a_HM_gg: 0.5735
-    # a_HM_gy: 0.7
-    # a_HM_gk: 0.7
+    a_HM_gy: 0.5735
+    a_HM_gk: 0.5735
     r_corr_gy: -0.5285
     r_corr_gk: 0.0
     width: 1.0
@@ -99,9 +99,9 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 0
+  n_steps: 10000
   n_walkers: 96
-  run_name: run0
+  run_name: run1
   transfer_function: baccoemu
   zpts: 16
 
@@ -155,7 +155,7 @@ params:
     - -1
     - 1
   value: 0.0
-  vary: false
+  vary: true
 
 - label: w_{N(z)}
   name: width
@@ -165,7 +165,7 @@ params:
     - 0.95
     - 1.05
   value: 1.0
-  vary: false
+  vary: true
 
 - label: \sigma_{{\rm ln}M}
   name: siglM_0
@@ -182,27 +182,27 @@ params:
   value: 1.0
   vary: true
 
-- alias: a_HM_gg
-  label: a_{\rm HM}
+- label: a_{\rm HM}
   name: a_HM_gy
-  # prior:
-  #   type: TopHat
-  #   values:
-  #   - 0.5
-  #   - 1.5
+  # alias: a_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 1.5
   # value: 1.0
-  # vary: false
+  vary: true
 
-- alias: a_HM_gg
-  label: a_{\rm HM}
+- label: a_{\rm HM}
   name: a_HM_gk
-  # prior:
-  #   type: TopHat
-  #   values:
-  #   - 0.5
-  #   - 1.5
+  # alias: a_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 1.5
   # value: 1.0
-  # vary: false
+  vary: true
 
 - label: s_{\rm HM}
   name: s_HM_gg
@@ -257,7 +257,7 @@ params:
     - 0.60
     - 0.95
   value: 0.8102
-  vary: false
+  vary: true
 
 - label: n_s
   name: n_s
