@@ -4,6 +4,7 @@ bandpowers:
   nlb: 20
   nlb_lin: 10
   type: linlog
+
 data_vectors:
 - covar_type: comb_m
   name: wisc5
@@ -21,38 +22,37 @@ data_vectors:
     - wisc5
     - lens
   type: Cl
+
 global:
   n_iter: 3
   nside: 2048
-  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_cobaya
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/out
+
 jk:
   do: true
   nside: 8
   store_mcm: true
+
 maps:
 - beam: false
   dndz: data/dndz/wisc5_DIR.txt
   map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits
   mask: mask_lowz
   model:
-    Omega_b: 0.048974682
-    Omega_c: 0.26066676
-    a_HMcorr: 0.1701704243193857
-    alpha: 1.0
-    b_hydro: 0.1862
-    beta_gal: 1.0
-    beta_max: 1.0
-    fc: 1.0
-    h: 0.6766
-    lM0: 11.80
-    lM1: 12.43
-    lMmin: 11.80
-    n_s: 0.9665
-    r_corr_gk: 0.
-    r_corr_gy: -0.6894
+    lMmin_0: 11.80
+    lM1_0: 12.43
+    mass_bias: 0.8138
     sigma8: 0.8102
-    sigmaLogM: 0.15
-    width: 1.
+    a_HM_gg: 0.7
+    # a_HM_gy: 0.7
+    # a_HM_gk: 0.7
+    r_corr_gy: -0.6894
+    r_corr_gk: 0.0
+    width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
   name: wisc5
   ns_independent: false
   systematics:
@@ -68,13 +68,6 @@ maps:
   - data/maps/lambda_sfd_ebv.fits
   type: y
 - beam: 10.0
-  map: data/maps/nilc_ymaps.fits
-  mask: mask_tsz
-  name: y_nilc
-  systematics:
-  - data/maps/lambda_sfd_ebv.fits
-  type: y
-- beam: 10.0
   map: data/maps/HFI_SkyMap_545_2048_R2.02_full.fits
   mask: mask_545
   name: dust_545
@@ -86,11 +79,13 @@ maps:
   ns_independent: false
   systematics: None
   type: k
+
 masks:
   mask_545: data/maps/mask_planck20.fits
   mask_lens_2015: data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits
   mask_lowz: data/maps/mask_v3.fits
   mask_tsz: data/maps/mask_planck60.fits
+
 mcmc:
   continue_mcmc: true
   debug: false
@@ -99,57 +94,41 @@ mcmc:
   mfunc: tinker08
   n_steps: 0
   n_walkers: 96
-  run_name: no_run
+  run_name: run0
+  transfer_function: baccoemu
+  zpts: 16
+
 params:
-- alias: lMmin
+- alias: lMmin_0
   label: M_0
-  name: lM0
-  value: 12.0
-  vary: false
+  name: lM0_0
 
 - label: M_1
-  name: lM1
+  name: lM1_0
   prior:
     type: TopHat
     values:
     - 10.0
     - 16.0
-  value: 13.0
   vary: true
 
 - label: M_{\rm min}
-  name: lMmin
+  name: lMmin_0
   prior:
     type: TopHat
     values:
     - 10.0
     - 16.0
-  value: 12.0
   vary: true
 
-- label: f_c
-  name: fc
-  value: 1.0
-  vary: false
-
-- label: \alpha
-  name: alpha
-  value: 1.0
-  vary: false
-
-- label: \sigma_{{\rm ln}M}
-  name: sigmaLogM
-  value: 0.15
-  vary: false
-
-- label: b_H
-  name: b_hydro
+- label: '1-b_H'
+  name: mass_bias
   prior:
     type: TopHat
     values:
     - 0.0
     - 1.0
-  value: 0.25
+  # value: 0.8
   vary: true
 
 - label: \rho_{gy}
@@ -159,7 +138,6 @@ params:
     values:
     - -1.0
     - 1.0
-  value: 0.0
   vary: true
 
 - label: \rho_{g\kappa}
@@ -182,6 +160,73 @@ params:
   value: 1.0
   vary: false
 
+- label: \sigma_{{\rm ln}M}
+  name: siglM_0
+  value: 0.15
+  vary: false
+
+- label: a_{\rm HM}
+  name: a_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 1.5
+  value: 1.0
+  vary: true
+
+- alias: a_HM_gg
+  label: a_{\rm HM}
+  name: a_HM_gy
+  # prior:
+  #   type: TopHat
+  #   values:
+  #   - 0.5
+  #   - 1.5
+  # value: 1.0
+  # vary: false
+
+- alias: a_HM_gg
+  label: a_{\rm HM}
+  name: a_HM_gk
+  # prior:
+  #   type: TopHat
+  #   values:
+  #   - 0.5
+  #   - 1.5
+  # value: 1.0
+  # vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gy
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gk
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
 - label: \Omega_c
   name: Omega_c
   value: 0.26066676
@@ -202,7 +247,7 @@ params:
   prior:
     type: TopHat
     values:
-    - 0.5
+    - 0.60
     - 0.95
   value: 0.8102
   vary: false
@@ -210,14 +255,4 @@ params:
 - label: n_s
   name: n_s
   value: 0.9665
-  vary: false
-
-- label: a_{\rm HMcorr}
-  name: a_HMcorr
-  prior:
-    type: TopHat
-    values:
-    - 0.1
-    - 1.0
-  value: 0.1701704243193857
   vary: false

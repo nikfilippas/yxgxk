@@ -26,7 +26,7 @@ data_vectors:
 global:
   n_iter: 3
   nside: 2048
-  output_dir: /mnt/extraspace/nikfilippas/yxgxk/output_lensing
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/out
 
 jk:
   do: true
@@ -39,25 +39,20 @@ maps:
   map: data/maps/2mpz_05_01_512.fits
   mask: mask_lowz
   model:
-    Omega_b: 0.048974682
-    Omega_c: 0.26066676
-    a_HM_gg: 0.7
-    a_HM_gy: 0.7
-    a_HM_gk: 0.7
-    s_HM_gg: 0.05
-    s_HM_gy: 0.05
-    s_HM_gk: 0.05
-    mass_bias: 0.8
-    h: 0.6766
-    lM0_0: 11.20
-    lM1_0: 12.46
     lMmin_0: 11.20
-    n_s: 0.9665
-    r_corr_gk: 0.0
+    lM1_0: 12.46
+    mass_bias: 0.8
+    sigma8: 0.8102
+    a_HM_gg: 0.7
+    # a_HM_gy: 0.7
+    # a_HM_gk: 0.7
     r_corr_gy: -0.5663
     r_corr_gk: 0.0
-    sigma8: 0.8102
     width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
   name: 2mpz
   ns_independent: false
   systematics:
@@ -97,7 +92,7 @@ mcmc:
   mfunc: tinker08
   n_steps: 0
   n_walkers: 96
-  run_name: test_run3
+  run_name: run0
   transfer_function: baccoemu
   zpts: 16
 
@@ -105,8 +100,6 @@ params:
 - alias: lMmin_0
   label: M_0
   name: lM0_0
-  value: 10.09
-  vary: false
 
 - label: M_1
   name: lM1_0
@@ -115,7 +108,6 @@ params:
     values:
     - 10.0
     - 16.0
-  value: 11.34
   vary: true
 
 - label: M_{\rm min}
@@ -125,32 +117,16 @@ params:
     values:
     - 10.0
     - 16.0
-  value: 10.09
   vary: true
 
-- label: f_c_0
-  name: fc_0
-  value: 1.0
-  vary: false
-
-- label: \alpha
-  name: alpha_0
-  value: 1.0
-  vary: false
-
-- label: \sigma_{{\rm ln}M}
-  name: siglM_0
-  value: 0.15
-  vary: false
-
-- label: b_H
+- label: '1-b_H'
   name: mass_bias
   prior:
     type: TopHat
     values:
     - 0.0
     - 1.0
-  value: 0.62
+  # value: 0.8
   vary: true
 
 - label: \rho_{gy}
@@ -160,7 +136,6 @@ params:
     values:
     - -1.0
     - 1.0
-  value: 0.0
   vary: true
 
 - label: \rho_{g\kappa}
@@ -181,6 +156,73 @@ params:
     - 0.95
     - 1.05
   value: 1.0
+  vary: false
+
+- label: \sigma_{{\rm ln}M}
+  name: siglM_0
+  value: 0.15
+  vary: false
+
+- label: a_{\rm HM}
+  name: a_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 1.5
+  value: 1.0
+  vary: true
+
+- alias: a_HM_gg
+  label: a_{\rm HM}
+  name: a_HM_gy
+  # prior:
+  #   type: TopHat
+  #   values:
+  #   - 0.5
+  #   - 1.5
+  # value: 1.0
+  # vary: false
+
+- alias: a_HM_gg
+  label: a_{\rm HM}
+  name: a_HM_gk
+  # prior:
+  #   type: TopHat
+  #   values:
+  #   - 0.5
+  #   - 1.5
+  # value: 1.0
+  # vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gy
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gk
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
   vary: false
 
 - label: \Omega_c
@@ -211,64 +253,4 @@ params:
 - label: n_s
   name: n_s
   value: 0.9665
-  vary: false
-
-- label: a_{\rm HM}
-  name: a_HM_gg
-  prior:
-    type: TopHat
-    values:
-    - 0.5
-    - 1.5
-  value: 1.0
-  vary: true
-
-- label: a_{\rm HM}
-  name: a_HM_gy
-  prior:
-    type: TopHat
-    values:
-    - 0.5
-    - 1.5
-  value: 1.0
-  vary: false
-
-- label: a_{\rm HM}
-  name: a_HM_gk
-  prior:
-    type: TopHat
-    values:
-    - 0.5
-    - 1.5
-  value: 1.0
-  vary: false
-
-- label: s_{\rm HM}
-  name: s_HM_gg
-  prior:
-    type: TopHat
-    values:
-    - 0.0
-    - 1e+16
-  value: 0.04
-  vary: false
-
-- label: s_{\rm HM}
-  name: s_HM_gy
-  prior:
-    type: TopHat
-    values:
-    - 0.0
-    - 1e+16
-  value: 0.04
-  vary: false
-
-- label: s_{\rm HM}
-  name: s_HM_gk
-  prior:
-    type: TopHat
-    values:
-    - 0.0
-    - 1e+16
-  value: 0.04
   vary: false
