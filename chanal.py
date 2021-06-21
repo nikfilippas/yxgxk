@@ -1,5 +1,3 @@
-import sys
-sys.path.append("../../")
 import numpy as np
 from scipy.integrate import simps
 from scipy.interpolate import interp1d
@@ -11,7 +9,6 @@ from likelihood.like import Likelihood
 from likelihood.sampler import Sampler
 from model.theory import get_theory
 from model.power_spectrum import hm_bias
-from model.hmcorr import HM_Gauss
 from model.utils import get_hmcalc
 from model.cosmo_utils import COSMO_VARY, COSMO_ARGS
 from scipy.stats import norm
@@ -42,8 +39,7 @@ class chan(object):
         self.cosmo = self.p.get_cosmo()
         self.cosmo_vary = COSMO_VARY(self.p)
         self.kwargs = self.p.get_cosmo_pars()
-        self.hmc = get_hmcalc(self.cosmo, **self.kwargs)
-        self.hm_correction = np.load("hm_correction.npy", allow_pickle=True).item()
+        self.hmc = get_hmcalc(**self.kwargs)
         self._PP = norm.sf(-1)-norm.sf(1)
 
 
@@ -61,14 +57,9 @@ class chan(object):
     def _th(self, pars):
         if self.cosmo_vary:
             cosmo = COSMO_ARGS(pars)
-            hmc = get_hmcalc(cosmo, **{"mass_function": self.p.get_massfunc(),
-                                       "halo_bias": self.p.get_halobias()})
         else:
             cosmo = self.cosmo
-            hmc = self.hmc
-        return get_theory(self.p, self.d, cosmo, hmc,
-                          hm_correction=self.hm_correction,
-                          **pars)
+        return get_theory(self.p, self.d, cosmo, self.hmc, **pars)
 
 
     def get_chains(self, pars=None, **specargs):
