@@ -2,7 +2,6 @@ import numpy as np
 import pyccl as ccl
 from scipy.integrate import simps
 from .power_spectrum import get_2pt
-from .cosmo_utils import COSMO_CHECK
 
 
 def hm_1h_trispectrum(cosmo, hmc, k, a, profiles,
@@ -11,7 +10,6 @@ def hm_1h_trispectrum(cosmo, hmc, k, a, profiles,
     """Computes the halo model prediction for the 1-halo 3D
     trispectrum of four profile quantities.
     """
-    COSMO_CHECK(cosmo, **kwargs)
     a_arr = np.atleast_1d(a)
 
     [p.update_parameters(cosmo, **kwargs) for p in profiles]

@@ -52,7 +52,6 @@ class used(object):
         return self.masks
 
 
-
 def read_fields(p):
     """Constructs a dictionary of classified fields."""
     nside = p.get_nside()
