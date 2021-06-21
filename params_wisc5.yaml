@@ -39,14 +39,14 @@ maps:
   map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits
   mask: mask_lowz
   model:
-    lMmin_0: 11.80
-    lM1_0: 12.43
-    mass_bias: 0.8138
+    lMmin_0: 10.6
+    lM1_0: 10.3
+    mass_bias: 0.808
     sigma8: 0.8102
-    a_HM_gg: 0.7
+    a_HM_gg: 0.9652
     # a_HM_gy: 0.7
     # a_HM_gk: 0.7
-    r_corr_gy: -0.6894
+    r_corr_gy: -0.6573
     r_corr_gk: 0.0
     width: 1.0
     Omega_c: 0.26066676
