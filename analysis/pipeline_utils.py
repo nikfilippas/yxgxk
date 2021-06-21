@@ -13,7 +13,6 @@ from analysis.field import Field
 from analysis.spectra import Spectrum
 from analysis.covariance import Covariance
 from analysis.jackknife import JackKnife
-from model.hmcorr import HM_Gauss
 from model.trispectrum import hm_ang_1h_covariance
 from model.power_spectrum import hm_ang_power_spectrum
 from model.utils import get_hmcalc
@@ -295,7 +294,7 @@ def get_1h_covariance(p, fields, xcorr, f11, f12, f21, f22):
         # Get single model parameter dictionary
         models_a = p.get_models()[f11.name]
         models_b = p.get_models()[f12.name]
-        print("models:", models_a, models_b)
+
         kwargs = models_a
         hmc = get_hmcalc(**kwargs)
         # Calculate covariace
