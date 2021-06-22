@@ -17,10 +17,10 @@ data_vectors:
     tracers:
     - 2mpz
     - y_milca
-  - lmin: 0
-    tracers:
-    - 2mpz
-    - lens
+  # - lmin: 0
+  #   tracers:
+  #   - 2mpz
+  #   - lens
   type: Cl
 
 global:
@@ -90,9 +90,9 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 10000
+  n_steps: 0
   n_walkers: 96
-  run_name: run1
+  run_name: yxg
   transfer_function: baccoemu
   zpts: 16
 
@@ -146,7 +146,7 @@ params:
     - -1
     - 1
   # value: 0.0
-  vary: true
+  vary: false
 
 - label: w_{N(z)}
   name: width
@@ -175,7 +175,7 @@ params:
 
 - label: a_{\rm HM}
   name: a_HM_gy
-  # alias: a_HM_gg
+  alias: a_HM_gg
   prior:
     type: TopHat
     values:
@@ -186,7 +186,7 @@ params:
 
 - label: a_{\rm HM}
   name: a_HM_gk
-  # alias: a_HM_gg
+  alias: a_HM_gg
   prior:
     type: TopHat
     values:
@@ -248,7 +248,7 @@ params:
     - 0.60
     - 0.95
   # value: 0.8102
-  vary: true
+  vary: false
 
 - label: n_s
   name: n_s
