@@ -182,7 +182,7 @@ params:
     - 0.5
     - 1.5
   # value: 1.0
-  vary: true
+  vary: false
 
 - label: a_{\rm HM}
   name: a_HM_gk
@@ -193,7 +193,7 @@ params:
     - 0.5
     - 1.5
   # value: 1.0
-  vary: true
+  vary: false
 
 - label: s_{\rm HM}
   name: s_HM_gg
