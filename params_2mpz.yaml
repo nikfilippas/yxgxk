@@ -247,7 +247,7 @@ params:
     values:
     - 0.60
     - 0.95
-  # value: 0.8102
+  value: 0.8102
   vary: false
 
 - label: n_s
