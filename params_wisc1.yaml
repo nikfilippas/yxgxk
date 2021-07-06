@@ -92,7 +92,7 @@ mcmc:
   hbias: tinker10
   kmax: 1.0
   mfunc: tinker08
-  n_steps: 0
+  n_steps: 10000
   n_walkers: 96
   run_name: yxg
   transfer_function: baccoemu
@@ -185,7 +185,7 @@ params:
     - 0.5
     - 1.5
   # value: 1.0
-  vary: true
+  vary: false
 
 - label: a_{\rm HM}
   name: a_HM_gk
