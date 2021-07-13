@@ -92,7 +92,7 @@ mcmc:
   mfunc: tinker08
   n_steps: 10000
   n_walkers: 96
-  run_name: yxg_old_nz
+  run_name: yxg_old_HMcorr
   transfer_function: baccoemu
   zpts: 16
 
