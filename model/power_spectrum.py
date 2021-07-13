@@ -19,7 +19,7 @@ def hm_bias(cosmo, hmc, a, profile, **kwargs):
     profile.update_parameters(cosmo, **kwargs)
     bias = ccl.halos.halomod_bias_1pt(cosmo, hmc, 0.0001, a,
                                       profile.profile,
-                                      normprof=(profile.type!='y'))
+                                      normprof=(profile.type != 'y'))
     return bias
 
 
@@ -36,12 +36,13 @@ def get_2pt(p1, p2, **kwargs):
             if r_corr is None:
                 r_corr = 0
                 print(' -- 2pt covariance for %sx%s defaulting to 0' %
-                     (p1.type, p2.type))
+                      (p1.type, p2.type))
         return ccl.halos.Profile2pt(r_corr=r_corr)
 
 
 def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
                           include_1h=True, include_2h=True,
+                          hm_correction=None,
                           kpts=128, zpts=16, **kwargs):
     """Angular power spectrum using CCL.
 
@@ -77,30 +78,47 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
 
     a_arr = np.linspace(1/(1+zmax), 1., zpts)
 
-    aHM = kwargs.get("a_HM_" + p1.type + p2.type)
-    if aHM is not None:
-        hm_correction = lambda a: aHM
-    else:
-        hm_correction = None
+    # aHM = kwargs.get("a_HM_" + p1.type + p2.type)
+    # if aHM is not None:
+    #     hm_correction = lambda a: aHM
+    # else:
+    #     hm_correction = None
 
-    sHM = kwargs.get("s_HM_" + p1.type + p2.type)
-    if sHM is not None:
-        supress_func = lambda a: sHM
-    else:
-        supress_func = None
+    # sHM = kwargs.get("s_HM_" + p1.type + p2.type)
+    # if sHM is not None:
+    #     supress_func = lambda a: sHM
+    # else:
+    #     supress_func = None
 
-    pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
-                                prof=p1.profile,
-                                prof_2pt=p2pt,
-                                prof2=p2.profile,
-                                normprof=(p1.type!='y'),   # don't normalise
-                                normprof2=(p2.type!='y'),  # pressure profile
-                                get_1h=include_1h,
-                                get_2h=include_2h,
-                                lk_arr=np.log(k_arr),
-                                a_arr=a_arr,
-                                smooth_transition=hm_correction,
-                                supress_1h=supress_func)
+    pk_arr = ccl.halos.halomod_power_spectrum(
+        cosmo, hmc, k_arr, a_arr,
+        prof=p1.profile,
+        prof_2pt=p2pt,
+        prof2=p2.profile,
+        normprof=(p1.type != "y"),
+        normprof2=(p2.type != "y"),
+        get_1h=include_1h,
+        get_2h=include_2h,
+        smooth_transition=None,
+        supress_1h=None)
 
-    cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, ell=l, p_of_k_a=pk)
+    pk2d = ccl.Pk2D(a_arr=a_arr,
+                    lk_arr=np.log(k_arr),
+                    pk_arr=pk_arr,
+                    cosmo=cosmo, is_logp=False)
+
+    # pk = ccl.halos.halomod_Pk2D(cosmo, hmc,
+    #                             prof=p1.profile,
+    #                             prof_2pt=p2pt,
+    #                             prof2=p2.profile,
+    #                             normprof=(p1.type != 'y'),   # don't normalise
+    #                             normprof2=(p2.type != 'y'),  # pressure profile
+    #                             get_1h=include_1h,
+    #                             get_2h=include_2h,
+    #                             lk_arr=np.log(k_arr),
+    #                             a_arr=a_arr,
+    #                             smooth_transition=hm_correction,
+    #                             supress_1h=supress_func)
+
+    cl = ccl.angular_cl(cosmo, p1.tracer, p2.tracer, ell=l, p_of_k_a=pk2d)
     return cl

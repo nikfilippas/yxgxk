@@ -5,6 +5,7 @@ from .power_spectrum import hm_ang_power_spectrum
 def get_theory(p, dm, cosmo, hmc,
                return_separated=False,
                include_1h=True, include_2h=True,
+               hm_correction=None,
                **kwargs):
     """Computes the theory prediction used in the MCMC.
 
@@ -22,6 +23,7 @@ def get_theory(p, dm, cosmo, hmc,
         cl = hm_ang_power_spectrum(cosmo, hmc, ls, tr,
                                    include_1h=include_1h,
                                    include_2h=include_2h,
+                                   hm_correction=hm_correction,
                                    zpts=p.get("mcmc")["zpts"],
                                    **kwargs)
         cl *= bms  # multiply by beams

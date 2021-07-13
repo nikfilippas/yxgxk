@@ -92,7 +92,10 @@ class ccl_baccoemu(object):
         pk_linear = np.zeros((len(a_arr), 200))
         for row, a in enumerate(a_arr):
             self.pars["expfactor"] = a
-            k_arr, pkl = self.emu.get_linear_pk(self.pars)
+            pars = {key: val
+                    for key, val in self.pars.items()
+                    if val is not None}
+            k_arr, pkl = self.emu.get_linear_pk(pars)
             pk_linear[row] = pkl
         pk_linear /= self.pars["hubble"]**3
         return k_arr*self.pars["hubble"], a_arr, pk_linear
@@ -106,7 +109,6 @@ class ccl_baccoemu(object):
         pk_nonlin = np.zeros((len(a_arr), 159))
         for row, a in enumerate(a_arr):
             self.pars["expfactor"] = a
-            if self.has_baryons is None: print("nobaryons")
             k_arr, pknl = self.emu.get_nonlinear_pk(
                               self.pars,
                               baryonic_boost=self.has_baryons)
@@ -119,11 +121,17 @@ class ccl_baccoemu(object):
                            m_nu=None, w0=None, wa=None):
         # query linear matter power spectrum
         pkl = self._query_linear()
-        pk_linear = dict(zip(["k","a","delta_matter:delta_matter"], pkl))
+        pk_linear = dict(zip(["k",
+                              "a",
+                              "delta_matter:delta_matter"],
+                             pkl))
         # query non-linear matter power spectrum
         if self.has_nonlin:
             pknl = self._query_nonlin()
-            pk_nonlin = dict(zip(["k","a","delta_matter:delta_matter"], pknl))
+            pk_nonlin = dict(zip(["k",
+                                  "a",
+                                  "delta_matter:delta_matter"],
+                                 pknl))
         else:
             pk_nonlin = None
 

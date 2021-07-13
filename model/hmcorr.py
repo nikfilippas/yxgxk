@@ -1,7 +1,4 @@
-"""
-Methods for the correction to the halo model transition regime.
-"""
-
+"""Methods for the correction to the halo model transition regime."""
 import numpy as np
 import pyccl as ccl
 from scipy.interpolate import interp1d
@@ -29,11 +26,12 @@ class HM_halofit(object):
     .. note: ``interp2d`` flips secondary axis
     .. note: non-linear prediction accurate up to `k~5`
     """
+
     def __init__(self, cosmo,
-                  k_range=[0.1, 5], nlk=512,
-                  z_range=[0., 1.], nz=32,
-                  Delta=500, rho_type='critical',
-                  **kwargs):
+                 k_range=[0.1, 5], nlk=128,
+                 z_range=[0., 1.], nz=8,
+                 Delta=500, rho_type='critical',
+                 **kwargs):
 
         k_arr = np.geomspace(*k_range, nlk)
         a_arr = 1/(1+np.linspace(*z_range, nz))
@@ -42,7 +40,7 @@ class HM_halofit(object):
         hmd = ccl.halos.MassDef(Delta, rho_type)
         cM = ccl.halos.ConcentrationDuffy08(hmd)
         NFW = ccl.halos.profiles.HaloProfileNFW(cM)
-        hmc = get_hmcalc(cosmo, Delta, rho_type, **kwargs)
+        hmc = get_hmcalc(Delta, rho_type, **kwargs)
         pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc,
                                                  k_arr, a_arr,
                                                  NFW,
@@ -59,7 +57,6 @@ class HM_halofit(object):
                                 bounds_error=False,
                                 fill_value=1)
 
-
     def rk_interp(self, k, a, **kwargs):
         """
         Returns the halo model correction for an array of k
@@ -71,7 +68,6 @@ class HM_halofit(object):
             kwargs (dict): empty dictionary
         """
         return self.rk_func(np.log10(k), a)
-
 
 
 class HM_Gauss(object):
@@ -91,6 +87,7 @@ class HM_Gauss(object):
 
         .. note: Same `kmax` as HALOFIT since we calibrate against it
     """
+
     def __init__(self, cosmo,
                  k_range=[0.1, 5.], nlk=128,
                  z_range=[0., 1.], nz=32,
@@ -100,7 +97,8 @@ class HM_Gauss(object):
         a_arr = 1/(1+np.linspace(*z_range, nz))
         a_arr = a_arr[::-1]
 
-        gauss = lambda k, A, k0, s: 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
+        def gauss(k, A, k0, s):
+            return 1 + A*np.exp(-0.5*(np.log10(k/k0)/s)**2)
 
         POPT = [[] for i in range(a_arr.size)]
         # catch covariance errors due to the `fill_value` step
@@ -112,10 +110,12 @@ class HM_Gauss(object):
 
         BF = np.vstack(POPT)
 
-        self.af = interp1d(a_arr, BF[:, 0], bounds_error=False, fill_value="extrapolate")
-        self.k0f = interp1d(a_arr, BF[:, 1], bounds_error=False, fill_value=1.)
-        self.sf = interp1d(a_arr, BF[:, 2], bounds_error=False, fill_value=1e64)
-
+        self.af = interp1d(a_arr, BF[:, 0],
+                           bounds_error=False, fill_value="extrapolate")
+        self.k0f = interp1d(a_arr, BF[:, 1], bounds_error=False,
+                            fill_value=1.)
+        self.sf = interp1d(a_arr, BF[:, 2], bounds_error=False,
+                           fill_value=1e64)
 
     def hm_correction(self, k, a, aHM=None, squeeze=True):
         """
