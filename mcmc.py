@@ -98,9 +98,9 @@ for v in p.get('data_vectors'):
     # Set up sampler
     p0 = extract_map_p0(p, v, lik.p_free_names)  # p0 for particular map
     # Benchmarks
-    print(dict(zip(lik.p_free_names, p0)))
-    print("chisq:", lik.chi2(p0))
-    exit(1)
+    # print(dict(zip(lik.p_free_names, p0)))
+    # print("chisq:", lik.chi2(p0))
+    # exit(1)
     sam = Sampler(lik.lnprob, p0, lik.p_free_names,
                   p.get_sampler_prefix(v['name']),
                   p.get('mcmc'))
