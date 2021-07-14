@@ -102,6 +102,8 @@ def hm_ang_power_spectrum(cosmo, hmc, l, profiles,
         smooth_transition=None,
         supress_1h=None)
 
+    pk_arr *= hm_correction(k_arr, a_arr)
+
     pk2d = ccl.Pk2D(a_arr=a_arr,
                     lk_arr=np.log(k_arr),
                     pk_arr=pk_arr,
