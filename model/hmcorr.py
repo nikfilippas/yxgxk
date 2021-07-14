@@ -29,7 +29,7 @@ class HM_halofit(object):
 
     def __init__(self, cosmo,
                  k_range=[0.1, 5], nlk=128,
-                 z_range=[0., 1.], nz=8,
+                 z_range=[0., 6.], nz=16,
                  Delta=500, rho_type='critical',
                  **kwargs):
 
@@ -44,7 +44,7 @@ class HM_halofit(object):
         pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc,
                                                  k_arr, a_arr,
                                                  NFW,
-                                                 normprof1=True,
+                                                 normprof=True,
                                                  normprof2=True)
 
         pk_hf = np.array([ccl.nonlin_matter_power(cosmo, k_arr, a)
