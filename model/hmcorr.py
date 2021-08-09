@@ -38,7 +38,7 @@ class HM_halofit(object):
         a_arr = a_arr[::-1]
 
         hmd = ccl.halos.MassDef(Delta, rho_type)
-        cM = ccl.halos.ConcentrationDuffy08(mass_def=hmd)
+        cM = ccl.halos.ConcentrationIshiyama21(mass_def=hmd)
         NFW = ccl.halos.profiles.HaloProfileNFW(c_m_relation=cM)
         hmc = get_hmcalc(Delta, rho_type, **kwargs)
         pk_hm = ccl.halos.halomod_power_spectrum(cosmo, hmc,

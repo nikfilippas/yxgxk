@@ -27,7 +27,7 @@ class ProfTracer(object):
             self.profile = ccl.halos.HaloProfilePressureGNFW()
         else:
             hmd = ccl.halos.MassDef(500, 'critical')
-            cM = ccl.halos.ConcentrationDuffy08(mass_def=hmd)
+            cM = ccl.halos.ConcentrationIshiyama21(mass_def=hmd)
 
             if m['type'] == 'g':
                 # transpose N(z)'s
