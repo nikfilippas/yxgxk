@@ -1,9 +1,7 @@
 import yaml
-from pyccl.halos.hmfunc import mass_function_from_name
-from pyccl.halos.hbias import halo_bias_from_name
+import pyccl as ccl
 from .bandpowers import Bandpowers
-from model.cosmo_utils import COSMO_KEYS, COSMO_ARGS
-from likelihood.ccl_baccoemu import ccl_baccoemu
+from model.cosmo_utils import COSMO_KEYS
 
 
 class ParamRun(object):
@@ -15,53 +13,97 @@ class ParamRun(object):
     def __init__(self, fname):
         with open(fname) as f:
             self.p = yaml.safe_load(f)
-        self.check_trf = False
+        self.mass_function = None
+        self.halo_bias = None
+        self.concentration = None
+        self.mass_def = None
+        self.hmc = None
 
-    def get_massfunc(self):
+    @property
+    def cosmo_vary(self):
+        """Check if cosmology varies in the current analysis."""
+        vary = [par["vary"]
+                for par in self.p.get("params")
+                if par["name"] in COSMO_KEYS]
+        return any(vary)
+
+    def get(self, k):
+        """Return a section of the param file from its name."""
+        return self.p.get(k)
+
+    def get_mass_function(self):
         """Get preferred mass function."""
-        try:
-            mf = self.p["mcmc"]["mfunc"]
-            mf = mf.lower()
-            mf = mf[0].upper() + mf[1:]
-            return mass_function_from_name(mf)
-        except KeyError:
-            raise ValueError("Provide cosmological mass function.")
+        if self.mass_function is None:
+            try:
+                mf = self.p["mcmc"]["mass_function"]
+                mf = ccl.halos.mass_function_from_name(mf)()
+                if self.mass_function is None:
+                    self.mass_function = mf
+            except KeyError:
+                raise ValueError("Provide cosmological mass function.")
+        return self.mass_function
 
-    def get_halobias(self):
+    def get_halo_bias(self):
         """Get preferred halo bias model."""
-        try:
-            hb = self.p["mcmc"]["hbias"]
-            hb = hb.lower()
-            hb = hb[0].upper() + hb[1:]
-            return halo_bias_from_name(hb)
-        except KeyError:
-            raise ValueError("Provide halo bias model.")
+        if self.halo_bias is None:
+            try:
+                hb = self.p["mcmc"]["halo_bias"]
+                hb = ccl.halos.halo_bias_from_name(hb)()
+                if self.halo_bias is None:
+                    self.halo_bias = hb
+            except KeyError:
+                raise ValueError("Provide halo bias model.")
+        return self.halo_bias
 
-    def get_cosmo_pars(self, hmfunc=True, hmbias=True):
-        """Extract cosmological parameters from yaml file."""
-        # names of all possible cosmological parameters
-        pars = {par["name"]: par["value"] for par in self.p.get("params") \
-                                          if par["name"] in COSMO_KEYS}
-        if hmfunc:
-            pars["mass_function"] = self.get_massfunc()
-        if hmbias:
-            pars["halo_bias"] = self.get_halobias()
+    def get_concentration(self):
+        """Get preferred halo concentration model."""
+        if self.concentration is None:
+            try:
+                con = self.p["mcmc"]["halo_concentration"]
+                con = ccl.halos.concentration_from_name(con)()
+                if self.concentration is None:
+                    self.concentration = con
+            except KeyError:
+                raise ValueError("Provide concentration model.")
+        return self.concentration
+
+    def get_mass_def(self):
+        """Get preferred mass definition."""
+        if self.mass_def is None:
+            try:
+                hmd = self.p["mcmc"]["mass_def"]
+                hmd = ccl.halos.mass_def_from_name(hmd)()
+                if self.mass_def is None:
+                    self.mass_def = hmd
+            except KeyError:
+                raise ValueError("Provide mass definition.")
+        return self.mass_def
+
+    def get_hmc(self):
+        """Construct a Halo Model Calculator."""
+        if self.hmc is None:
+            hmd = self.get_mass_def()
+            hmf = self.get_mass_function()
+            hbf = self.get_halo_bias()
+            hmc = ccl.halos.HMCalculator(mass_function=hmf,
+                                         halo_bias=hbf,
+                                         mass_def=hmd)
+            self.hmc = hmc
+        return self.hmc
+
+    def get_kwarg_init(self):
+        """Get set of proposal parameters."""
+        pars = {par["name"]: par["value"]
+                for par in self.p.get("params")
+                if par["name"] in COSMO_KEYS}
         return pars
 
-    def check_emu(self):
-        if not self.check_trf:
-            if self.get("mcmc")["transfer_function"] == "baccoemu":
-                self.cc = ccl_baccoemu()  # load emulator
-            else:
-                self.cc = None
-            self.check_trf = True
-
-    def get_cosmo(self):
-        """Get default cosmology."""
-        self.check_emu()
-        pars = self.get_cosmo_pars(hmfunc=False, hmbias=False)
-        # return ccl.Cosmology(**pars)
-        return COSMO_ARGS(pars, transfer=self.cc)
+    def get_cosmo(self, pars=None):
+        """Construct cosmo from parameters."""
+        if pars is None:
+            pars = self.get_kwarg_init()
+        pars["transfer_function"] = self.p.get("mcmc")["transfer_function"]
+        return ccl.Cosmology(**pars)
 
     def get_outdir(self):
         """Get output directory
@@ -191,10 +233,6 @@ class ParamRun(object):
         fname += "_".join([name1, name2, name3, name4])
         fname += ".npz"
         return fname
-
-    def get(self, k):
-        """Return a section of the param file from its name."""
-        return self.p.get(k)
 
     def do_jk(self):
         """Return true if JKs are requested."""
