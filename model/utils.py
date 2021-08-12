@@ -4,66 +4,6 @@ This file contains a series of convenience functions used in various parts of th
 
 import numpy as np
 import pyccl as ccl
-from .cosmo_utils import COSMO_CHECK
-
-
-def get_hmcalc(mdef_delta=500, mdef_type='critical', **kwargs):
-    """Generates the associated halo model calculator.
-
-    Parameters
-    ----------
-    mdef_delta (int) : reference halo mass overdensity
-    mdef_type (str) : reference halo mass overdensity type
-    **kwargs : dictionary containing 'mass_function' and 'halo_bias' functions
-
-    Returns
-    -------
-    `~pyccl.halos.halo_model.HMCalculator : halo model calculator
-    """
-    hmd = ccl.halos.MassDef(mdef_delta, mdef_type)
-    nM = kwargs["mass_function"](mass_def=hmd)
-    bM = kwargs["halo_bias"](mass_def=hmd)
-    hmc = ccl.halos.HMCalculator(mass_function=nM, halo_bias=bM, mass_def=hmd)
-    return hmc
-
-
-
-# Halo sizes
-def concentration_duffy(M, a, is_D500=False, squeeze=True):
-    """
-    Mass-Concentration relation from 0804.2486.
-    Extended to ``Delta=500`` (Delta definition uses critical density).
-
-    .. note:: Returns ``1A*(halo_mass/M_pivot)**B/a**C``,  where (A,B,C) depend
-              on the mass definition and ``M_pivot = 1e+12 M_sun/h``.
-
-    Arguments
-    ---------
-    M : float or array_like
-        Halo mass [Msun].
-    a : float or array_like
-        Scale factor.
-    is_D500 : bool
-        If `True`, extends of the original Duffy et al. relation to Delta=500.
-    squeeze : bool
-        Whether to squeeze extra dimensions.
-
-    Returns
-    -------
-    float or array_like : The halo concentration.
-    """
-    # Input handling
-    M, a = np.atleast_1d(M, a)
-
-    m_pivot = 2.78164e12  # Pivot mass [M_sun]
-
-    if is_D500:
-        A, B, C = 3.67, -0.0903, -0.51
-    else:  # Duffy et al. 2008 (Table 1, row 2)
-        A, B, C = 5.71, -0.084, -0.47
-
-    c = A * (M[..., None]/m_pivot)**B / a**C
-    return c.squeeze() if squeeze else c
 
 
 def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
@@ -95,7 +35,6 @@ def R_Delta(cosmo, M, a, Delta=500, is_matter=False, squeeze=True, **kwargs):
     -------
     float or array_like : The halo reference radius in `Mpc`.
     """
-    COSMO_CHECK(cosmo, **kwargs)
     # Input handling
     M, a = np.atleast_1d(M, a)
 
