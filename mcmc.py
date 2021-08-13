@@ -19,7 +19,9 @@ args = parser.parse_args()
 fname_params = args.fname_params
 
 p = ParamRun(fname_params)
-hm_correction = HM_halofit(ccl.CosmologyVanillaLCDM(), p.get_hmc()).rk_interp
+# hm_correction = HM_halofit(ccl.CosmologyVanillaLCDM(), p.get_hmc())
+# hm_correction = hm_correction.rk_interp
+hm_correction = None
 
 # Jackknives
 jk_region = args.jk_id
