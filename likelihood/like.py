@@ -148,7 +148,7 @@ class Likelihood(object):
             pr += self.lnlike(par)
 
         if self.debug:
-            print(par, pr)
+            print("%.5f" % pr, "%.5f" % (-2*pr), par)
 
         return pr
 
@@ -172,7 +172,6 @@ class Likelihood(object):
             print(par, -2 * pr)
 
         c2 = -2 * pr
-        # print(c2)
         return c2
 
 
