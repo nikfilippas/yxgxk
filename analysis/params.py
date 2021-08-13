@@ -31,14 +31,35 @@ class ParamRun(object):
         """Return a section of the param file from its name."""
         return self.p.get(k)
 
+    def get_mass_def(self):
+        """Get preferred mass definition."""
+        if self.mass_def is None:
+            try:
+                hmd = self.p["mcmc"]["mass_def"]
+                hmd = ccl.halos.mass_def_from_name(hmd)
+                self.mass_def = hmd()
+            except KeyError:
+                raise ValueError("Provide mass definition.")
+        return self.mass_def
+
+    def get_concentration(self):
+        """Get preferred halo concentration model."""
+        if self.concentration is None:
+            try:
+                con = self.p["mcmc"]["halo_concentration"]
+                con = ccl.halos.concentration_from_name(con)
+                self.concentration = con(mass_def=self.mass_def)
+            except KeyError:
+                raise ValueError("Provide concentration model.")
+        return self.concentration
+
     def get_mass_function(self):
         """Get preferred mass function."""
         if self.mass_function is None:
             try:
                 mf = self.p["mcmc"]["mass_function"]
-                mf = ccl.halos.mass_function_from_name(mf)()
-                if self.mass_function is None:
-                    self.mass_function = mf
+                mf = ccl.halos.mass_function_from_name(mf)
+                self.mass_function = mf(mass_def=self.mass_def)
             except KeyError:
                 raise ValueError("Provide cosmological mass function.")
         return self.mass_function
@@ -48,36 +69,11 @@ class ParamRun(object):
         if self.halo_bias is None:
             try:
                 hb = self.p["mcmc"]["halo_bias"]
-                hb = ccl.halos.halo_bias_from_name(hb)()
-                if self.halo_bias is None:
-                    self.halo_bias = hb
+                hb = ccl.halos.halo_bias_from_name(hb)
+                self.halo_bias = hb(mass_def=self.mass_def)
             except KeyError:
                 raise ValueError("Provide halo bias model.")
         return self.halo_bias
-
-    def get_concentration(self):
-        """Get preferred halo concentration model."""
-        if self.concentration is None:
-            try:
-                con = self.p["mcmc"]["halo_concentration"]
-                con = ccl.halos.concentration_from_name(con)()
-                if self.concentration is None:
-                    self.concentration = con
-            except KeyError:
-                raise ValueError("Provide concentration model.")
-        return self.concentration
-
-    def get_mass_def(self):
-        """Get preferred mass definition."""
-        if self.mass_def is None:
-            try:
-                hmd = self.p["mcmc"]["mass_def"]
-                hmd = ccl.halos.mass_def_from_name(hmd)()
-                if self.mass_def is None:
-                    self.mass_def = hmd
-            except KeyError:
-                raise ValueError("Provide mass definition.")
-        return self.mass_def
 
     def get_hmc(self):
         """Construct a Halo Model Calculator."""
