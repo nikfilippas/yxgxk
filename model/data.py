@@ -26,11 +26,10 @@ class ProfTracer(object):
         if m['type'] == 'y':
             self.profile = ccl.halos.HaloProfilePressureGNFW()
         else:
-            hmd = ccl.halos.MassDef(500, 'critical')
-            cM = ccl.halos.ConcentrationIshiyama21(mass_def=hmd)
+            cM = m["halo_concentration"]
 
             if m['type'] == 'g':
-                # transpose N(z)'s
+                # truncate N(z)'s
                 self.dndz = m['dndz']
                 self.z, self.nz = np.loadtxt(self.dndz).T
                 self.nzf = interp1d(self.z, self.nz, kind='cubic',
@@ -50,8 +49,12 @@ class ProfTracer(object):
                 self.profile = ccl.halos.HaloProfileNFW(c_m_relation=cM)
         if self.profile is not None:
             try:
-                args = self.profile.update_parameters.__code__.co_varnames
-                code = self.profile.update_parameters.__code__
+                func = self.profile.update_parameters
+                if hasattr(func, "__wrapped__"):
+                    # bypass the decorator
+                    func = func.__wrapped__
+                args = func.__code__.co_varnames
+                code = func.__code__
                 count = code.co_argcount + code.co_kwonlyargcount
                 self.args = args[1: count]  # discard self & locals
             except AttributeError:  # profile has no parameters
@@ -167,6 +170,11 @@ class DataManager(object):
         nside = p.get_nside()
         kmax = np.inf if all_data else p.get('mcmc')['kmax']
         # Create tracers for all maps in the param file.
+        tracers = {}
+        for m in p.get("maps"):
+            m["halo_concentration"] = p.get_concentration()
+            m["mass_def"] = p.get_mass_def()
+            tracers[m["name"]] = ProfTracer(m, kmax)
         tracers = {m['name']: ProfTracer(m, kmax) for m in p.get('maps')}
 
         self.tracers = []
