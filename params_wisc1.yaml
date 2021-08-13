@@ -88,16 +88,17 @@ masks:
 
 mcmc:
   continue_mcmc: true
-  debug: false
-  hbias: tinker10
+  debug: true
+  halo_bias: Tinker10
   kmax: 1.0
-  mfunc: tinker08
+  mass_function: Tinker08
   n_steps: 10000
   n_walkers: 96
   run_name: yxg_old_HMcorr
-  transfer_function: baccoemu
+  transfer_function: arico21
+  halo_concentration: Duffy08M500c
+  mass_def: 500c
   zpts: 16
-
 
 params:
 - alias: lMmin_0
