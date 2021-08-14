@@ -19,9 +19,15 @@ args = parser.parse_args()
 fname_params = args.fname_params
 
 p = ParamRun(fname_params)
-# hm_correction = HM_halofit(ccl.CosmologyVanillaLCDM(), p.get_hmc())
-# hm_correction = hm_correction.rk_interp
-hm_correction = None
+if p.get_hm_correction() == "HALOFIT":
+    hm_correction = HM_halofit(ccl.CosmologyVanillaLCDM(), p.get_hmc())
+    hm_correction = hm_correction.rk_interp
+elif p.get_hm_correction() == "Mead":
+    hm_correction = "Mead"
+elif p.get_hm_correction() == "None":
+    hm_correction = None
+else:
+    raise ValueError("HM correction model not recognized.")
 
 # Jackknives
 jk_region = args.jk_id
