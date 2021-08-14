@@ -17,10 +17,10 @@ data_vectors:
     tracers:
     - wisc3
     - y_milca
-  - lmin: 0
-    tracers:
-    - wisc3
-    - lens
+  # - lmin: 0
+  #   tracers:
+  #   - wisc3
+  #   - lens
   type: Cl
 
 global:
@@ -101,7 +101,7 @@ mcmc:
   mass_function: Tinker08
   n_steps: 10000
   n_walkers: 96
-  run_name: yxgxk_DIR
+  run_name: yxg_DIR
   transfer_function: arico21
   halo_concentration: Duffy08M500c
   mass_def: 500c
