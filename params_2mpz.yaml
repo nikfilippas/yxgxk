@@ -17,10 +17,10 @@ data_vectors:
     tracers:
     - 2mpz
     - y_milca
-  # - lmin: 0
-  #   tracers:
-  #   - 2mpz
-  #   - lens
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - lens
   type: Cl
 
 global:
@@ -35,7 +35,7 @@ jk:
 
 maps:
 - beam: false
-  dndz: data/dndz/2MPZ_bin1.txt
+  dndz: data/dndz/2mpz_DIR.txt
   map: data/maps/2mpz_05_01_512.fits
   mask: mask_lowz
   model:
@@ -92,7 +92,7 @@ mcmc:
   mass_function: Tinker08
   n_steps: 10000
   n_walkers: 96
-  run_name: yxg_old_nz
+  run_name: yxgxk_DIR
   transfer_function: arico21
   halo_concentration: Duffy08M500c
   mass_def: 500c

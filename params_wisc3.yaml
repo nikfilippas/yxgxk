@@ -17,10 +17,10 @@ data_vectors:
     tracers:
     - wisc3
     - y_milca
-  # - lmin: 0
-  #   tracers:
-  #   - wisc3
-  #   - lens
+  - lmin: 0
+    tracers:
+    - wisc3
+    - lens
   type: Cl
 
 global:
@@ -35,7 +35,7 @@ jk:
 
 maps:
 - beam: false
-  dndz: data/dndz/WISC_bin3.txt
+  dndz: data/dndz/wisc3_DIR.txt
   map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
   mask: mask_lowz
   model:
@@ -101,7 +101,7 @@ mcmc:
   mass_function: Tinker08
   n_steps: 10000
   n_walkers: 96
-  run_name: yxg_old_HMcorr
+  run_name: yxgxk_DIR
   transfer_function: arico21
   halo_concentration: Duffy08M500c
   mass_def: 500c
