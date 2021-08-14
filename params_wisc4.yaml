@@ -35,7 +35,7 @@ jk:
 
 maps:
 - beam: false
-  dndz: data/dndz/WISC_bin4.txt
+  dndz: data/dndz/wisc4_DIR.txt
   map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits
   mask: mask_lowz
   model:
