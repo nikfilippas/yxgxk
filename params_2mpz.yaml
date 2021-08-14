@@ -35,7 +35,7 @@ jk:
 
 maps:
 - beam: false
-  dndz: data/dndz/2mpz_DIR.txt
+  dndz: data/dndz/2MPZ_bin1.txt
   map: data/maps/2mpz_05_01_512.fits
   mask: mask_lowz
   model:
@@ -92,7 +92,7 @@ mcmc:
   mass_function: Tinker08
   n_steps: 10000
   n_walkers: 96
-  run_name: yxg_DIR
+  run_name: yxg_oldnz
   transfer_function: arico21
   halo_concentration: Duffy08M500c
   mass_def: 500c

@@ -35,7 +35,7 @@ jk:
 
 maps:
 - beam: false
-  dndz: data/dndz/wisc2_DIR.txt
+  dndz: data/dndz/WISC_bin2.txt
   map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits
   mask: mask_lowz
   model:
@@ -93,7 +93,7 @@ mcmc:
   mass_function: Tinker08
   n_steps: 10000
   n_walkers: 96
-  run_name: yxg_DIR
+  run_name: yxg_oldnz
   transfer_function: arico21
   halo_concentration: Duffy08M500c
   mass_def: 500c
