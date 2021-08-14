@@ -101,6 +101,10 @@ class ParamRun(object):
         pars["transfer_function"] = self.p.get("mcmc")["transfer_function"]
         return ccl.Cosmology(**pars)
 
+    def get_hm_correction(self):
+        """Get Halo Model Correction model."""
+        return self.p["mcmc"]["hm_correction"]
+
     def get_outdir(self):
         """Get output directory
 

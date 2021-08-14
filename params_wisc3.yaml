@@ -36,7 +36,7 @@ jk:
 maps:
 - beam: false
   dndz: data/dndz/WISC_bin3.txt
-  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits.gz
   mask: mask_lowz
   model:
     lMmin_0: 11.19
@@ -57,30 +57,30 @@ maps:
   ns_independent: false
   systematics:
   - scos_plates
-  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits
-  - data/maps/lambda_sfd_ebv.fits
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits.gz
+  - data/maps/lambda_sfd_ebv.fits.gz
   type: g
 - beam: 10.0
-  map: data/maps/milca_ymaps.fits
+  map: data/maps/milca_ymaps.fits.gz
   mask: mask_tsz
   name: y_milca
   systematics:
-  - data/maps/lambda_sfd_ebv.fits
+  - data/maps/lambda_sfd_ebv.fits.gz
   type: y
 - beam: 10.0
-  map: data/maps/nilc_ymaps.fits
+  map: data/maps/nilc_ymaps.fits.gz
   mask: mask_tsz
   name: y_nilc
   systematics:
-  - data/maps/lambda_sfd_ebv.fits
+  - data/maps/lambda_sfd_ebv.fits.gz
   type: y
 - beam: 10.0
-  map: data/maps/HFI_SkyMap_545_2048_R2.02_full.fits
+  map: data/maps/HFI_SkyMap_545_2048_R2.02_full.fits.gz
   mask: mask_545
   name: dust_545
   type: d
 - beam: false
-  map: data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits
+  map: data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits.gz
   mask: mask_lens_2015
   name: lens
   ns_independent: false
@@ -88,15 +88,16 @@ maps:
   type: k
 
 masks:
-  mask_545: data/maps/mask_planck20.fits
-  mask_lens_2015: data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits
-  mask_lowz: data/maps/mask_v3.fits
-  mask_tsz: data/maps/mask_planck60.fits
+  mask_545: data/maps/mask_planck20.fits.gz
+  mask_lens_2015: data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits.gz
+  mask_lowz: data/maps/mask_v3.fits.gz
+  mask_tsz: data/maps/mask_planck60.fits.gz
 
 mcmc:
   continue_mcmc: true
   debug: true
   halo_bias: Tinker10
+  hm_correction: HALOFIT
   kmax: 1.0
   mass_function: Tinker08
   n_steps: 10000
