@@ -1,7 +1,11 @@
 import yaml
 import pyccl as ccl
 from .bandpowers import Bandpowers
+
+import sys
+sys.path.append("..")
 from model.cosmo_utils import COSMO_KEYS
+from model.hmcorr import HM_halofit
 
 
 class ParamRun(object):
@@ -18,6 +22,7 @@ class ParamRun(object):
         self.concentration = None
         self.mass_def = None
         self.hmc = None
+        self._this_cosmo = None
 
     @property
     def cosmo_vary(self):
@@ -98,12 +103,28 @@ class ParamRun(object):
         """Construct cosmo from parameters."""
         if pars is None:
             pars = self.get_kwarg_init()
+        else:
+            pars = {key: val for key, val in pars.items() if key in COSMO_KEYS}
+
         pars["transfer_function"] = self.p.get("mcmc")["transfer_function"]
-        return ccl.Cosmology(**pars)
+        cosmo_new = ccl.Cosmology(**pars)
+        if self._this_cosmo is None or not cosmo_new.__eq__(self._this_cosmo):
+            self._this_cosmo = cosmo_new
+        return self._this_cosmo
 
     def get_hm_correction(self):
-        """Get Halo Model Correction model."""
-        return self.p["mcmc"]["hm_correction"]
+        """Get Halo Model Correction name."""
+        name = self.p["mcmc"]["hm_correction"]
+        if name == "HALOFIT":
+            hmcorr = HM_halofit(ccl.CosmologyVanillaLCDM(), self.get_hmc())
+            hmcorr = hmcorr.rk_interp
+        elif name == "Mead":
+            hmcorr = name
+        elif name == "None":
+            hmcorr = None
+        else:
+            raise ValueError("HM correction model not recognized.")
+        return hmcorr
 
     def get_outdir(self):
         """Get output directory
@@ -154,6 +175,29 @@ class ParamRun(object):
         for d in self.p['maps']:
             models[d['name']] = d.get('model')
         return models
+
+    def get_map_p0(self, parameters, item=0):
+        """Return the proposal parameters for the map of the data vector.
+        Assumes that there is only one data vector in the parameter file.
+        If you want to extract a specific data vector, replace the `item`
+        index.
+        """
+        v = self.get("data_vectors")[item]
+        for m in self.get("maps"):
+            if m["name"] == v["name"]:
+                break
+        p0 = [m["model"][par] for par in parameters]
+        return p0
+
+    def get_data_vector(self, name=None):
+        """Data vector from name."""
+        if name is None:
+            return self.get("data_vectors")[0]
+
+        for v in self.get("data_vectors"):
+            if v["name"] == name:
+                break
+        return v
 
     def get_fname_mcm(self, mask1, mask2, jk_region=None):
         """Get file name for the mode-coupling matrix associated with
