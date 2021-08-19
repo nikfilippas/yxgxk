@@ -23,7 +23,6 @@ cobaya_lensing/
 *.mcm
 *.cmcm
 *.out
-*.sh
 
 # Others
 .bashrc

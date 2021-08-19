@@ -1,0 +1,453 @@
+bandpowers:
+  lsplit: 52
+  nb_log: 28
+  nlb: 20
+  nlb_lin: 10
+  type: linlog
+
+data_vectors:
+- covar_type: comb_m
+  name: 2mpz
+  twopoints:
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - 2mpz
+  - lmin: 0
+    tracers:
+    - 2mpz
+    - y_milca
+  # - lmin: 0
+  #   tracers:
+  #   - 2mpz
+  #   - lens
+  type: Cl
+- covar_type: comb_m
+  name: wisc1
+  twopoints:
+  - lmin: 10
+    tracers:
+    - wisc1
+    - wisc1
+  - lmin: 0
+    tracers:
+    - wisc1
+    - y_milca
+  # - lmin: 0
+  #   tracers:
+  #   - wisc1
+  #   - lens
+  type: Cl
+- covar_type: comb_m
+  name: wisc2
+  twopoints:
+  - lmin: 10
+    tracers:
+    - wisc2
+    - wisc2
+  - lmin: 0
+    tracers:
+    - wisc2
+    - y_milca
+  # - lmin: 0
+  #   tracers:
+  #   - wisc2
+  #   - lens
+  type: Cl
+- covar_type: comb_m
+  name: wisc4
+  twopoints:
+  - lmin: 10
+    tracers:
+    - wisc4
+    - wisc4
+  - lmin: 0
+    tracers:
+    - wisc4
+    - y_milca
+  # - lmin: 0
+  #   tracers:
+  #   - wisc4
+  #   - lens
+  type: Cl
+- covar_type: comb_m
+  name: wisc5
+  twopoints:
+  - lmin: 10
+    tracers:
+    - wisc5
+    - wisc5
+  - lmin: 0
+    tracers:
+    - wisc5
+    - y_milca
+  # - lmin: 0
+  #   tracers:
+  #   - wisc5
+  #   - lens
+  type: Cl
+
+global:
+  n_iter: 3
+  nside: 2048
+  output_dir: /mnt/extraspace/nikfilippas/yxgxk/out
+
+jk:
+  do: true
+  nside: 8
+  store_mcm: true
+
+maps:
+- beam: false
+  dndz: data/dndz/2MPZ_bin1.txt
+  map: data/maps/2mpz_05_01_512.fits.gz
+  mask: mask_lowz
+  model:
+    lMmin_0: 11.20
+    lM1_0: 12.46
+    mass_bias: 0.8
+    sigma8: 0.8102
+    a_HM_gg: 0.7
+    a_HM_gy: 0.7
+    a_HM_gk: 0.7
+    r_corr_gy: -0.5663
+    r_corr_gk: 0.0
+    width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
+  name: 2mpz
+  ns_independent: false
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits.gz
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin1.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits.gz
+  mask: mask_lowz
+  model:
+    lMmin_0: 10.00
+    lM1_0: 11.38
+    mass_bias: 0.6083
+    sigma8: 0.7605
+    a_HM_gg: 0.5142
+    a_HM_gy: 0.5142
+    a_HM_gk: 0.5142
+    r_corr_gy: -0.3916
+    r_corr_gk: 0.0
+    width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
+  name: wisc1
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.1_z_0.15.Pix512.fits.gz
+  - data/maps/lambda_sfd_ebv.fits.gz
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin2.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits.gz
+  mask: mask_lowz
+  model:
+    lMmin_0: 10.95
+    lM1_0: 12.18
+    mass_bias: 0.6249
+    sigma8: 0.8102
+    a_HM_gg: 0.5497
+    a_HM_gy: 0.5497
+    a_HM_gk: 0.5497
+    r_corr_gy: -0.4059
+    r_corr_gk: 0.0
+    width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
+  name: wisc2
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.15_z_0.2.Pix512.fits.gz
+  - data/maps/lambda_sfd_ebv.fits.gz
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin3.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits.gz
+  mask: mask_lowz
+  model:
+    lMmin_0: 11.19
+    lM1_0: 12.34
+    mass_bias: 0.6596
+    sigma8: 0.8102
+    a_HM_gg: 0.5735
+    a_HM_gy: 0.5735
+    a_HM_gk: 0.5735
+    r_corr_gy: -0.5285
+    r_corr_gk: 0.0
+    width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
+  name: wisc3
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.2_z_0.25.Pix512.fits.gz
+  - data/maps/lambda_sfd_ebv.fits.gz
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin4.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits.gz
+  mask: mask_lowz
+  model:
+    lMmin_0: 11.41
+    lM1_0: 12.49
+    mass_bias: 0.654
+    sigma8: 0.8102
+    a_HM_gg: 0.598
+    a_HM_gy: 0.598
+    a_HM_gk: 0.598
+    r_corr_gy: -0.524
+    r_corr_gk: 0.0
+    width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
+  name: wisc4
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.25_z_0.3.Pix512.fits.gz
+  - data/maps/lambda_sfd_ebv.fits.gz
+  type: g
+- beam: false
+  dndz: data/dndz/WISC_bin5.txt
+  map: data/maps/2dstarsub_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits.gz
+  mask: mask_lowz
+  model:
+    lMmin_0: 10.6
+    lM1_0: 10.3
+    mass_bias: 0.808
+    sigma8: 0.8102
+    a_HM_gg: 0.9652
+    a_HM_gy: 0.9652
+    a_HM_gk: 0.9652
+    r_corr_gy: -0.6573
+    r_corr_gk: 0.0
+    width: 1.0
+    Omega_c: 0.26066676
+    Omega_b: 0.048974682
+    h: 0.6766
+    n_s: 0.9665
+  name: wisc5
+  ns_independent: false
+  systematics:
+  - scos_plates
+  - Star_contamination/2dstarcorr_WISC_cleaned_public.bin_0.3_z_0.35.Pix512.fits.gz
+  - data/maps/lambda_sfd_ebv.fits.gz
+  type: g
+- beam: 10.0
+  map: data/maps/milca_ymaps.fits.gz
+  mask: mask_tsz
+  name: y_milca
+  systematics:
+  - data/maps/lambda_sfd_ebv.fits.gz
+  type: y
+- beam: 10.0
+  map: data/maps/HFI_SkyMap_545_2048_R2.02_full.fits.gz
+  mask: mask_545
+  name: dust_545
+  type: d
+- beam: false
+  map: data/maps/COM_CompMap_Lensing_2048_R2.00_map.fits.gz
+  mask: mask_lens_2015
+  name: lens
+  ns_independent: false
+  systematics: None
+  type: k
+
+masks:
+  mask_545: data/maps/mask_planck20.fits.gz
+  mask_lens_2015: data/maps/COM_CompMap_Lensing_2048_R2.00_mask.fits.gz
+  mask_lowz: data/maps/mask_v3.fits.gz
+  mask_tsz: data/maps/mask_planck60.fits.gz
+
+mcmc:
+  continue_mcmc: true
+  debug: true
+  halo_bias: Tinker10
+  hm_correction: Mead
+  kmax: 1.0
+  mass_function: Tinker08
+  n_steps: 10000
+  n_walkers: 96
+  run_name: yxg_oldnz
+  transfer_function: arico21
+  halo_concentration: Duffy08M500c
+  mass_def: 500c
+  zpts: 16
+
+params:
+- alias: lMmin_0
+  label: M_0
+  name: lM0_0
+
+- label: M_1
+  name: lM1_0
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  vary: true
+
+- label: M_{\rm min}
+  name: lMmin_0
+  prior:
+    type: TopHat
+    values:
+    - 10.0
+    - 16.0
+  vary: true
+
+- label: '1-b_H'
+  name: mass_bias
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1.0
+  # value: 0.8
+  vary: true
+
+- label: \rho_{gy}
+  name: r_corr_gy
+  prior:
+    type: TopHat
+    values:
+    - -1.0
+    - 1.0
+  vary: true
+
+- label: \rho_{g\kappa}
+  name: r_corr_gk
+  prior:
+    type: TopHat
+    values:
+    - -1
+    - 1
+  # value: 0.0
+  vary: false
+
+- label: w_{N(z)}
+  name: width
+  prior:
+    type: TopHat
+    values:
+    - 0.95
+    - 1.05
+  # value: 1.0
+  vary: true
+
+- label: \sigma_{{\rm ln}M}
+  name: siglM_0
+  value: 0.15
+  vary: false
+
+- label: a_{\rm HM}
+  name: a_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 1.5
+  # value: 1.0
+  vary: true
+
+- label: a_{\rm HM}
+  name: a_HM_gy
+  alias: a_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 1.5
+  # value: 1.0
+  vary: false
+
+- label: a_{\rm HM}
+  name: a_HM_gk
+  alias: a_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.5
+    - 1.5
+  # value: 1.0
+  vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gg
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gy
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
+- label: s_{\rm HM}
+  name: s_HM_gk
+  prior:
+    type: TopHat
+    values:
+    - 0.0
+    - 1e+16
+  value: 0.05
+  vary: false
+
+- label: \Omega_c
+  name: Omega_c
+  value: 0.26066676
+  vary: false
+
+- label: \Omega_b
+  name: Omega_b
+  value: 0.048974682
+  vary: false
+
+- label: h
+  name: h
+  value: 0.6766
+  vary: false
+
+- label: \sigma_8
+  name: sigma8
+  prior:
+    type: TopHat
+    values:
+    - 0.60
+    - 0.95
+  value: 0.8102
+  vary: false
+
+- label: n_s
+  name: n_s
+  value: 0.9665
+  vary: false
