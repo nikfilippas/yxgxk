@@ -47,9 +47,9 @@ sam = Sampler(lik.lnprob, p0, lik.p_free_names,
               p.get_sampler_prefix(v['name']),
               p.get('mcmc'))
 
-print(dict(zip(lik.p_free_names, p0)))
-print("chisq:", lik.chi2(p0))
-exit(1)
+# print(dict(zip(lik.p_free_names, p0)))
+# print("chisq:", lik.chi2(p0))
+# exit(1)
 
 # Compute best fit and covariance
 if not sam.read_properties():
